@@ -85,7 +85,7 @@ $$ \texttt{x} = \texttt{xmin} + \left(\frac{\exp(y)}{1+\exp(y)} \right)(\texttt{
 to return a bounded variable ```x```, contrained to be between ```xmin``` and ```xmax```.
 
 ```fortran
-call denormaliza ( betau , beta , 1.0d0 , 0.0d0 )
+call denormalize ( betau , beta , 1.0d0 , 0.0d0 )
 
 ! if betau = 3 --> beta = 0.952
 ! if betau = -2 --> beta = 0.119
@@ -140,12 +140,12 @@ subroutine interpolation(pos,wth,xnow,xgrid)
 ```
 This subroutine finds the closest point in a given grid and return its position and the relative distance.
 
-_Example_: consider a vector ```vec = [1,2,3]```. We can use ```interpolation``` to find the closest point of ```xnow=2.3```:
+_Example_: consider a vector ```vec = [1,2,3]```. We can use ```interpolation``` to find the closest point of ```xnow = 2.3```:
 ```fortran
 call interpolation(pos,wth,2.3,vec)
 
 ! Results: pos = 3, wth = 0.3
-! 2.3 = vec(pos)*wth + vec(pos-1)*(one-wth)
+! 2.3 = vec(pos)*wth + vec(pos-1)*(one-wth) = 3*0.3 + 2*0.7
 ```
 This subroutine is mainly used by the function ```interpolate```.
 
@@ -161,16 +161,17 @@ function interpolate(x1,x2,...,xn,y1,y2,...,yn,mat) result(xi)
   real(kind=8) :: xi
   real(kind=8) :: x1,x2,...,xn
   real(kind=8) :: y1(:),y2(:),...,yn(:)
-  real(kind=8) :: wth4,mat(:,:,...,:)
+  real(kind=8) :: mat(:,:,...,:)
 
   ! Dependencies: interpolation
 ```
 This function returns the linearly interpolated value of an n-dimensional function. The variables ```x1```, ```x2```, ..., ```xn``` are the values of the variables to be interpolated over their coresponding grids ```y1```, ```y2```, ...., ```yn```, and ```mat``` is an n-dimensional array with the results. The array ```mat``` must have at most, dimension 6.
 
-_Example_: consider 2-dimensional function $f(x,y)$. We have an array ```mat``` whose $(i,j)$-element is the value of $f$ evaluated at the $i$-element of a grid for $x$, and the $j$-element of a grid for $xy$. then, we can interpolate the value of $f$ at the point $(x_0,y_0)$ using the ```interpolate```:
+_Example_: consider 2-dimensional function $f(x,y)$. We have an array ```mat``` whose $(i,j)$-element is the value of $f$ evaluated at the $i$-element of a grid for $x$, and the $j$-element of a grid for $y$. Then, we can interpolate the value of $f$ at $(x_0,y_0)$ using the ```interpolate```:
 ```fortran
-result = interpolate(x_0,y_0,x_grid,y_grid,mat)
+xi = interpolate(x_0,y_0,x_grid,y_grid,mat)
 ```
+If $x_0<\min($```x_grid```$)$ the subroutine take $\min($```x_grid```$)$ as the value of x. The same happens with $y$. Then, if $x_0<\min($```x_grid```$)$ and $y_0<\min($```y_grid```$)$, the function would return ```xi = mat(1,1)```.
 
 [(back to index)](#inicio)
 
@@ -198,10 +199,9 @@ This functions returns a timing number that is robust to parallel computing. In 
 ### <a name="multiplo"></a>```multiplo``` 
 
 ```fortran
-function multiplo(num0,num1) result(mul)
+elemental function multiplo(num,xx) result(mul)
   implicit none
-  integer , intent(in) :: num0,num1
-  integer              :: mul
+  integer :: num,xx,mul
 
   ! Dependencies: none
 ```
@@ -209,8 +209,8 @@ This function checks whether a number ```num0``` is a multiple of ```num1```. Th
 
 _Example_: check whether 25 and 27 are multiples of 5:
 ```fortran
-check = multiplo(5,25)  ! check = 1
-check = multiplo(5,27)  ! check = 0
+print * , multiplo(5,25)  ! result 1
+print * , multiplo(5,27)  ! result 0
 ```
 
 [(back to index)](#inicio)
@@ -218,11 +218,10 @@ check = multiplo(5,27)  ! check = 0
 ---
 
 ### <a name="iseven"></a>```iseven``` 
-
 ```fortran
 function iseven(num) result(ise)
-  implicit none  
-  integer , intent(in) :: num
+  implicit none
+  integer :: num,ise
 
   ! Dependencies: multiplo
 ```
@@ -385,18 +384,27 @@ This function returns a random number draw from a distribution $N(\mu,\sigma)$.
 
 ### <a name="cdfn"></a>```cdfn``` 
 ```fortran
-function cdfn(x) result(f)
+elemental function cdfn(x) result(f)
   implicit none
-  real(kind=8) :: x,f
+  real(kind=8), intent(in) :: x
+  real(kind=8)             :: f
 
   ! Dependencies: none
 ```
 This function returns the cdf of a standard normal distribution, ```f``` $=\Phi(x)$.
 
-_Example_: given a vector ```xvec``` with a sample of a variable ```x```, find the 60th percentile:
+_Example_: 
 ```fortran
 phi = cdf(0.0)    ! phi = 0.50
 phi = cdf(-1.0)   ! phi = 0.158
+```
+
+This subroutine is defined as ```elemental```, which implies that it can be call for both scalars and arrays.
+
+_Example_:
+```fortran
+vec = (/ 0.0 , -1.0 /)
+print * , cdf(vec)    ! result: (/ 0.50 , 0.158 /)
 ```
 
 [(back to index)](#inicio)
@@ -446,7 +454,7 @@ function diag(mat) result(vec)
 This function returns the main diagonal of a matric ```mat```.
 _Example_: given a vector ```xvec``` with a sample of a variable ```x```, find the 60th percentile:
 ```fortran
-mar = (/ 1.0, 2.0, 1.0 ; 3.0, 3.0, 4.0 ; 5.0, 1.0, 3.0 /) 
+mat = (/ 1.0, 2.0, 1.0 ; 3.0, 3.0, 4.0 ; 5.0, 1.0, 3.0 /) 
 vec = diag(vec0) ! vec = (/ 1.0, 3.0, 1.0 /)
 ```
 
@@ -456,9 +464,15 @@ vec = diag(vec0) ! vec = (/ 1.0, 3.0, 1.0 /)
 
 ### <a name="transmat"></a>```transmat``` 
 
-returns the average of a variable, allowing for weigths
+```fortran
+function transmat(mat) result(matt)
+  implicit none
+  real(kind=8) , intent(in)  :: mat(:,:)
+  real(kind=8)               :: matt(size(mat,2),size(mat,1))
 
-
+  ! Dependencies: none
+```
+This function returns the transpose of a matrix ```mat```.
 
 
 
@@ -468,9 +482,15 @@ returns the average of a variable, allowing for weigths
 
 ### <a name="inverse"></a>```inverse``` 
 
-returns the average of a variable, allowing for weigths
+```fortran
+function inverse(mat) result(imat)
+  implicit none
+  real(kind=8) :: mat(:,:)
+  real(kind=8) :: imat(size(m,1),size(m,1))
 
-
+  ! Dependencies: none
+```
+This function returns the inverse of a squared matrix ```mat```.
 
 
 
@@ -480,11 +500,21 @@ returns the average of a variable, allowing for weigths
 
 ### <a name="broyden"></a>```broyden``` 
 
-returns the average of a variable, allowing for weigths
+```fortran
+subroutine broyden(j1,j0,x1,x0,f1,f0)
+  implicit none
+  real(kind=8) , intent(in)  :: x1(:),f1(:)
+  real(kind=8) , intent(in)  :: x0(:),f0(:)
+  real(kind=8) , intent(in)  :: j0(:,:)
+  real(kind=8) , intent(out) :: j1(:,:)
 
+  ! Dependencies: none
+```
+This subroutine applies the Boryden's method to update a Jacobian matrix.
 
+Imagine we have an $m$-dimensional function $f$ in $n$ unknows. We evaluate two points $x_0$ and $x_1$, $f_1 = f(x_1)$ and $f_0 = f(x_0)$, and we compute the numerical jacobian of the function $f$ around $x=x_0$. This subroutine returns an opproximation to the jacobian matrix arounf the point $x=x_1$. The user must supply a pair of points ```x0``` and ```x1```, the value of the function evaluated at thos epoints ```f0``` and ```f1```, and the jacobian matrix ```j0``` evaluated at ```x0```.
 
-
+You can learn more about this method in this [link](https://en.wikipedia.org/wiki/Broyden%27s_method).
 
 [(back to index)](#inicio)
 
@@ -492,7 +522,21 @@ returns the average of a variable, allowing for weigths
 
 ### <a name="simplex"></a>```simplex```
 
-returns the average of a variable, allowing for weigths
+```fortran
+subroutine simplex(func,x,y,iy,ind,x0,itermax,tol,iprint)
+  implicit none
+  external                             :: func        ! user-supplied function to be minimize
+  real(kind=8) , intent(out)           :: x(:)        ! values of "x" at minimum
+  real(kind=8) , intent(out)           :: y           ! valuf of "func" at "x"
+  integer      , intent(out)           :: iy          ! number of function evaluations
+  integer      , intent(out)           :: ind         ! indicator of convergence
+  real(kind=8) , intent(in)            :: x0(:)       ! initial guess
+  real(kind=8) , intent(in) , optional :: tol         ! tolerance level
+  integer      , intent(in) , optional :: itermax     ! max number of functione valuations
+  integer      , intent(in) , optional :: iprint      ! indicator for printing behaviour
+
+  ! Dependencies: none
+```
 
 
 
@@ -505,23 +549,23 @@ returns the average of a variable, allowing for weigths
 ### <a name="lmmin"></a>```lmmin```
 
 ```fortran
-subroutine lmmin(func,x,y,iy,ind,x0,states,itermax,damp,tol,shock,usebro,iprint)
+subroutine lmmin_states_both(func,x,y,iy,ind,x0,itermax,damp,tol,toleach,shock,usebro,iprint)
+  implicit none
+  external                             :: func        ! user-supplied function to be minimize
+  real(kind=8) , intent(out)           :: x(:)        ! values of "x" at minimum
+  real(kind=8) , intent(out)           :: y(:)        ! valuf of "func" at "x"
+  integer      , intent(out)           :: iy          ! number of function evaluations
+  integer      , intent(out)           :: ind         ! indicator of convergence
+  real(kind=8) , intent(in)            :: x0(:)       ! initial guess
+  real(kind=8) , intent(in) , optional :: shock       ! shock to parameter values (as %)
+  real(kind=8) , intent(in) , optional :: damp        ! damping factor
+  real(kind=8) , intent(in) , optional :: tol         ! tolerance level
+  real(kind=8) , intent(in) , optional :: toleach     ! tolerance level for each function
+  integer      , intent(in) , optional :: itermax     ! max number of functione valuations
+  integer      , intent(in) , optional :: iprint      ! indicator for printing behaviour
+  integer      , intent(in) , optional :: usebro      ! indicator for the use of Broyden method to update Jacobian
 
-  ! outputs
-  real(kind=8) , intent(out)           :: x(:)  !
-  real(kind=8) , intent(out)           :: y(:)  !
-  integer      , intent(out)           :: iy    !
-  integer      , intent(out)           :: ind   !
-
-  ! inputs (including optionals)
-  real(kind=8) , intent(in)            :: x0(:)     !
-  integer      , intent(in)            :: states(:) !
-  real(kind=8) , intent(in) , optional :: shock     !
-  real(kind=8) , intent(in) , optional :: damp      !
-  real(kind=8) , intent(in) , optional :: tol       !
-  integer      , intent(in) , optional :: itermax   !
-  integer      , intent(in) , optional :: iprint    !
-  integer      , intent(in) , optional :: usebro    !
+  ! Dependencies: broyden,inverse
 ```
 
 
@@ -533,7 +577,19 @@ subroutine lmmin(func,x,y,iy,ind,x0,states,itermax,damp,tol,shock,usebro,iprint)
 
 ### <a name="golden"></a>```golden```
 
-returns the average of a variable, allowing for weigths
+```fortran
+subroutine golden(func,x,y,xmax,xmin,itermax,tol)
+  implicit none
+  external                             :: func
+  real(kind=8) , intent(out)           :: x
+  real(kind=8) , intent(out)           :: y
+  real(kind=8) , intent(in)            :: xmax
+  real(kind=8) , intent(in)            :: xmin
+  real(kind=8) , intent(in) , optional :: tol
+  integer      , intent(in) , optional :: itermax
+
+  ! Dependencies: none
+```
 
 
 
@@ -544,7 +600,20 @@ returns the average of a variable, allowing for weigths
 ---
 ### <a name="brent"></a>```brent```
 
-returns the average of a variable, allowing for weigths
+```fortran
+subroutine brent(func,x,iy,ind,x0,x1,itermax,tol)
+  implicit none
+  external                             :: func
+  real(kind=8) , intent(out)           :: x
+  integer      , intent(out)           :: iy
+  integer      , intent(out)           :: ind
+  real(kind=8) , intent(in)            :: x0
+  real(kind=8) , intent(in)            :: x1
+  real(kind=8) , intent(in) , optional :: tol
+  integer      , intent(in) , optional :: itermax
+
+  ! Dependencies: none
+```
 
 
 

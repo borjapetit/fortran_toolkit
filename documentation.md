@@ -1,7 +1,5 @@
 # <a name="inicio"></a>A Toolkit for Fortran90
 
-### Index fo functions and subroutines
-
 #### General propuse:
   - [```normalize```](#normalize): transform a bounded variable into an unbounded one [for optimizaton]
   - [```denormalize```](#denormalize): transform a undonded variable into an counded one [for optimizaton]

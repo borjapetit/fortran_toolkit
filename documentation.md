@@ -36,6 +36,8 @@
   - [```broyden```](#broyden): updates a Jacobian matrix using the Broyden's method
 ---
 
+## General purpose
+
 ### <a name="grid"></a>```grid``` 
 
 ```fortran
@@ -176,6 +178,8 @@ check = iseven(6)  ! check = 1
 [(back to index)](#inicio)
 
 ---
+
+## Statistics
 
 ### <a name="varmean"></a>```varmean``` 
 ```fortran
@@ -350,6 +354,8 @@ print * , cdf(vec)    ! result: (/ 0.50 , 0.158 /)
 
 ---
 
+## Linear algebra
+
 ### <a name="vectorize"></a>```vectorize``` 
 
 returns the average of a variable, allowing for weigths
@@ -436,6 +442,8 @@ This function returns the inverse of a squared matrix ```mat```.
 [(back to index)](#inicio)
 
 ---
+
+## Optimization
 
 ### <a name="simplex"></a>```simplex```
 

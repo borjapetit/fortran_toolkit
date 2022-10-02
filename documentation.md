@@ -1,8 +1,6 @@
 # <a name="inicio"></a>A Toolkit for Fortran90
 
 #### General propuse:
-  - [```normalize```](#normalize): transform a bounded variable into an unbounded one [for optimizaton]
-  - [```denormalize```](#denormalize): transform a undonded variable into an counded one [for optimizaton]
   - [```grid```](#grid): generate a grid for a continuous varibale
   - [```interpolation```](#interpolation): interpolate a value over a grid, returning position and distance
   - [```interpolate```](#interpolate): linearly interpolate a value over an n-dimensional grid, with n <= 6
@@ -27,62 +25,15 @@
   - [```diag```](#diag): returns the main diagonal of a matrix
   - [```transmat```](#transmat): returns the transpose of a square matrix
   - [```inverse```](#inverse): returns the invesrse of a sqaured matrix
-  - [```broyden```](#broyden): updates a Jacobian matrix using the Broyden's method
 
 #### Optimization (with and without states/fixed parameters)
   - [```simplex```](#simplex): Simplex algorithm
   - [```lmmin```](#lmmin): Levenberg–Marquardt algorithm
   - [```golden```](#golden): Golden search algorithm
   - [```brent```](#brent): Brent method
----
-
-### <a name="normalize"></a>```normalize``` 
-
-```fortran
-subroutine normalize(y,x,xmax,xmin)
-  implicit none
-  real(kind=8) , intent(in)  :: xmax,xmin,x
-  real(kind=8) , intent(out) :: y
-
-  ! Dependencies: none
-```
-
-This subroutine takes a bounded varibale  ```x```, contrained to be between ```xmin``` and ```xmax```, and applies the transformation 
-$$ \texttt{y} = \log\left( \frac{ \texttt{x} - \texttt{xmin}}{\texttt{xmax} - \texttt{x}} \right) $$
-to return an unbounded variable ```y```.
-
-**Note**: This subroutine is useful to use stadard optimization algorithms for contrained problems. For isntance, one can use the Simplex method to minimize a function of ```x```, where ```x``` should be in the unit interval, by making use of ```normalize``` and ```denormalize```.
-
-[(back to index)](#inicio)
-
----
-
-### <a name="denormalize"></a>```denormalize``` 
-
-```fortran
-subroutine denormalize(y,x,xmax,xmin)
-  implicit none
-  real(kind=8) , intent(in)  :: xmax,xmin,y
-  real(kind=8) , intent(out) :: x
-
-  ! Dependencies: none
-```
-
-This subroutine takes an unbounded varibale ```y``` and applies the transformation 
-$$ \texttt{x} = \texttt{xmin} + \left(\frac{\exp(y)}{1+\exp(y)} \right)(\texttt{xmax}-\texttt{xmin}) $$
-to return a bounded variable ```x```, contrained to be between ```xmin``` and ```xmax```.
-
-```fortran
-call denormalize ( betau , beta , 1.0d0 , 0.0d0 )
-
-! if betau = 3 --> beta = 0.952
-! if betau = -2 --> beta = 0.119
-```
-
-**Note**: This subroutine is useful to use stadard optimization algorithms for contrained problems. For isntance, one can use the Simplex method to minimize a function of ```x```, where ```x``` should be in the unit interval, by making use of ```normalize``` and ```denormalize```.
-
-[(back to index)](#inicio)
-
+  - [```normalize```](#normalize): transform a bounded variable into an unbounded one [for optimizaton]
+  - [```denormalize```](#denormalize): transform a undonded variable into an counded one [for optimizaton]
+  - [```broyden```](#broyden): updates a Jacobian matrix using the Broyden's method
 ---
 
 ### <a name="grid"></a>```grid``` 
@@ -486,28 +437,6 @@ This function returns the inverse of a squared matrix ```mat```.
 
 ---
 
-### <a name="broyden"></a>```broyden``` 
-
-```fortran
-subroutine broyden(j1,j0,x1,x0,f1,f0)
-  implicit none
-  real(kind=8) , intent(in)  :: x1(:),f1(:)
-  real(kind=8) , intent(in)  :: x0(:),f0(:)
-  real(kind=8) , intent(in)  :: j0(:,:)
-  real(kind=8) , intent(out) :: j1(:,:)
-
-  ! Dependencies: none
-```
-This subroutine applies the Boryden's method to update a Jacobian matrix.
-
-Imagine we have an $m$-dimensional function $f$ in $n$ unknows. We evaluate two points $x_0$ and $x_1$, $f_1 = f(x_1)$ and $f_0 = f(x_0)$, and we compute the numerical jacobian of the function $f$ around $x=x_0$. This subroutine returns an opproximation to the jacobian matrix arounf the point $x=x_1$. The user must supply a pair of points ```x0``` and ```x1```, the value of the function evaluated at thos epoints ```f0``` and ```f1```, and the jacobian matrix ```j0``` evaluated at ```x0```.
-
-You can learn more about this method in this [link](https://en.wikipedia.org/wiki/Broyden%27s_method).
-
-[(back to index)](#inicio)
-
----
-
 ### <a name="simplex"></a>```simplex```
 
 ```fortran
@@ -610,3 +539,75 @@ subroutine brent(func,x,iy,ind,x0,x1,itermax,tol)
 [(back to index)](#inicio)
 
 ---
+
+### <a name="normalize"></a>```normalize``` 
+
+```fortran
+subroutine normalize(y,x,xmax,xmin)
+  implicit none
+  real(kind=8) , intent(in)  :: xmax,xmin,x
+  real(kind=8) , intent(out) :: y
+
+  ! Dependencies: none
+```
+
+This subroutine takes a bounded varibale  ```x```, contrained to be between ```xmin``` and ```xmax```, and applies the transformation 
+$$ \texttt{y} = \log\left( \frac{ \texttt{x} - \texttt{xmin}}{\texttt{xmax} - \texttt{x}} \right) $$
+to return an unbounded variable ```y```.
+
+**Note**: This subroutine is useful to use stadard optimization algorithms for contrained problems. For isntance, one can use the Simplex method to minimize a function of ```x```, where ```x``` should be in the unit interval, by making use of ```normalize``` and ```denormalize```.
+
+[(back to index)](#inicio)
+
+---
+
+### <a name="denormalize"></a>```denormalize``` 
+
+```fortran
+subroutine denormalize(y,x,xmax,xmin)
+  implicit none
+  real(kind=8) , intent(in)  :: xmax,xmin,y
+  real(kind=8) , intent(out) :: x
+
+  ! Dependencies: none
+```
+
+This subroutine takes an unbounded varibale ```y``` and applies the transformation 
+$$ \texttt{x} = \texttt{xmin} + \left(\frac{\exp(y)}{1+\exp(y)} \right)(\texttt{xmax}-\texttt{xmin}) $$
+to return a bounded variable ```x```, contrained to be between ```xmin``` and ```xmax```.
+
+```fortran
+call denormalize ( betau , beta , 1.0d0 , 0.0d0 )
+
+! if betau = 3 --> beta = 0.952
+! if betau = -2 --> beta = 0.119
+```
+
+**Note**: This subroutine is useful to use stadard optimization algorithms for contrained problems. For isntance, one can use the Simplex method to minimize a function of ```x```, where ```x``` should be in the unit interval, by making use of ```normalize``` and ```denormalize```.
+
+[(back to index)](#inicio)
+
+---
+
+### <a name="broyden"></a>```broyden``` 
+
+```fortran
+subroutine broyden(j1,j0,x1,x0,f1,f0)
+  implicit none
+  real(kind=8) , intent(in)  :: x1(:),f1(:)
+  real(kind=8) , intent(in)  :: x0(:),f0(:)
+  real(kind=8) , intent(in)  :: j0(:,:)
+  real(kind=8) , intent(out) :: j1(:,:)
+
+  ! Dependencies: none
+```
+This subroutine applies the Boryden's method to update a Jacobian matrix.
+
+Imagine we have an $m$-dimensional function $f$ in $n$ unknows. We evaluate two points $x_0$ and $x_1$, $f_1 = f(x_1)$ and $f_0 = f(x_0)$, and we compute the numerical jacobian of the function $f$ around $x=x_0$. This subroutine returns an opproximation to the jacobian matrix arounf the point $x=x_1$. The user must supply a pair of points ```x0``` and ```x1```, the value of the function evaluated at thos epoints ```f0``` and ```f1```, and the jacobian matrix ```j0``` evaluated at ```x0```.
+
+You can learn more about this method in this [link](https://en.wikipedia.org/wiki/Broyden%27s_method).
+
+[(back to index)](#inicio)
+
+---
+

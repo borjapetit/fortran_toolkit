@@ -212,6 +212,9 @@ subroutine error(mess)
 
 This subroutine prints an error message ```mess``` and interrupt the execution of the program until the user type an interger.
 
+  
+  
+
 ## Statistics
 
 ### varmean

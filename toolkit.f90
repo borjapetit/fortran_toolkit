@@ -65,10 +65,6 @@ module toolkit
                      vectorize_dp_2d,vectorize_dp_3d,vectorize_dp_4d,vectorize_dp_5d
   end interface vect
 
-  ! interface reg
-  !   module procedure ols1var,ols2var,ols3var,ols4var
-  ! end interface reg
-
   interface randomnormal
     module procedure randomnormal_scalar,randomnormal_vec
   end interface randomnormal

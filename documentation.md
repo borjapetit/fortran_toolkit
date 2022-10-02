@@ -38,7 +38,8 @@
 
 ## General purpose
 
-### grid <a name="grid"></a>
+### grid
+<a name="grid"></a>
 
 ```fortran
 function grid(maxv,minv,n,s) result(v)

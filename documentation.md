@@ -38,7 +38,7 @@
 
 ## General purpose
 
-### <a name="grid"></a>```grid``` 
+### grid <a name="grid"></a>
 
 ```fortran
 function grid(maxv,minv,n,s) result(v)
@@ -68,7 +68,7 @@ vector = grid( 1.d0 , -1.0d0 , 400 , 2.0d0 )
 [(back to index)](#inicio)
 
 
-### <a name="interpolation"></a>```interpolation``` 
+### interpolation <a name="interpolation"></a>
 ```fortran
 subroutine interpolation(pos,wth,xnow,xgrid)
   implicit none
@@ -92,7 +92,7 @@ This subroutine is mainly used by the function ```interpolate```.
 [(back to index)](#inicio)
 
 
-### <a name="interpolate"></a>```interpolate``` 
+### interpolate <a name="interpolate"></a>
 returns the average of a variable, allowing for weigths
 ```fortran
 function interpolate(x1,x2,...,xn,y1,y2,...,yn,mat) result(xi)
@@ -115,7 +115,7 @@ If $x_0<\min($```x_grid```$)$ the subroutine take $\min($```x_grid```$)$ as the 
 [(back to index)](#inicio)
 
 
-### <a name="timing"></a>```timing``` 
+### timing <a name="timing"></a>
 ```fortran
 function timing(mode) result(time)
   implicit none
@@ -133,7 +133,7 @@ This functions returns a timing number that is robust to parallel computing. In 
 [(back to index)](#inicio)
 
 
-### <a name="multiplo"></a>```multiplo``` 
+### multiplo <a name="multiplo"></a>
 
 ```fortran
 elemental function multiplo(num,xx) result(mul)
@@ -153,7 +153,7 @@ print * , multiplo(5,27)  ! result 0
 [(back to index)](#inicio)
 
 
-### <a name="iseven"></a>```iseven``` 
+### iseven <a name="iseven"></a>
 ```fortran
 function iseven(num) result(ise)
   implicit none
@@ -176,7 +176,7 @@ check = iseven(6)  ! check = 1
 
 ## Statistics
 
-### <a name="varmean"></a>```varmean``` 
+### varmean <a name="varmean"></a>
 ```fortran
 function varmean(var,wvar) result(meanvar)
   implicit none
@@ -203,7 +203,7 @@ mean = varmean(xvar,wvar)  ! mean = 4.3076
 [(back to index)](#inicio)
 
 
-### <a name="varstd"></a>```varstd``` 
+### varstd <a name="varstd"></a>
 ```fortran
 function varstd(var,wvar) result(stdvar)
   implicit none
@@ -218,7 +218,7 @@ This function returns the stadard deviation of a variable ```var``` given some (
 [(back to index)](#inicio)
 
 
-### <a name="correlation"></a>```correlation``` 
+### correlation <a name="correlation"></a>
 ```fortran
 function correlation(xvar1,xvar2,wvar) result(corr)
   implicit none
@@ -233,7 +233,7 @@ This function returns the correlation coefficient between two variables ```xvar1
 [(back to index)](#inicio)
 
 
-### <a name="percentile"></a>```percentile``` 
+### percentile <a name="percentile"></a>
 ```fortran
 function percentile(xvec,pct,wvar) result(cutoff)
   implicit none
@@ -253,7 +253,7 @@ pc60 = percentile(xvec,60.0d0)
 [(back to index)](#inicio)
 
 
-### <a name="olsreg"></a>```olsreg``` 
+### olsreg <a name="olsreg"></a>
 
 returns the average of a variable, allowing for weigths
 
@@ -264,7 +264,7 @@ returns the average of a variable, allowing for weigths
 [(back to index)](#inicio)
 
 
-### <a name="tauchen"></a>```tauchen``` 
+### tauchen <a name="tauchen"></a>
 ```fortran
 subroutine tauchen(xvec,rho,mu,sigma,n,pmat)
   implicit none
@@ -281,7 +281,7 @@ The vector with values of $x$, ```xvec```, if of dimension ```n``` and does not 
 [(back to index)](#inicio)
 
 
-### <a name="normaldist"></a>```normaldist``` 
+### normaldist <a name="normaldist"></a>
 ```fortran
 subroutine normaldist(xvec,mu,sigma,n,dist)
   implicit none
@@ -297,7 +297,7 @@ This function returns the distribution of a normal random variable with mean ```
 [(back to index)](#inicio)
 
 
-### <a name="randomnormal"></a>```randomnormal``` 
+### randomnormal <a name="randomnormal"></a>
 ```fortran
 function randomnormal(mu,std) result(shock)
   implicit none
@@ -312,7 +312,7 @@ This function returns a random number draw from a distribution $N(\mu,\sigma)$.
 [(back to index)](#inicio)
 
 
-### <a name="cdfn"></a>```cdfn``` 
+### cdfn <a name="cdfn"></a>
 ```fortran
 elemental function cdfn(x) result(f)
   implicit none
@@ -343,7 +343,7 @@ print * , cdf(vec)    ! result: (/ 0.50 , 0.158 /)
 
 ## Linear algebra
 
-### <a name="vectorize"></a>```vectorize``` 
+### vectorize <a name="vectorize"></a>
 
 returns the average of a variable, allowing for weigths
 
@@ -354,7 +354,7 @@ returns the average of a variable, allowing for weigths
 [(back to index)](#inicio)
 
 
-### <a name="cumsum"></a>```cumsum``` 
+### cumsum <a name="cumsum"></a>
 ```fortran
 function cumsum(vec0) result(vec1)
   implicit none
@@ -373,7 +373,7 @@ vec1 = cumsum(vec0) ! vec1 = (/ 1.0, 3.0, 4.0, 7.0 /)
 [(back to index)](#inicio)
 
 
-### <a name="diag"></a>```diag``` 
+### diag <a name="diag"></a>
 ```fortran
 function diag(mat) result(vec)
   implicit none
@@ -391,7 +391,7 @@ vec = diag(vec0) ! vec = (/ 1.0, 3.0, 1.0 /)
 [(back to index)](#inicio)
 
 
-### <a name="transmat"></a>```transmat``` 
+### transmat <a name="transmat"></a>
 
 ```fortran
 function transmat(mat) result(matt)
@@ -408,7 +408,7 @@ This function returns the transpose of a matrix ```mat```.
 [(back to index)](#inicio)
 
 
-### <a name="inverse"></a>```inverse``` 
+### inverse <a name="inverse"></a>
 
 ```fortran
 function inverse(mat) result(imat)
@@ -428,7 +428,7 @@ This function returns the inverse of a squared matrix ```mat```.
 
 ## Optimization
 
-### <a name="simplex"></a>```simplex```
+### simplex <a name="simplex"></a>
 
 ```fortran
 subroutine simplex(func,x,y,iy,ind,x0,itermax,tol,iprint)
@@ -453,7 +453,7 @@ subroutine simplex(func,x,y,iy,ind,x0,itermax,tol,iprint)
 [(back to index)](#inicio)
 
 
-### <a name="lmmin"></a>```lmmin```
+### lmmin <a name="lmmin"></a>
 
 ```fortran
 subroutine lmmin_states_both(func,x,y,iy,ind,x0,itermax,damp,tol,toleach,shock,usebro,iprint)
@@ -481,7 +481,7 @@ subroutine lmmin_states_both(func,x,y,iy,ind,x0,itermax,damp,tol,toleach,shock,u
 [(back to index)](#inicio)
 
 
-### <a name="golden"></a>```golden```
+### golden <a name="golden"></a>
 
 ```fortran
 subroutine golden(func,x,y,xmax,xmin,itermax,tol)
@@ -504,7 +504,7 @@ subroutine golden(func,x,y,xmax,xmin,itermax,tol)
 [(back to index)](#inicio)
 
 
-### <a name="brent"></a>```brent```
+### brent <a name="brent"></a>
 
 ```fortran
 subroutine brent(func,x,iy,ind,x0,x1,itermax,tol)
@@ -528,7 +528,7 @@ subroutine brent(func,x,iy,ind,x0,x1,itermax,tol)
 [(back to index)](#inicio)
 
 
-### <a name="normalize"></a>```normalize``` 
+### normalize <a name="normalize"></a>
 
 ```fortran
 subroutine normalize(y,x,xmax,xmin)
@@ -548,7 +548,7 @@ to return an unbounded variable ```y```.
 [(back to index)](#inicio)
 
 
-### <a name="denormalize"></a>```denormalize``` 
+### denormalize <a name="denormalize"></a>
 
 ```fortran
 subroutine denormalize(y,x,xmax,xmin)

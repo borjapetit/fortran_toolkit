@@ -54,7 +54,7 @@ function grid(maxv,minv,n,s) result(v)
   integer                 :: n
 ```
 
-**Dependencies**: none
+_Dependencies_: none
 
 This function creates a grid of ```n``` points between ```maxv``` and ```minv``` with a curvature of ```s```
 
@@ -87,7 +87,7 @@ subroutine interpolation(pos,wth,xnow,xgrid)
   integer     , intent(out) :: pos
 ```
 
-**Dependencies**: none
+_Dependencies_: none
 
 This subroutine finds the closest point in a given grid and return its position and the relative distance.
 
@@ -117,17 +117,24 @@ function interpolate(x1,x2,...,xn,y1,y2,...,yn,mat) result(xi)
   real(kind=8) :: mat(:,:,...,:)
 ```
 
-**Dependencies**: ```interpolation```
+_Dependencies_: ```interpolation```
 
-This function returns the linearly interpolated value of an n-dimensional function. The variables ```x1```, ```x2```, ..., ```xn``` are the values of the variables to be interpolated over their coresponding grids ```y1```, ```y2```, ...., ```yn```, and ```mat``` is an n-dimensional array with the results. The array ```mat``` must have at most, dimension 6.
+This function returns the linearly interpolated value of an n-dimensional function. The variables ```x1```, ```x2```, ..., ```xn``` are the values of the variables to be interpolated over their coresponding grids ```y1```, ```y2```, ...., ```yn```, and ```mat``` is an n-dimensional array with the results.
 
-_Example_: consider 2-dimensional function $f(x,y)$. We have an array ```mat``` whose $(i,j)$-element is the value of $f$ evaluated at the $i$-element of a grid for $x$, and the $j$-element of a grid for $y$. Then, we can interpolate the value of $f$ at $(x_0,y_0)$ using the ```interpolate```:
+- The array ```mat``` must have at most, dimension 6 (so ```n```$\leq6$).
+- If ```xn```$<\min$(```yn```) the subroutine takes $\min($```yn```$)$ as the value of ```x```.
+
+_Example 1_: We have a 2-dimensional array ```mat``` whose $(i,j)$-element is the value of some function $f$ evaluated at the $i$-element of the vector $x$, and the $j$-element of the vector $y$. Then, we can interpolate the value of $f$ at $(x_0,y_0)$ using the ```interpolate```:
 
 ```fortran
-xi = interpolate(x_0,y_0,x_grid,y_grid,mat)
+xi = interpolate(x_0,y_0,x,y,mat)
 ```
 
-If $x_0<\min($```x_grid```$)$ the subroutine take $\min($```x_grid```$)$ as the value of x. The same happens with $y$. Then, if $x_0<\min($```x_grid```$)$ and $y_0<\min($```y_grid```$)$, the function would return ```xi = mat(1,1)```.
+_Example 2_: We have a 3-dimensional array ```mat``` whose $(i,j,k)$-element is the value of some function $f$ evaluated at the $i$-element of the vector $x$, the $j$-element of the vector $y$, and the $k$-element of the vecor $z$. Then, we can interpolate the value of $f$ at $(x_0,y_0,z_0)$ using the ```interpolate```:
+
+```fortran
+xi = interpolate(x_0,y_0,z_0,x,y,z,mat)
+```
 
 [(back to index)](#inicio)
 
@@ -142,7 +149,7 @@ function timing(mode) result(time)
   real(kind=8)       :: time
 ```
 
-**Dependencies**: ```none```
+_Dependencies_: ```none```
 
 This functions returns a timing number that is robust to parallel computing. In particular, it returns the number of seconds since 00:00h of the 1st day of the month. The variable ```mode``` controls how time is measured:
 
@@ -163,7 +170,7 @@ elemental function multiplo(num,xx) result(mul)
   integer :: num,xx,mul
 ```
 
-**Dependencies**: ```none```
+_Dependencies_: ```none```
 
 This function checks whether a number ```num0``` is a multiple of ```num1```. The result ```mul``` takes value 1 if ```num0``` is a multiple of ```num1```, and 0 otherwise.
 
@@ -186,7 +193,7 @@ function iseven(num) result(ise)
   integer :: num,ise
 ```
 
-**Dependencies**: none
+_Dependencies_: none
 
 This function checks whether a number ```num``` is even. The result ```ise``` takes value 1 if ```num``` is even, and 0 otherwise.
 
@@ -208,7 +215,7 @@ subroutine error(mess)
   character(len=*) , intent(in) :: mess
 ```
 
-**Dependencies**: none
+_Dependencies_: none
 
 This subroutine prints an error message ```mess``` and interrupt the execution of the program until the user type an interger.
 
@@ -228,7 +235,7 @@ function varmean(var,wvar) result(meanvar)
   real(kind=8)            :: meanvar
 ```
 
-**Dependencies**: none
+_Dependencies_: none
 
 This function returns the mean of a variable ```var``` given some (optional) weigths ```wvar```. If supplied, the vector ```wvar``` should have the same size as ```var```. If not supplied, the program assums uniform weigthing.
 
@@ -259,7 +266,7 @@ function varstd(var,wvar) result(stdvar)
   real(kind=8)            :: stdvar
 ```
 
-**Dependencies**: ```varmean```
+_Dependencies_: ```varmean```
 
 This function returns the stadard deviation of a variable ```var``` given some (optional) weigths ```wvar```. If supplied, the vector ```wvar``` should have the same size as ```var```. If not supplied, the program assums uniform weigthing.
 
@@ -277,7 +284,7 @@ function correlation(xvar1,xvar2,wvar) result(corr)
   real(kind=8)            :: corr
 ```
 
-**Dependencies**: ```varmean```, ```varstd```
+_Dependencies_: ```varmean```, ```varstd```
 
 This function returns the correlation coefficient between two variables ```xvar1``` and ```xvar2``` given some (optional) weigths ```wvar```. If supplied, the vector ```wvar``` should have the same size as ```var```. If not supplied, the program assums uniform weigthing.
 
@@ -293,11 +300,9 @@ function percentile(xvec,pct,wvar) result(cutoff)
   real(kind=8)            :: xvec(:),pct
   real(kind=8) , optional :: wvar(:)
   real(kind=8)            :: cutoff
-  
-  ! Dependencies: none
 ```
 
-**Dependencies**: none
+_Dependencies_: none
 
 This function returns the percentile ```pct``` for a distribution ```xvec```, given some (optional) weigths ```wvar```. If supplied, the vector ```wvar``` should have the same size as ```var```. If not supplied, the program assums uniform weigthing.
 
@@ -333,7 +338,7 @@ subroutine tauchen(xvec,rho,mu,sigma,n,pmat)
   real(kind=8), intent(out) :: pmat(n,n)
 ```
 
-**Dependencies**: ```normaldist```
+_Dependencies_: ```normaldist```
 
 This function returns the transition matrix for a discretized AR(1) process of the form:
 $$x' = \mu + \rho x + \sigma \epsilon, \hspace{0.2cm} \epsilon \sim N(0,1)$$
@@ -353,7 +358,7 @@ subroutine normaldist(xvec,mu,sigma,n,dist)
   real(kind=8), intent(out) :: dist(n)
 ```
 
-**Dependencies**: ```cdfn```
+_Dependencies_: ```cdfn```
 
 This function returns the distribution of a normal random variable with mean ```mu``` and standadrd deviation ```sigma```.
 
@@ -371,7 +376,7 @@ subroutine randomnormal(shock,mu,std)
   real(kind=8) , intent(out) :: shock ! or shock(:)
 ```
 
-**Dependencies:** none
+_Dependencies_: none
 
 This function returns a random number draw from a distribution $N(\mu,\sigma)$. The output, ```shock```, can either be a scalar or a vector of dimension-$n$.
 
@@ -391,7 +396,7 @@ elemental function cdfn(x) result(f)
   real(kind=8)             :: f
 ```
 
-**Dependencies:** none
+_Dependencies_: none
 
 This function returns the cdf of a standard normal distribution, ```f``` $=\Phi(x)$. This subroutine is defined as ```elemental```, which implies that it can be call for both scalars and arrays.
 
@@ -432,12 +437,14 @@ returns the average of a variable, allowing for weigths
 function cumsum(vec0) result(vec1)
   implicit none
   real(kind=8) :: vec0(:),vec1(size(vec0))
-
-  ! Dependencies: none
 ```
+
+_Dependencies_: none
+
 Returns the cummulative sum of a vector ```vec0```.
 
 _Example_: given a vector ```xvec``` with a sample of a variable ```x```, find the 60th percentile:
+
 ```fortran
 vec0 = (/ 1.0, 2.0, 1.0, 3.0 /) 
 vec1 = cumsum(vec0) ! vec1 = (/ 1.0, 3.0, 4.0, 7.0 /)
@@ -453,11 +460,13 @@ vec1 = cumsum(vec0) ! vec1 = (/ 1.0, 3.0, 4.0, 7.0 /)
 function diag(mat) result(vec)
   implicit none
   real(kind=8) :: mat(:,:),vec(size(mat,dim=1))
-
-  ! Dependencies: none
 ```
+
+_Dependencies_: none
+
 This function returns the main diagonal of a matric ```mat```.
 _Example_: given a vector ```xvec``` with a sample of a variable ```x```, find the 60th percentile:
+
 ```fortran
 mat = (/ 1.0, 2.0, 1.0 ; 3.0, 3.0, 4.0 ; 5.0, 1.0, 3.0 /) 
 vec = diag(vec0) ! vec = (/ 1.0, 3.0, 1.0 /)
@@ -474,9 +483,10 @@ function transmat(mat) result(matt)
   implicit none
   real(kind=8) , intent(in)  :: mat(:,:)
   real(kind=8)               :: matt(size(mat,2),size(mat,1))
-
-  ! Dependencies: none
 ```
+
+_Dependencies_: none
+
 This function returns the transpose of a matrix ```mat```.
 
 
@@ -492,9 +502,10 @@ function inverse(mat) result(imat)
   implicit none
   real(kind=8) :: mat(:,:)
   real(kind=8) :: imat(size(m,1),size(m,1))
-
-  ! Dependencies: none
 ```
+
+_Dependencies_: none
+
 This function returns the inverse of a squared matrix ```mat```.
 
 
@@ -519,13 +530,9 @@ subroutine simplex(func,x,y,iy,ind,x0,itermax,tol,iprint)
   real(kind=8) , intent(in) , optional :: tol         ! tolerance level
   integer      , intent(in) , optional :: itermax     ! max number of functione valuations
   integer      , intent(in) , optional :: iprint      ! indicator for printing behaviour
-
-  ! Dependencies: none
 ```
 
-
-
-
+_Dependencies_: none
 
 [(back to index)](#inicio)
 
@@ -549,10 +556,9 @@ subroutine lmmin_states_both(func,x,y,iy,ind,x0,itermax,damp,tol,toleach,shock,u
   integer      , intent(in) , optional :: itermax     ! max number of functione valuations
   integer      , intent(in) , optional :: iprint      ! indicator for printing behaviour
   integer      , intent(in) , optional :: usebro      ! indicator for the use of Broyden method to update Jacobian
-
-  ! Dependencies: broyden,inverse
 ```
 
+_Dependencies_: ```broyden```, ```inverse```
 
 
 
@@ -572,10 +578,9 @@ subroutine golden(func,x,y,xmax,xmin,itermax,tol)
   real(kind=8) , intent(in)            :: xmin
   real(kind=8) , intent(in) , optional :: tol
   integer      , intent(in) , optional :: itermax
-
-  ! Dependencies: none
 ```
 
+_Dependencies_: none
 
 
 
@@ -597,10 +602,9 @@ subroutine brent(func,x,iy,ind,x0,x1,itermax,tol)
   real(kind=8) , intent(in)            :: x1
   real(kind=8) , intent(in) , optional :: tol
   integer      , intent(in) , optional :: itermax
-
-  ! Dependencies: none
 ```
 
+_Dependencies_: none
 
 
 
@@ -616,9 +620,9 @@ subroutine normalize(y,x,xmax,xmin)
   implicit none
   real(kind=8) , intent(in)  :: xmax,xmin,x
   real(kind=8) , intent(out) :: y
-
-  ! Dependencies: none
 ```
+
+_Dependencies_: none
 
 This subroutine takes a bounded varibale  ```x```, contrained to be between ```xmin``` and ```xmax```, and applies the transformation 
 $$ \texttt{y} = \log\left( \frac{ \texttt{x} - \texttt{xmin}}{\texttt{xmax} - \texttt{x}} \right) $$
@@ -637,9 +641,9 @@ subroutine denormalize(y,x,xmax,xmin)
   implicit none
   real(kind=8) , intent(in)  :: xmax,xmin,y
   real(kind=8) , intent(out) :: x
-
-  ! Dependencies: none
 ```
+
+_Dependencies_: none
 
 This subroutine takes an unbounded varibale ```y``` and applies the transformation 
 $$ \texttt{x} = \texttt{xmin} + \left(\frac{\exp(y)}{1+\exp(y)} \right)(\texttt{xmax}-\texttt{xmin}) $$
@@ -667,9 +671,10 @@ subroutine broyden(j1,j0,x1,x0,f1,f0)
   real(kind=8) , intent(in)  :: x0(:),f0(:)
   real(kind=8) , intent(in)  :: j0(:,:)
   real(kind=8) , intent(out) :: j1(:,:)
-
-  ! Dependencies: none
 ```
+
+_Dependencies_: none
+
 This subroutine applies the Boryden's method to update a Jacobian matrix.
 
 Imagine we have an $m$-dimensional function $f$ in $n$ unknows. We evaluate two points $x_0$ and $x_1$, $f_1 = f(x_1)$ and $f_0 = f(x_0)$, and we compute the numerical jacobian of the function $f$ around $x=x_0$. This subroutine returns an opproximation to the jacobian matrix arounf the point $x=x_1$. The user must supply a pair of points ```x0``` and ```x1```, the value of the function evaluated at thos epoints ```f0``` and ```f1```, and the jacobian matrix ```j0``` evaluated at ```x0```.

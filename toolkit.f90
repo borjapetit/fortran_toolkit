@@ -47,15 +47,15 @@ module toolkit
 
   implicit none
 
-  integer  , parameter :: dp = kind(1.0d00)
-
-  real(kind=8) , parameter :: zero  = dble(0.00000000000000)
-  real(kind=8) , parameter :: one   = dble(1.00000000000000)
-  real(kind=8) , parameter :: cien  = dble(100.000000000000)
-  real(kind=8) , parameter :: mil   = dble(1000.00000000000)
-  real(kind=8) , parameter :: tolvl = dble(0.00000000010000)
-  real(kind=8) , parameter :: half  = dble(0.50000000000000)
-
+  integer  , parameter :: dp    = kind(1.0d00)
+  real(dp) , parameter :: zero  = dble(0.00000000000000)
+  real(dp) , parameter :: half  = dble(0.50000000000000)
+  real(dp) , parameter :: one   = dble(1.00000000000000)
+  real(dp) , parameter :: two   = dble(2.00000000000000)
+  real(dp) , parameter :: cien  = dble(100.000000000000)
+  real(dp) , parameter :: mil   = dble(1000.00000000000)
+  real(dp) , parameter :: tolvl = dble(0.00000000010000)
+  
   interface interpolate
     module procedure interpolate1d,interpolate2d,interpolate3d,interpolate4d,interpolate5d,interpolate6d
   end interface interpolate
@@ -93,13 +93,13 @@ module toolkit
   function grid(maxv,minv,n,s) result(v)
     implicit none
     integer                 :: i,n
-    real(kind=8) , optional :: s
-    real(kind=8)            :: maxv,minv,grid0(n),v(n),ss,xmin,xmax
+    real(dp) , optional :: s
+    real(dp)            :: maxv,minv,grid0(n),v(n),ss,xmin,xmax
     v(:) = zero ; ss = one ; if (present(s)) ss = s
     if (ss.le.zero) call error(' errror in grid: spacing parameter is nonpositive')
     do i=1,n ; grid0(i)=dble(i-1)/dble(n-1) ; end do
-    xmin = max(maxv,minv)
-    xmax = min(maxv,minv)
+    xmin = min(maxv,minv)
+    xmax = max(maxv,minv)
     if (ss.gt.zero) then
       do i = 1,n ; v(i) = (grid0(i)**ss)*(xmax-xmin) + minv ; end do
     end if
@@ -113,8 +113,8 @@ module toolkit
   subroutine interpolation(pos,wth,xnow,xgrid)
     implicit none
     integer                   :: j,n
-    real(kind=8), intent(in)  :: xnow,xgrid(:)
-    real(kind=8), intent(out) :: wth
+    real(dp), intent(in)  :: xnow,xgrid(:)
+    real(dp), intent(out) :: wth
     integer     , intent(out) :: pos
     if (isnan(xnow)) call error(' errror in interpolation: xnow is nan')
     n = size(xgrid)
@@ -159,7 +159,7 @@ module toolkit
   function interpolate1d(x1,y1,m) result(xi)
     implicit none
     integer      :: pos
-    real(kind=8) :: y1(:),m(:),x1,xi,wth
+    real(dp) :: y1(:),m(:),x1,xi,wth
     if (size(y1).ne.size(m)) call error(' error in interpolate: 1st dimension incorrect')
     call interpolation(pos,wth,x1,y1)
     xi = m(pos)*wth + m(pos-1)*(one-wth)
@@ -168,9 +168,9 @@ module toolkit
   function interpolate2d(x1,x2,y1,y2,m) result(xi)
     implicit none
     integer      :: pos2
-    real(kind=8) :: wth2
-    real(kind=8) :: x1,x2,xi
-    real(kind=8) :: y1(:),y2(:),m(:,:)
+    real(dp) :: wth2
+    real(dp) :: x1,x2,xi
+    real(dp) :: y1(:),y2(:),m(:,:)
     if (size(m,2).ne.size(y2)) call error(' error in interpolate: 2nd dimension incorrect')
     call interpolation(pos2,wth2,x2,y2)
     xi = interpolate1d(x1,y1,m(:,pos2)  )*wth2 + &
@@ -180,8 +180,8 @@ module toolkit
   function interpolate3d(x1,x2,x3,y1,y2,y3,m) result(xi)
     implicit none
     integer      :: pos3
-    real(kind=8) :: y1(:),y2(:),y3(:),x1,x2,x3,xi
-    real(kind=8) :: wth3,m(:,:,:)
+    real(dp) :: y1(:),y2(:),y3(:),x1,x2,x3,xi
+    real(dp) :: wth3,m(:,:,:)
     if (size(m,3).ne.size(y3)) call error(' error in interpolate: 3rd dimension incorrect')
     call interpolation(pos3,wth3,x3,y3)
     xi = interpolate2d(x1,x2,y1,y2,m(:,:,pos3)  )*wth3 + &
@@ -191,8 +191,8 @@ module toolkit
   function interpolate4d(x1,x2,x3,x4,y1,y2,y3,y4,m) result(xi)
     implicit none
     integer      :: pos4
-    real(kind=8) :: y1(:),y2(:),y3(:),y4(:),x1,x2,x3,x4,xi
-    real(kind=8) :: wth4,m(:,:,:,:)
+    real(dp) :: y1(:),y2(:),y3(:),y4(:),x1,x2,x3,x4,xi
+    real(dp) :: wth4,m(:,:,:,:)
     if (size(m,4).ne.size(y4)) call error(' error in interpolate: 4th dimension incorrect')
     call interpolation(pos4,wth4,x4,y4)
     xi = interpolate3d(x1,x2,x3,y1,y2,y3,m(:,:,:,pos4)  )*wth4 + &
@@ -202,8 +202,8 @@ module toolkit
   function interpolate5d(x1,x2,x3,x4,x5,y1,y2,y3,y4,y5,m) result(xi)
     implicit none
     integer      :: pos5
-    real(kind=8) :: y1(:),y2(:),y3(:),y4(:),y5(:),x1,x2,x3,x4,x5,xi
-    real(kind=8) :: wth5,m(:,:,:,:,:)
+    real(dp) :: y1(:),y2(:),y3(:),y4(:),y5(:),x1,x2,x3,x4,x5,xi
+    real(dp) :: wth5,m(:,:,:,:,:)
     if (size(m,5).ne.size(y5)) call error(' error in interpolate: 5th dimension incorrect')
     call interpolation(pos5,wth5,x5,y5)
     xi = interpolate4d(x1,x2,x3,x4,y1,y2,y3,y4,m(:,:,:,:,pos5))*wth5 + &
@@ -213,8 +213,8 @@ module toolkit
   function interpolate6d(x1,x2,x3,x4,x5,x6,y1,y2,y3,y4,y5,y6,m) result(xi)
     implicit none
     integer      :: pos6
-    real(kind=8) :: y1(:),y2(:),y3(:),y4(:),y5(:),y6(:),x1,x2,x3,x4,x5,x6,xi
-    real(kind=8) :: wth6,m(:,:,:,:,:,:)
+    real(dp) :: y1(:),y2(:),y3(:),y4(:),y5(:),y6(:),x1,x2,x3,x4,x5,x6,xi
+    real(dp) :: wth6,m(:,:,:,:,:,:)
     if (size(m,5).ne.size(y5)) call error(' error in interpolate: 6th dimension incorrect')
     call interpolation(pos6,wth6,x6,y6)
     xi = interpolate5d(x1,x2,x3,x4,x5,y1,y2,y3,y4,y5,m(:,:,:,:,:,pos6))*wth6 + &
@@ -235,7 +235,7 @@ module toolkit
     implicit none
     integer , optional :: mode
     integer            :: v1(8)
-    real(kind=8)       :: time,v2(8) ; time = zero ; v2 = zero
+    real(dp)           :: time,v2(8) ; time = zero ; v2 = zero
     
     call date_and_time(values=v1)  
 
@@ -315,8 +315,8 @@ module toolkit
   function varmean(var,wvar) result(meanvar)
 
     implicit none
-    real(kind=8) , optional :: wvar(:)
-    real(kind=8)            :: var(:),meanvar,weig(size(var))
+    real(dp) , optional :: wvar(:)
+    real(dp)            :: var(:),meanvar,weig(size(var))
     
     weig(:) = one
     meanvar = zero
@@ -338,10 +338,10 @@ module toolkit
   function varstd(var,wvar) result(stdvar)
 
     implicit none
-    real(kind=8)            :: var(:)
-    real(kind=8) , optional :: wvar(:)
-    real(kind=8)            :: stdvar
-    real(kind=8)            :: weig(size(var)),mvar
+    real(dp)            :: var(:)
+    real(dp) , optional :: wvar(:)
+    real(dp)            :: stdvar
+    real(dp)            :: weig(size(var)),mvar
 
     weig(:) = one
 
@@ -363,9 +363,9 @@ module toolkit
   function correlation(xvar1,xvar2,wvar) result(corr)
 
     implicit none
-    real(kind=8) , optional :: wvar(:)
-    real(kind=8)            :: xvar1(:),xvar2(:),corr,weig(size(xvar1))
-    real(kind=8)            :: aux1,aux2,aux3,aux4,aux5
+    real(dp) , optional :: wvar(:)
+    real(dp)            :: xvar1(:),xvar2(:),corr,weig(size(xvar1))
+    real(dp)            :: aux1,aux2,aux3,aux4,aux5
 
     weig(:) = one
     corr    = zero
@@ -397,11 +397,11 @@ module toolkit
   function percentile(xvec,pct,wvar) result(cutoff)
 
     implicit none
-    real(kind=8)            :: xvec(:),pct
-    real(kind=8) , optional :: wvar(:)
-    real(kind=8)            :: cutoff
-    real(kind=8)            :: weig(size(xvec))
-    real(kind=8)            :: aux1,aux2,aux3,aux4
+    real(dp)            :: xvec(:),pct
+    real(dp) , optional :: wvar(:)
+    real(dp)            :: cutoff
+    real(dp)            :: weig(size(xvec))
+    real(dp)            :: aux1,aux2,aux3,aux4
     integer                 :: iter
 
     weig(:) = one
@@ -441,27 +441,27 @@ module toolkit
 
   subroutine olsreg(coefs,yvec,x1vec,x2vec,x3vec,x4vec,x5vec,x6vec,x7vec,x8vec,wvec,iprint)
     implicit none
-    real(kind=8) , intent(out)           :: coefs(:)
-    real(kind=8) , intent(in)            :: yvec(:)
-    real(kind=8) , intent(in)            :: x1vec(:)
-    real(kind=8) , intent(in) , optional :: x2vec(:)
-    real(kind=8) , intent(in) , optional :: x3vec(:)
-    real(kind=8) , intent(in) , optional :: x4vec(:)
-    real(kind=8) , intent(in) , optional :: x5vec(:)
-    real(kind=8) , intent(in) , optional :: x6vec(:)
-    real(kind=8) , intent(in) , optional :: x7vec(:)
-    real(kind=8) , intent(in) , optional :: x8vec(:)
-    real(kind=8) , intent(in) , optional :: wvec(:)
-    integer      , intent(in) , optional :: iprint
-    real(kind=8) , allocatable           :: xvars(:,:),xTx(:,:),ixTx(:,:),xTy(:)
-    real(kind=8)                         :: wvar(size(yvec))
-    real(kind=8)                         :: evar(size(yvec)),shat
-    real(kind=8)                         :: sdbeta(size(coefs),size(coefs))
-    real(kind=8)                         :: sdcoefs(size(coefs))
-    real(kind=8)                         :: tstats(size(coefs))
-    real(kind=8)                         :: inter(size(coefs),2)
-    real(kind=8)                         :: pvals(size(coefs))
-    integer                              :: j,i,nx ; nx = 1
+    real(dp) , intent(out)           :: coefs(:)
+    real(dp) , intent(in)            :: yvec(:)
+    real(dp) , intent(in)            :: x1vec(:)
+    real(dp) , intent(in) , optional :: x2vec(:)
+    real(dp) , intent(in) , optional :: x3vec(:)
+    real(dp) , intent(in) , optional :: x4vec(:)
+    real(dp) , intent(in) , optional :: x5vec(:)
+    real(dp) , intent(in) , optional :: x6vec(:)
+    real(dp) , intent(in) , optional :: x7vec(:)
+    real(dp) , intent(in) , optional :: x8vec(:)
+    real(dp) , intent(in) , optional :: wvec(:)
+    integer  , intent(in) , optional :: iprint
+    real(dp) , allocatable           :: xvars(:,:),xTx(:,:),ixTx(:,:),xTy(:)
+    real(dp)                         :: wvar(size(yvec))
+    real(dp)                         :: evar(size(yvec)),shat
+    real(dp)                         :: sdbeta(size(coefs),size(coefs))
+    real(dp)                         :: sdcoefs(size(coefs))
+    real(dp)                         :: tstats(size(coefs))
+    real(dp)                         :: inter(size(coefs),2)
+    real(dp)                         :: pvals(size(coefs))
+    integer                          :: j,i,nx ; nx = 1
 
     coefs = zero
 
@@ -567,10 +567,10 @@ module toolkit
 
   subroutine tauchen(xvec,rho,mu,sigma,n,pmat)
     implicit none
-    integer     , intent(in)  :: n
-    real(kind=8), intent(in)  :: rho,mu,sigma,xvec(n)
-    real(kind=8), intent(out) :: pmat(n,n)
-    integer                   :: i
+    integer  , intent(in)  :: n
+    real(dp) , intent(in)  :: rho,mu,sigma,xvec(n)
+    real(dp) , intent(out) :: pmat(n,n)
+    integer                :: i
     do i=1,n
       pmat(i,:) = zero
       call normaldist(xvec,mu+rho*xvec(i),sigma,n,pmat(i,:))
@@ -584,11 +584,11 @@ module toolkit
 
   subroutine normaldist(xvec,mu,sigma,n,dist)
     implicit none
-    integer     , intent(in)  :: n
-    real(kind=8), intent(in)  :: mu,sigma,xvec(n)
-    real(kind=8), intent(out) :: dist(n)
-    real(kind=8)              :: xvec0(n),aux1
-    integer                   :: j
+    integer  , intent(in)  :: n
+    real(dp) , intent(in)  :: mu,sigma,xvec(n)
+    real(dp) , intent(out) :: dist(n)
+    real(dp)               :: xvec0(n),aux1
+    integer                :: j
     xvec0 = (xvec-mu)/sigma
     dist(1) = cdfn( dble(0.5)*(xvec0(2)+xvec0(1)) )
     do j=2,n-1
@@ -606,11 +606,11 @@ module toolkit
 
   subroutine randomnormal_scalar(shock,mu,std)
     implicit none
-    real(kind=8) , intent(out) :: shock
-    real(kind=8) , intent(in)  :: mu,std
-    real(kind=8)               :: u,v,q
-    real(kind=8) , parameter   :: s  = 0.449871 , t  = -0.386595 , a = 0.19600
-    real(kind=8) , parameter   :: r1 = 0.275970 , r2 =  0.278460 , b = 0.25472
+    real(dp) , intent(out) :: shock
+    real(dp) , intent(in)  :: mu,std
+    real(dp)               :: u,v,q
+    real(dp) , parameter   :: s  = 0.449871 , t  = -0.386595 , a = 0.19600
+    real(dp) , parameter   :: r1 = 0.275970 , r2 =  0.278460 , b = 0.25472
     do
       call random_number(u)
       call random_number(v)
@@ -625,12 +625,12 @@ module toolkit
   end subroutine randomnormal_scalar
   subroutine randomnormal_vec(shock,mu,std)
     implicit none
-    integer                    :: i
-    real(kind=8) , intent(out) :: shock(:)
-    real(kind=8) , intent(in)  :: mu,std
-    real(kind=8)               :: u,v,q
-    real(kind=8) , parameter   :: s  = 0.449871 , t  = -0.386595 , a = 0.19600
-    real(kind=8) , parameter   :: r1 = 0.275970 , r2 =  0.278460 , b = 0.25472
+    integer                :: i
+    real(dp) , intent(out) :: shock(:)
+    real(dp) , intent(in)  :: mu,std
+    real(dp)               :: u,v,q
+    real(dp) , parameter   :: s  = 0.449871 , t  = -0.386595 , a = 0.19600
+    real(dp) , parameter   :: r1 = 0.275970 , r2 =  0.278460 , b = 0.25472
     do i=1,size(shock)
       do
         call random_number(u)
@@ -652,18 +652,18 @@ module toolkit
 
   elemental function cdfn(x) result(f)
     implicit none
-    real(kind=8) , intent(in)  :: x
-    real(kind=8)               :: f,xabs,xsq
-    real(kind=8) , parameter   :: a0  = 0.500000000000d0 , a1  = 0.398942280444d0
-    real(kind=8) , parameter   :: a2  = 0.399903438504d0 , a3  = 5.758854804580d0
-    real(kind=8) , parameter   :: a4  = 29.82135578080d0 , a5  = 2.624331216790d0
-    real(kind=8) , parameter   :: a6  = 48.69599306920d0 , a7  = 5.928857244380d0
-    real(kind=8) , parameter   :: b0  = 0.398942280385d0 , b1  = 3.8052d-8
-    real(kind=8) , parameter   :: b2  = 1.000006153020d0 , b3  = 3.98064794d-4
-    real(kind=8) , parameter   :: b4  = 1.986153813640d0 , b5  = 0.151679116635d0
-    real(kind=8) , parameter   :: b6  = 5.293303249260d0 , b7  = 4.8385912808d0
-    real(kind=8) , parameter   :: b8  = 15.15089724510d0 , b9  = 0.742380924027d0
-    real(kind=8) , parameter   :: b10 = 30.78993303400d0 , b11 = 3.99019417011d0
+    real(dp) , intent(in)  :: x
+    real(dp)               :: f,xabs,xsq
+    real(dp) , parameter   :: a0  = 0.500000000000d0 , a1  = 0.398942280444d0
+    real(dp) , parameter   :: a2  = 0.399903438504d0 , a3  = 5.758854804580d0
+    real(dp) , parameter   :: a4  = 29.82135578080d0 , a5  = 2.624331216790d0
+    real(dp) , parameter   :: a6  = 48.69599306920d0 , a7  = 5.928857244380d0
+    real(dp) , parameter   :: b0  = 0.398942280385d0 , b1  = 3.8052d-8
+    real(dp) , parameter   :: b2  = 1.000006153020d0 , b3  = 3.98064794d-4
+    real(dp) , parameter   :: b4  = 1.986153813640d0 , b5  = 0.151679116635d0
+    real(dp) , parameter   :: b6  = 5.293303249260d0 , b7  = 4.8385912808d0
+    real(dp) , parameter   :: b8  = 15.15089724510d0 , b9  = 0.742380924027d0
+    real(dp) , parameter   :: b10 = 30.78993303400d0 , b11 = 3.99019417011d0
     xabs = abs(x)
     xsq  = a0*x**2
     if (xabs <= 1.28d0)then
@@ -714,13 +714,13 @@ module toolkit
     implicit none
     integer            :: i,j,k
     integer , optional :: byrow
-    real(kind=8)       :: mat(:,:),vec(size(mat,dim=1)*size(mat,dim=2)) ; k = 0
+    real(dp)           :: mat(:,:),vec(size(mat,1)*size(mat,2)) ; k = 0
     if (present(byrow) .and. byrow.eq.1) then
-      do j=1,size(mat,dim=2) ; do i=1,size(mat,dim=1)
+      do j=1,size(mat,2) ; do i=1,size(mat,1)
         k = k + 1 ; vec(k) = mat(i,j)
       end do ; end do
     else
-      do i=1,size(mat,dim=1) ; do j=1,size(mat,dim=2)
+      do i=1,size(mat,1) ; do j=1,size(mat,2)
         k = k + 1 ; vec(k) = mat(i,j)
       end do ; end do
     end if
@@ -730,13 +730,13 @@ module toolkit
     implicit none
     integer            :: i,j,p,k
     integer , optional :: byrow
-    real(kind=8)       :: mat(:,:,:),vec(size(mat,dim=1)*size(mat,dim=2)*size(mat,dim=3)) ; k = 0
+    real(dp)           :: mat(:,:,:),vec(size(mat,1)*size(mat,2)*size(mat,3)) ; k = 0
     if (present(byrow) .and. byrow.eq.1) then
-      do p=1,size(mat,dim=2) ; do j=1,size(mat,dim=2) ; do i=1,size(mat,dim=1)
+      do p=1,size(mat,2) ; do j=1,size(mat,2) ; do i=1,size(mat,1)
         k = k + 1 ; vec(k) = mat(i,j,p)
       end do ; end do ; end do
     else
-      do i=1,size(mat,dim=1) ; do j=1,size(mat,dim=2) ; do p=1,size(mat,dim=3)
+      do i=1,size(mat,1) ; do j=1,size(mat,2) ; do p=1,size(mat,3)
         k = k + 1 ; vec(k) = mat(i,j,p)
       end do ; end do ; end do
     end if
@@ -746,13 +746,13 @@ module toolkit
     implicit none
     integer            :: i,j,p,n,k
     integer , optional :: byrow
-    real(kind=8)       :: mat(:,:,:,:),vec(size(mat,dim=1)*size(mat,dim=2)*size(mat,dim=3)*size(mat,dim=4)) ; k = 0
+    real(dp)           :: mat(:,:,:,:),vec(size(mat,1)*size(mat,2)*size(mat,3)*size(mat,4)) ; k = 0
     if (present(byrow) .and. byrow.eq.1) then
-      do n=1,size(mat,dim=4) ; do p=1,size(mat,dim=3) ; do j=1,size(mat,dim=2) ; do i=1,size(mat,dim=1)
+      do n=1,size(mat,4) ; do p=1,size(mat,3) ; do j=1,size(mat,2) ; do i=1,size(mat,1)
         k = k + 1 ; vec(k) = mat(i,j,p,n)
       end do ; end do ; end do ; end do
     else
-      do i=1,size(mat,dim=1) ; do j=1,size(mat,dim=2) ; do p=1,size(mat,dim=3) ; do n=1,size(mat,dim=4)
+      do i=1,size(mat,1) ; do j=1,size(mat,2) ; do p=1,size(mat,3) ; do n=1,size(mat,4)
         k = k + 1 ; vec(k) = mat(i,j,p,n)
       end do ; end do ; end do ; end do
     end if
@@ -762,14 +762,14 @@ module toolkit
     implicit none
     integer            :: i,j,p,n,k,w
     integer , optional :: byrow
-    real(kind=8)       :: mat(:,:,:,:,:)
-    real(kind=8)       :: vec(size(mat,dim=1)*size(mat,dim=2)*size(mat,dim=3)*size(mat,dim=4)*size(mat,dim=5)) ; k = 0
+    real(dp)           :: mat(:,:,:,:,:)
+    real(dp)           :: vec(size(mat,1)*size(mat,2)*size(mat,3)*size(mat,4)*size(mat,5)) ; k = 0
     if (present(byrow) .and. byrow.eq.1) then
-      do w=1,size(mat,dim=4) ; do n=1,size(mat,dim=4) ; do p=1,size(mat,dim=3) ; do j=1,size(mat,dim=2) ; do i=1,size(mat,dim=1)
+      do w=1,size(mat,4) ; do n=1,size(mat,4) ; do p=1,size(mat,3) ; do j=1,size(mat,2) ; do i=1,size(mat,1)
         k = k + 1 ; vec(k) = mat(i,j,p,n,w)
       end do ; end do ; end do ; end do ; end do
     else
-      do i=1,size(mat,dim=1) ; do j=1,size(mat,dim=2) ; do p=1,size(mat,dim=3) ; do n=1,size(mat,dim=4) ; do w=1,size(mat,dim=5)
+      do i=1,size(mat,1) ; do j=1,size(mat,2) ; do p=1,size(mat,3) ; do n=1,size(mat,4) ; do w=1,size(mat,5)
         k = k + 1 ; vec(k) = mat(i,j,p,n,w)
       end do ; end do ; end do ; end do ; end do
     end if
@@ -779,13 +779,13 @@ module toolkit
     implicit none
     integer            :: i,j,k
     integer , optional :: byrow
-    integer            :: mat(:,:),vec(size(mat,dim=1)*size(mat,dim=2)) ; k = 0
+    integer            :: mat(:,:),vec(size(mat,1)*size(mat,2)) ; k = 0
     if (present(byrow) .and. byrow.eq.1) then
-      do j=1,size(mat,dim=2) ; do i=1,size(mat,dim=1)
+      do j=1,size(mat,2) ; do i=1,size(mat,1)
         k = k + 1 ; vec(k) = mat(i,j)
       end do ; end do
     else
-      do i=1,size(mat,dim=1) ; do j=1,size(mat,dim=2)
+      do i=1,size(mat,1) ; do j=1,size(mat,2)
         k = k + 1 ; vec(k) = mat(i,j)
       end do ; end do
     end if
@@ -795,13 +795,13 @@ module toolkit
     implicit none
     integer            :: i,j,p,k
     integer , optional :: byrow
-    integer            :: mat(:,:,:),vec(size(mat,dim=1)*size(mat,dim=2)*size(mat,dim=3)) ; k = 0
+    integer            :: mat(:,:,:),vec(size(mat,1)*size(mat,2)*size(mat,3)) ; k = 0
     if (present(byrow) .and. byrow.eq.1) then
-      do p=1,size(mat,dim=3) ; do j=1,size(mat,dim=2) ; do i=1,size(mat,dim=1)
+      do p=1,size(mat,3) ; do j=1,size(mat,2) ; do i=1,size(mat,1)
         k = k + 1 ; vec(k) = mat(i,j,p)
       end do ; end do ; end do
     else
-      do i=1,size(mat,dim=1) ; do j=1,size(mat,dim=2) ; do p=1,size(mat,dim=3)
+      do i=1,size(mat,1) ; do j=1,size(mat,2) ; do p=1,size(mat,3)
         k = k + 1 ; vec(k) = mat(i,j,p)
       end do ; end do ; end do
     end if
@@ -811,13 +811,13 @@ module toolkit
     implicit none
     integer            :: i,j,p,n,k
     integer , optional :: byrow
-    integer            :: mat(:,:,:,:),vec(size(mat,dim=1)*size(mat,dim=2)*size(mat,dim=3)*size(mat,dim=4)) ; k = 0
+    integer            :: mat(:,:,:,:),vec(size(mat,1)*size(mat,2)*size(mat,3)*size(mat,4)) ; k = 0
     if (present(byrow) .and. byrow.eq.1) then
-      do n=1,size(mat,dim=4) ; do p=1,size(mat,dim=3) ; do j=1,size(mat,dim=2) ; do i=1,size(mat,dim=1)
+      do n=1,size(mat,4) ; do p=1,size(mat,3) ; do j=1,size(mat,2) ; do i=1,size(mat,1)
         k = k + 1 ; vec(k) = mat(i,j,p,n)
       end do ; end do ; end do ; end do
     else
-      do i=1,size(mat,dim=1) ; do j=1,size(mat,dim=2) ; do p=1,size(mat,dim=3) ; do n=1,size(mat,dim=4)
+      do i=1,size(mat,1) ; do j=1,size(mat,2) ; do p=1,size(mat,3) ; do n=1,size(mat,4)
         k = k + 1 ; vec(k) = mat(i,j,p,n)
       end do ; end do ; end do ; end do
     end if
@@ -828,13 +828,13 @@ module toolkit
     integer            :: i,j,p,n,k,w
     integer , optional :: byrow
     integer            :: mat(:,:,:,:,:)
-    integer            :: vec(size(mat,dim=1)*size(mat,dim=2)*size(mat,dim=3)*size(mat,dim=4)*size(mat,dim=5)) ; k = 0
+    integer            :: vec(size(mat,1)*size(mat,2)*size(mat,3)*size(mat,4)*size(mat,5)) ; k = 0
     if (present(byrow) .and. byrow.eq.1) then
-      do w=1,size(mat,dim=4) ; do n=1,size(mat,dim=4) ; do p=1,size(mat,dim=3) ; do j=1,size(mat,dim=2) ; do i=1,size(mat,dim=1)
+      do w=1,size(mat,4) ; do n=1,size(mat,4) ; do p=1,size(mat,3) ; do j=1,size(mat,2) ; do i=1,size(mat,1)
         k = k + 1 ; vec(k) = mat(i,j,p,n,w)
       end do ; end do ; end do ; end do ; end do
     else
-      do i=1,size(mat,dim=1) ; do j=1,size(mat,dim=2) ; do p=1,size(mat,dim=3) ; do n=1,size(mat,dim=4) ; do w=1,size(mat,dim=5)
+      do i=1,size(mat,1) ; do j=1,size(mat,2) ; do p=1,size(mat,3) ; do n=1,size(mat,4) ; do w=1,size(mat,5)
         k = k + 1 ; vec(k) = mat(i,j,p,n,w)
       end do ; end do ; end do ; end do ; end do
     end if
@@ -847,8 +847,8 @@ module toolkit
 
   function cumsum(vec0) result(vec1)
     implicit none
-    real(kind=8) :: vec0(:),vec1(size(vec0))
-    integer      :: i
+    real(dp) :: vec0(:),vec1(size(vec0))
+    integer  :: i
     vec1(1) = vec0(1) ; do i=2,size(vec0) ; vec1(i) = vec1(i-1) + vec0(i) ; end do
     return
   end function cumsum
@@ -858,10 +858,10 @@ module toolkit
 
   function diag(mat) result(vec)
     implicit none
-    real(kind=8) :: mat(:,:),vec(size(mat,dim=1))
-    integer      :: i
+    real(dp) :: mat(:,:),vec(size(mat,1))
+    integer  :: i
     if (size(mat,1).ne.size(mat,2)) call error(' error in diag: matrix not sqaure')
-    do i=1,size(mat,dim=1) ; vec(i) = mat(i,i) ; end do
+    do i=1,size(mat,1) ; vec(i) = mat(i,i) ; end do
     return
   end function diag
 
@@ -870,9 +870,9 @@ module toolkit
 
   function transmat(mat) result(matt)
     implicit none
-    integer                    :: i,j
-    real(kind=8) , intent(in)  :: mat(:,:)
-    real(kind=8)               :: matt(size(mat,2),size(mat,1))
+    integer               :: i,j
+    real(dp) , intent(in) :: mat(:,:)
+    real(dp)              :: matt(size(mat,2),size(mat,1))
     do i=1,size(mat,1) ; do j=1,size(mat,2)
       matt(j,i) = mat(i,j)
     end do ; end do
@@ -884,10 +884,10 @@ module toolkit
 
   function inverse(m) result(im)
     implicit none
-    integer      :: n,i,j,k
-    real(kind=8) :: m(:,:),coeff
-    real(kind=8) :: im(size(m,1),size(m,1)),b(size(m,1)),d(size(m,1)),x(size(m,1))
-    real(kind=8) :: l(size(m,1),size(m,1)),u(size(m,1),size(m,1)),mb(size(m,1),size(m,1))
+    integer  :: n,i,j,k
+    real(dp) :: m(:,:),coeff
+    real(dp) :: im(size(m,1),size(m,1)),b(size(m,1)),d(size(m,1)),x(size(m,1))
+    real(dp) :: l(size(m,1),size(m,1)),u(size(m,1),size(m,1)),mb(size(m,1),size(m,1))
     if (size(m,1).ne.size(m,2)) call error(' error in inverse: matrix is not square')
     n  = size(m,1)
     l  = 0.0
@@ -968,7 +968,7 @@ module toolkit
   ! for example, maximize a function f(x,y) over "x" for a given value of "y" (state)
   ! since I typically use this feature with state variables, the vector "states" is
   ! a vector of integers that indicates the position of each state variable on 
-  ! its corresponding grid.
+  ! its corresponding .
   !
   ! if your problem has states, please check the corresponding subroutine to make
   ! sure your function has the correct form.
@@ -993,7 +993,7 @@ module toolkit
     !   - func: user-provided function to be minimize. this function should of the form:
     !
     !       function func(x) result(y)
-    !         real(kind=8) :: x(:),y
+    !         real(dp) :: x(:),y
     !       end function func
     !
     !   - xmin: lower bound of variable "x"
@@ -1010,14 +1010,14 @@ module toolkit
     !   y:    the value of the function at the point x
 
     implicit none
-    external                             :: func
-    real(kind=8) , intent(in)            :: xmax,xmin
-    real(kind=8) , intent(out)           :: x,y
-    real(kind=8) , intent(in) , optional :: tol
-    integer      , intent(in) , optional :: itermax
-    real(kind=8) , parameter             :: alpha=0.61803399
-    real(kind=8)                         :: x0,x1,x2,x3,f1,f2,tolgold
-    integer                              :: it,maxiter
+    external                         :: func
+    real(dp) , intent(in)            :: xmax,xmin
+    real(dp) , intent(out)           :: x,y
+    real(dp) , intent(in) , optional :: tol
+    integer  , intent(in) , optional :: itermax
+    real(dp) , parameter             :: alpha=0.61803399
+    real(dp)                         :: x0,x1,x2,x3,f1,f2,tolgold
+    integer                          :: it,maxiter
 
     interface
       function func(xx) result(ff)
@@ -1078,7 +1078,7 @@ module toolkit
     !   - func: user-provided function to be minimize. this function should of the form:
     !
     !       function func(x) result(y)
-    !         real(kind=8) :: x(:),y
+    !         real(dp) :: x(:),y
     !       end function func
     !
     !   - x0: lower bound of variable "x" such that func(x0)<0
@@ -1098,15 +1098,15 @@ module toolkit
     !           1: not solved
 
     implicit none
-    external                             :: func
-    real(kind=8) , intent(out)           :: x
-    integer      , intent(out)           :: iy
-    integer      , intent(out)           :: ind
-    real(kind=8) , intent(in)            :: x0,x1
-    real(kind=8) , intent(in) , optional :: tol
-    integer      , intent(in) , optional :: itermax
-    integer                              :: maxiter
-    real(kind=8)                         :: toler,xa,ya,xb,yb,xc,yc,ys,xs
+    external                         :: func
+    real(dp) , intent(out)           :: x
+    integer  , intent(out)           :: iy
+    integer  , intent(out)           :: ind
+    real(dp) , intent(in)            :: x0,x1
+    real(dp) , intent(in) , optional :: tol
+    integer  , intent(in) , optional :: itermax
+    integer                          :: maxiter
+    real(dp)                         :: toler,xa,ya,xb,yb,xc,yc,ys,xs
 
     interface
       function func(xx) result(resid)
@@ -1172,7 +1172,7 @@ module toolkit
     !   - func: user-provided function to be minimize. this function should of the form:
     !
     !       function func(x,states) result(y)
-    !         real(kind=8) :: x(:),y
+    !         real(dp) :: x(:),y
     !       end function func
     !
     !   - x0:     the vector of dimension n with the initial guess
@@ -1198,20 +1198,20 @@ module toolkit
 
     implicit none
 
-    external func
-    integer      , intent(out)           :: iy,ind
-    real(kind=8) , intent(out)           :: x(:),y
+    external                         :: func
+    integer  , intent(out)           :: iy,ind
+    real(dp) , intent(out)           :: x(:),y
 
-    real(kind=8) , intent(in)            :: x0(:)
-    real(kind=8) , intent(in) , optional :: tol
-    integer      , intent(in) , optional :: itermax
-    integer      , intent(in) , optional :: iprint
+    real(dp) , intent(in)            :: x0(:)
+    real(dp) , intent(in) , optional :: tol
+    integer  , intent(in) , optional :: itermax
+    integer  , intent(in) , optional :: iprint
 
-    integer                  :: n,i,j,ilow,ihigh,ihigh2,maxiter,ipri
-    real(kind=8)             :: xp(size(x,1),size(x,1)+1),yp(size(x,1)+1),xr(size(x,1))
-    real(kind=8)             :: xm(size(x,1)),xe(size(x,1)),xc(size(x,1))
-    real(kind=8)             :: y0,yr,ye,yc,cent,toler
-    real(kind=8) , parameter :: alpha=1.0,beta=0.5,gamma=2.0
+    integer              :: n,i,j,ilow,ihigh,ihigh2,maxiter,ipri
+    real(dp)             :: xp(size(x,1),size(x,1)+1),yp(size(x,1)+1),xr(size(x,1))
+    real(dp)             :: xm(size(x,1)),xe(size(x,1)),xc(size(x,1))
+    real(dp)             :: y0,yr,ye,yc,cent,toler
+    real(dp) , parameter :: alpha=1.0,beta=0.5,gamma=2.0
 
     interface
       function func(xvar) result(resid)
@@ -1447,8 +1447,8 @@ module toolkit
     !   - func: user-provided function to be minimize. this function should of the form:
     !
     !       function func(x) result(y)
-    !         real(kind=8) :: x(:)
-    !         real(kind=8),allocatable :: y(:)
+    !         real(dp) :: x(:)
+    !         real(dp),allocatable :: y(:)
     !       end function func
     !
     !   - x0: the vector of dimension n with the initial guess
@@ -1480,43 +1480,43 @@ module toolkit
 
     implicit none
 
-    external                             :: func
+    external                         :: func
     
     ! outputs
-    real(kind=8) , intent(out)           :: x(:),y(:)
-    integer      , intent(out)           :: iy,ind
+    real(dp) , intent(out)           :: x(:),y(:)
+    integer  , intent(out)           :: iy,ind
 
     ! inputs (including optionals)
-    real(kind=8) , intent(in)            :: x0(:)
-    real(kind=8) , intent(in) , optional :: shock
-    real(kind=8)                         :: shck(size(x,1))
-    real(kind=8) , intent(in) , optional :: damp
-    real(kind=8)                         :: da
-    real(kind=8) , intent(in) , optional :: tol
-    real(kind=8)                         :: toler
-    real(kind=8) , intent(in) , optional :: toleach
-    real(kind=8)                         :: tolereach
-    integer      , intent(in) , optional :: itermax
-    integer                              :: maxiter
-    integer      , intent(in) , optional :: iprint
-    integer                              :: ip
-    integer      , intent(in) , optional :: usebro
-    integer                              :: bro,br
+    real(dp) , intent(in)            :: x0(:)
+    real(dp) , intent(in) , optional :: shock
+    real(dp)                         :: shck(size(x,1))
+    real(dp) , intent(in) , optional :: damp
+    real(dp)                         :: da
+    real(dp) , intent(in) , optional :: tol
+    real(dp)                         :: toler
+    real(dp) , intent(in) , optional :: toleach
+    real(dp)                         :: tolereach
+    integer  , intent(in) , optional :: itermax
+    integer                          :: maxiter
+    integer  , intent(in) , optional :: iprint
+    integer                          :: ip
+    integer  , intent(in) , optional :: usebro
+    integer                          :: bro,br
 
     ! other variables
     integer      ::  i,k,n,m,qp
-    real(kind=8) ::  j(size(y,1),size(x,1))
-    real(kind=8) :: j0(size(y,1),size(x,1))
-    real(kind=8) :: ij(size(x,1),size(x,1))
-    real(kind=8) :: jj(size(x,1),size(x,1))
-    real(kind=8) :: ja(size(x,1),size(x,1))
-    real(kind=8) :: jt(size(x,1))
-    real(kind=8) :: e0,y0(size(y,1))
-    real(kind=8) :: eb,yb(size(y,1)),xb(size(x,1))
-    real(kind=8) :: e1,y1(size(y,1)),x1(size(x,1))
-    real(kind=8) :: ea,ya(size(y,1)),xa(size(x,1))
-    real(kind=8) :: ej,yj(size(y,1),size(x,1)),xj(size(x,1),size(x,1))
-    real(kind=8) :: dy(size(y,1)),dx(size(x,1)),ddx
+    real(dp) ::  j(size(y,1),size(x,1))
+    real(dp) :: j0(size(y,1),size(x,1))
+    real(dp) :: ij(size(x,1),size(x,1))
+    real(dp) :: jj(size(x,1),size(x,1))
+    real(dp) :: ja(size(x,1),size(x,1))
+    real(dp) :: jt(size(x,1))
+    real(dp) :: e0,y0(size(y,1))
+    real(dp) :: eb,yb(size(y,1)),xb(size(x,1))
+    real(dp) :: e1,y1(size(y,1)),x1(size(x,1))
+    real(dp) :: ea,ya(size(y,1)),xa(size(x,1))
+    real(dp) :: ej,yj(size(y,1),size(x,1)),xj(size(x,1),size(x,1))
+    real(dp) :: dy(size(y,1)),dx(size(x,1)),ddx
 
     ! function
     interface
@@ -1730,8 +1730,8 @@ module toolkit
 
   subroutine normalize(y,x,xmax,xmin)
     implicit none
-    real(kind=8) , intent(in)  :: xmax,xmin,x
-    real(kind=8) , intent(out) :: y
+    real(dp) , intent(in)  :: xmax,xmin,x
+    real(dp) , intent(out) :: y
     if (xmax.lt.xmin) call error(' errror in normalize: xmax > xmin')
     if (x.gt.xmax   ) call error(' errror in normalize: x > xmax')
     if (x.lt.xmin   ) call error(' errror in normalize: x < xmin')
@@ -1746,8 +1746,8 @@ module toolkit
 
   subroutine denormalize(y,x,xmax,xmin)
     implicit none
-    real(kind=8) , intent(in)  :: xmax,xmin,y
-    real(kind=8) , intent(out) :: x
+    real(dp) , intent(in)  :: xmax,xmin,y
+    real(dp) , intent(out) :: x
     if (xmax.lt.xmin) call error(' errror in denormalize: xmax > xmin')
     x = (exp(y)/(one+exp(y)))*(xmax-xmin) + xmin
     if (isnan(x) .and. y.gt.cien) x = xmax
@@ -1760,11 +1760,11 @@ module toolkit
 
   subroutine broyden(j1,j0,x1,x0,f1,f0)
     implicit none
-    real(kind=8) , intent(in)  :: x1(:),f1(:),x0(:),f0(:),j0(:,:)
-    real(kind=8) , intent(out) :: j1(:,:)
-    real(kind=8)               :: df(size(f0,1))
-    real(kind=8)               :: dx(size(x1,1))
-    integer                    :: i,k
+    real(dp) , intent(in)  :: x1(:),f1(:),x0(:),f0(:),j0(:,:)
+    real(dp) , intent(out) :: j1(:,:)
+    real(dp)               :: df(size(f0,1))
+    real(dp)               :: dx(size(x1,1))
+    integer                :: i,k
     dx(:) = x1(:)-x0(:)
     df(:) = f1(:)-f0(:)
     do i=1,size(x1) ; do k=1,size(f1)

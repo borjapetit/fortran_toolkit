@@ -15,12 +15,11 @@
   - [```varstd```](#varstd): returns the standard deviation of a variable, allowing for weigths
   - [```correlation```](#correlation): returns the correlation of two variables, allowing for weigths
   - [```percentile```](#percentile): returns the i-th percentile of a variables, allowing for weigths
-  - [```ols```](#ols): returns the ols coefficients of a 1-var or 2-var regression, allowing for weigths
-  - [```fit2poli```](#fit2poli): fits a 2nd order polynomianl to a variable, allowing for weigths
-  - [```tachen```](#tachen): returns the transition matrix for a discretized ar(1) process
+  - [```olsreg```](#olsreg): returns the ols coefficients of a n-var regression (with n<=8), allowing for weigths
+  - [```tauchen```](#tauchen): returns the transition matrix for a discretized ar(1) process
   - [```normaldist```](#normaldist): returns the distribution for a nomral random variable
   - [```randomnormal```](#randomnormal): returns a random draw for a nomal distribution
-  - [```cdfn```](#cdfn): retutns the cdf of a nomabl distribution
+  - [```cdfn```](#cdfn): retutns the cdf of a nomabl distribution.
 
 #### Linear algebra:
   - [```vectorize```](#vectorize): transform a matrix of NxM into a vector of NxM rows
@@ -308,7 +307,7 @@ pc60 = percentile(xvec,60.0d0)
 
 ---
 
-### <a name="ols"></a>```ols``` 
+### <a name="olsreg"></a>```olsreg``` 
 
 returns the average of a variable, allowing for weigths
 

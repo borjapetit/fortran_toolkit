@@ -1,0 +1,12 @@
+
+# Start of the makefile
+
+files = toolkit.f90 test_toolkit.f90
+
+model: $(files)
+	gfortran -O3 $(files) -o test
+
+check: $(files)
+	gfortran -fcheck=all -fbacktrace -Wall -g $(files) -o test
+
+# End of the makefile

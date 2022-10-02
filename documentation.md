@@ -67,7 +67,6 @@ vector = grid( 1.d0 , -1.0d0 , 400 , 2.0d0 )
 
 [(back to index)](#inicio)
 
----
 
 ### <a name="interpolation"></a>```interpolation``` 
 ```fortran
@@ -92,7 +91,6 @@ This subroutine is mainly used by the function ```interpolate```.
 
 [(back to index)](#inicio)
 
----
 
 ### <a name="interpolate"></a>```interpolate``` 
 returns the average of a variable, allowing for weigths
@@ -116,7 +114,6 @@ If $x_0<\min($```x_grid```$)$ the subroutine take $\min($```x_grid```$)$ as the 
 
 [(back to index)](#inicio)
 
----
 
 ### <a name="timing"></a>```timing``` 
 ```fortran
@@ -135,7 +132,6 @@ This functions returns a timing number that is robust to parallel computing. In 
 
 [(back to index)](#inicio)
 
----
 
 ### <a name="multiplo"></a>```multiplo``` 
 
@@ -156,7 +152,6 @@ print * , multiplo(5,27)  ! result 0
 
 [(back to index)](#inicio)
 
----
 
 ### <a name="iseven"></a>```iseven``` 
 ```fortran
@@ -207,7 +202,6 @@ mean = varmean(xvar,wvar)  ! mean = 4.3076
 
 [(back to index)](#inicio)
 
----
 
 ### <a name="varstd"></a>```varstd``` 
 ```fortran
@@ -223,7 +217,6 @@ This function returns the stadard deviation of a variable ```var``` given some (
 
 [(back to index)](#inicio)
 
----
 
 ### <a name="correlation"></a>```correlation``` 
 ```fortran
@@ -239,7 +232,6 @@ This function returns the correlation coefficient between two variables ```xvar1
 
 [(back to index)](#inicio)
 
----
 
 ### <a name="percentile"></a>```percentile``` 
 ```fortran
@@ -260,7 +252,6 @@ pc60 = percentile(xvec,60.0d0)
 
 [(back to index)](#inicio)
 
----
 
 ### <a name="olsreg"></a>```olsreg``` 
 
@@ -272,7 +263,6 @@ returns the average of a variable, allowing for weigths
 
 [(back to index)](#inicio)
 
----
 
 ### <a name="tauchen"></a>```tauchen``` 
 ```fortran
@@ -290,7 +280,6 @@ The vector with values of $x$, ```xvec```, if of dimension ```n``` and does not 
 
 [(back to index)](#inicio)
 
----
 
 ### <a name="normaldist"></a>```normaldist``` 
 ```fortran
@@ -307,7 +296,6 @@ This function returns the distribution of a normal random variable with mean ```
 
 [(back to index)](#inicio)
 
----
 
 ### <a name="randomnormal"></a>```randomnormal``` 
 ```fortran
@@ -323,7 +311,6 @@ This function returns a random number draw from a distribution $N(\mu,\sigma)$.
 
 [(back to index)](#inicio)
 
----
 
 ### <a name="cdfn"></a>```cdfn``` 
 ```fortran
@@ -366,7 +353,6 @@ returns the average of a variable, allowing for weigths
 
 [(back to index)](#inicio)
 
----
 
 ### <a name="cumsum"></a>```cumsum``` 
 ```fortran
@@ -386,7 +372,6 @@ vec1 = cumsum(vec0) ! vec1 = (/ 1.0, 3.0, 4.0, 7.0 /)
 
 [(back to index)](#inicio)
 
----
 
 ### <a name="diag"></a>```diag``` 
 ```fortran
@@ -405,7 +390,6 @@ vec = diag(vec0) ! vec = (/ 1.0, 3.0, 1.0 /)
 
 [(back to index)](#inicio)
 
----
 
 ### <a name="transmat"></a>```transmat``` 
 
@@ -423,7 +407,6 @@ This function returns the transpose of a matrix ```mat```.
 
 [(back to index)](#inicio)
 
----
 
 ### <a name="inverse"></a>```inverse``` 
 
@@ -469,7 +452,6 @@ subroutine simplex(func,x,y,iy,ind,x0,itermax,tol,iprint)
 
 [(back to index)](#inicio)
 
----
 
 ### <a name="lmmin"></a>```lmmin```
 
@@ -498,7 +480,6 @@ subroutine lmmin_states_both(func,x,y,iy,ind,x0,itermax,damp,tol,toleach,shock,u
 
 [(back to index)](#inicio)
 
----
 
 ### <a name="golden"></a>```golden```
 
@@ -522,7 +503,7 @@ subroutine golden(func,x,y,xmax,xmin,itermax,tol)
 
 [(back to index)](#inicio)
 
----
+
 ### <a name="brent"></a>```brent```
 
 ```fortran
@@ -546,7 +527,6 @@ subroutine brent(func,x,iy,ind,x0,x1,itermax,tol)
 
 [(back to index)](#inicio)
 
----
 
 ### <a name="normalize"></a>```normalize``` 
 
@@ -567,7 +547,6 @@ to return an unbounded variable ```y```.
 
 [(back to index)](#inicio)
 
----
 
 ### <a name="denormalize"></a>```denormalize``` 
 
@@ -595,9 +574,8 @@ call denormalize ( betau , beta , 1.0d0 , 0.0d0 )
 
 [(back to index)](#inicio)
 
----
 
-### <a name="broyden"></a>```broyden``` 
+### ```broyden``` <a name="broyden"></a>
 
 ```fortran
 subroutine broyden(j1,j0,x1,x0,f1,f0)

@@ -1,6 +1,6 @@
 # <a name="inicio"></a>A Toolkit for Fortran90
 
-#### General propuse:
+**General propuse:**
   - [```grid```](#grid): generate a grid for a continuous varibale
   - [```interpolation```](#interpolation): interpolate a value over a grid, returning position and distance
   - [```interpolate```](#interpolate): linearly interpolate a value over an n-dimensional grid, with n <= 6
@@ -8,7 +8,7 @@
   - [```multiplo```](#multiplo): returns 1 if an integer is a multiple of another user-provided integer
   - [```iseven```](#iseven): returns 1 if a user-provided integer is even
 
-#### Statistics:
+**Statistics:**
   - [```varmean```](#varmean): returns the average of a variable, allowing for weigths
   - [```varstd```](#varstd): returns the standard deviation of a variable, allowing for weigths
   - [```correlation```](#correlation): returns the correlation of two variables, allowing for weigths
@@ -19,14 +19,14 @@
   - [```randomnormal```](#randomnormal): returns a random draw for a nomal distribution
   - [```cdfn```](#cdfn): retutns the cdf of a nomabl distribution.
 
-#### Linear algebra:
+**Linear algebra:**
   - [```vectorize```](#vectorize): transform a matrix of NxM into a vector of NxM rows
   - [```cumsum```](#cumsum): returns the vector with cummulative sum of a vector (as Matlab's cumsum function)
   - [```diag```](#diag): returns the main diagonal of a matrix
   - [```transmat```](#transmat): returns the transpose of a square matrix
   - [```inverse```](#inverse): returns the invesrse of a sqaured matrix
 
-#### Optimization (with and without states/fixed parameters)
+**Optimization**
   - [```simplex```](#simplex): Simplex algorithm
   - [```lmmin```](#lmmin): Levenberg–Marquardt algorithm
   - [```golden```](#golden): Golden search algorithm
@@ -36,9 +36,9 @@
   - [```broyden```](#broyden): updates a Jacobian matrix using the Broyden's method
 ---
 
-# General purpose
+## General purpose
 
-## grid <a name="grid"></a>
+### grid <a name="grid"></a>
 
 ```fortran
 function grid(maxv,minv,n,s) result(v)
@@ -68,7 +68,7 @@ vector = grid( 1.d0 , -1.0d0 , 400 , 2.0d0 )
 [(back to index)](#inicio)
 
 
-## interpolation <a name="interpolation"></a>
+### interpolation <a name="interpolation"></a>
 ```fortran
 subroutine interpolation(pos,wth,xnow,xgrid)
   implicit none
@@ -92,7 +92,7 @@ This subroutine is mainly used by the function ```interpolate```.
 [(back to index)](#inicio)
 
 
-## interpolate <a name="interpolate"></a>
+### interpolate <a name="interpolate"></a>
 returns the average of a variable, allowing for weigths
 ```fortran
 function interpolate(x1,x2,...,xn,y1,y2,...,yn,mat) result(xi)
@@ -115,7 +115,7 @@ If $x_0<\min($```x_grid```$)$ the subroutine take $\min($```x_grid```$)$ as the 
 [(back to index)](#inicio)
 
 
-## timing <a name="timing"></a>
+### timing <a name="timing"></a>
 ```fortran
 function timing(mode) result(time)
   implicit none
@@ -133,7 +133,7 @@ This functions returns a timing number that is robust to parallel computing. In 
 [(back to index)](#inicio)
 
 
-## multiplo <a name="multiplo"></a>
+### multiplo <a name="multiplo"></a>
 
 ```fortran
 elemental function multiplo(num,xx) result(mul)
@@ -153,7 +153,7 @@ print * , multiplo(5,27)  ! result 0
 [(back to index)](#inicio)
 
 
-## iseven <a name="iseven"></a>
+### iseven <a name="iseven"></a>
 ```fortran
 function iseven(num) result(ise)
   implicit none
@@ -172,8 +172,7 @@ check = iseven(6)  ! check = 1
 
 [(back to index)](#inicio)
 
-
-# Statistics
+## Statistics
 
 ### varmean <a name="varmean"></a>
 ```fortran
@@ -338,8 +337,6 @@ print * , cdf(vec)    ! result: (/ 0.50 , 0.158 /)
 
 [(back to index)](#inicio)
 
----
-
 ## Linear algebra
 
 ### vectorize <a name="vectorize"></a>
@@ -423,7 +420,6 @@ This function returns the inverse of a squared matrix ```mat```.
 
 [(back to index)](#inicio)
 
----
 
 ## Optimization
 

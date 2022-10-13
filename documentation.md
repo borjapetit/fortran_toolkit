@@ -228,16 +228,17 @@ This subroutine prints an error message ```mess``` and interrupt the execution o
 <a name="varmean"></a>
 
 ```fortran
-function varmean(var,wvar) result(meanvar)
+function varmean(var,wvar,mask) result(meanvar)
   implicit none
   real(kind=8)            :: var(:)
   real(kind=8) , optional :: wvar(:)
   real(kind=8)            :: meanvar
+  logical      , optimal  :: mask
 ```
 
 _Dependencies_: none
 
-This function returns the mean of a variable ```var``` given some (optional) weigths ```wvar```. If supplied, the vector ```wvar``` should have the same size as ```var```. If not supplied, the program assums uniform weigthing.
+This function returns the mean of a variable ```var``` given some (optional) weigths ```wvar```. The user can also supply as ```mask``` to compute the conditional mean. If supplied, the vector ```wvar``` should have the same size as ```var```. If not supplied, the program assums uniform weigthing.
 
 _Example_: compute the mean of a vector
 
@@ -245,6 +246,10 @@ _Example_: compute the mean of a vector
 ! without weigths
 xvar = (/ 1.0, 4.0, 4.0, 9.0 /)
 mean = varmean(xvar)  ! mean = 4.5
+
+! without weigths and conditional on xvar>0
+xvar = (/ 1.0, 4.0, 4.0, 9.0 /)
+mean = varmean(xvar, mask = xvar.gt.2.0d0 )  ! mean = 5.66
 
 ! with weigths
 xvar = (/ 1.0, 4.0, 4.0, 9.0 /)
@@ -259,16 +264,17 @@ mean = varmean(xvar,wvar)  ! mean = 4.3076
 <a name="varstd"></a>
 
 ```fortran
-function varstd(var,wvar) result(stdvar)
+function varstd(var,wvar,mask) result(stdvar)
   implicit none
   real(kind=8)            :: var(:)
   real(kind=8) , optional :: wvar(:)
   real(kind=8)            :: stdvar
+  logical      , optimal  :: mask
 ```
 
 _Dependencies_: ```varmean```
 
-This function returns the stadard deviation of a variable ```var``` given some (optional) weigths ```wvar```. If supplied, the vector ```wvar``` should have the same size as ```var```. If not supplied, the program assums uniform weigthing.
+This function returns the stadard deviation of a variable ```var``` given some (optional) weigths ```wvar```. The user can also supply as ```mask``` to compute the conditional stadard deviation. If supplied, the vector ```wvar``` should have the same size as ```var```. If not supplied, the program assums uniform weigthing.
 
 [(back to index)](#inicio)
 
@@ -277,16 +283,17 @@ This function returns the stadard deviation of a variable ```var``` given some (
 <a name="correlation"></a>
 
 ```fortran
-function correlation(xvar1,xvar2,wvar) result(corr)
+function correlation(xvar1,xvar2,wvar,mask) result(corr)
   implicit none
   real(kind=8) , optional :: wvar(:)
   real(kind=8)            :: xvar1(:),xvar2(:)
   real(kind=8)            :: corr
+  logical      , optimal  :: mask
 ```
 
 _Dependencies_: ```varmean```, ```varstd```
 
-This function returns the correlation coefficient between two variables ```xvar1``` and ```xvar2``` given some (optional) weigths ```wvar```. If supplied, the vector ```wvar``` should have the same size as ```var```. If not supplied, the program assums uniform weigthing.
+This function returns the correlation coefficient between two variables ```xvar1``` and ```xvar2``` given some (optional) weigths ```wvar```. The user can also supply as ```mask``` to compute the conditional stadard deviation. If supplied, the vector ```wvar``` should have the same size as ```var```. If not supplied, the program assums uniform weigthing.
 
 [(back to index)](#inicio)
 
@@ -295,16 +302,17 @@ This function returns the correlation coefficient between two variables ```xvar1
 <a name="percentile"></a>
 
 ```fortran
-function percentile(xvec,pct,wvar) result(cutoff)
+function percentile(xvec,pct,wvar,mask) result(cutoff)
   implicit none
   real(kind=8)            :: xvec(:),pct
   real(kind=8) , optional :: wvar(:)
   real(kind=8)            :: cutoff
+  logical      , optimal  :: mask
 ```
 
 _Dependencies_: none
 
-This function returns the percentile ```pct``` for a distribution ```xvec```, given some (optional) weigths ```wvar```. If supplied, the vector ```wvar``` should have the same size as ```var```. If not supplied, the program assums uniform weigthing.
+This function returns the percentile ```pct``` for a distribution ```xvec```, given some (optional) weigths ```wvar```. The user can also supply as ```mask``` to compute the conditional correlation. If supplied, the vector ```wvar``` should have the same size as ```var```. If not supplied, the program assums uniform weigthing.
 
 _Example_: given a vector ```xvec``` with a sample of a variable ```x```, find the 60th percentile:
 
@@ -400,18 +408,19 @@ _Dependencies_: none
 
 This function returns the cdf of a standard normal distribution, ```f``` $=\Phi(x)$. This subroutine is defined as ```elemental```, which implies that it can be call for both scalars and arrays.
 
-_Example_: Scalar output
+_Example 1_: Scalar output
 
 ```fortran
-phi = cdf(0.0)    ! phi = 0.50
-phi = cdf(-1.0)   ! phi = 0.158
+print * , 'Result =', cdf(0.0)    ! Result = 0.500
+print * , 'Result =', cdf(-1.0)   ! Result = 0.158
 ```
 
-_Example_: Vector otput
+_Example 2_: Vector otput
 
 ```fortran
 vec = (/ 0.0 , -1.0 /)
-print * , cdf(vec)    ! result: (/ 0.50 , 0.158 /)
+
+print * , 'Result =', cdf(vec)   ! Result = 0.500 0.158
 ```
 
 [(back to index)](#inicio)
@@ -421,10 +430,33 @@ print * , cdf(vec)    ! result: (/ 0.50 , 0.158 /)
 ### vect
 <a name="vect"></a>
 
-returns the average of a variable, allowing for weigths
+```fortran
+function vec(mat,byrow) result(vec)
+  implicit none
+  real(kind=8)       :: mat(:,:,...,:)
+  real(kind=8)       :: vec(:)
+  integer , optional :: byrow
+```
 
+_Dependencies_: none
 
+This function returns a 1-dimensional array ```vec``` with all the elements of a user-supplied ```n```-dimensional array ```mat```, where ```n```$\leq5$. The optional argument ```byrow``` controls the order in which the elements of ```mat``` are stacked (see an example below).
 
+_Example 1_:
+
+```fortran
+mat(:,1) = (/ 1 , 2 /)
+mat(:,2) = (/ 3 , 4 /)
+
+vec = vect(mat)
+
+print * , 'vec =', vec   ! vec =  1.00  3.00  2.00  4.00
+
+vec = vect(mat,byrow=1)
+
+print * , 'vec =', vec   ! vec =  1.00  2.00  3.00  4.00
+
+```
 
 
 [(back to index)](#inicio)
@@ -443,11 +475,14 @@ _Dependencies_: none
 
 Returns the cummulative sum of a vector ```vec0```.
 
-_Example_: given a vector ```xvec``` with a sample of a variable ```x```, find the 60th percentile:
+_Example_:
 
 ```fortran
 vec0 = (/ 1.0, 2.0, 1.0, 3.0 /) 
-vec1 = cumsum(vec0) ! vec1 = (/ 1.0, 3.0, 4.0, 7.0 /)
+
+vec1 = cumsum(vec0) 
+
+print * , 'vec1 = ', vec1   ! vec1 =  1.00  3.00  4.00  7.00
 ```
 
 [(back to index)](#inicio)
@@ -465,11 +500,17 @@ function diag(mat) result(vec)
 _Dependencies_: none
 
 This function returns the main diagonal of a matric ```mat```.
-_Example_: given a vector ```xvec``` with a sample of a variable ```x```, find the 60th percentile:
+
+_Example_:
 
 ```fortran
-mat = (/ 1.0, 2.0, 1.0 ; 3.0, 3.0, 4.0 ; 5.0, 1.0, 3.0 /) 
-vec = diag(vec0) ! vec = (/ 1.0, 3.0, 1.0 /)
+mat(:,1) = (/ 1.0, 2.0, 1.0 /)
+mat(:,2) = (/ 3.0, 3.0, 4.0 /)
+mat(:,3) = (/ 5.0, 1.0, 3.0 /)
+
+vec = diag(mat)
+
+print * , 'vec = ', vec   ! vec =  1.00  3.00  3.00
 ```
 
 [(back to index)](#inicio)

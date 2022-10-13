@@ -2,6 +2,17 @@
 program test
 use toolkit
 implicit none
+real(dp) :: mat0(2,2),vec(10)
+
+mat0(:,1) = (/1,2/)
+mat0(:,2) = (/3,4/)
+
+vec = grid(10.0d0,1.0d0,10)
+
+print * , diag(mat0)
+print * , transmat(mat0)
+print * , cumsum(vect(mat0))
+print * , vec
 
 print * , ' '
 
@@ -16,7 +27,7 @@ contains
 
 subroutine test_ols
     implicit none
-    integer  , parameter :: nn = 500
+    integer  , parameter :: nn = 50
     real(dp) :: y(nn),x1(nn),x2(nn),x3(nn),x0(nn),b(4)
     
     call randomnormal(x0,dble(0.10),dble(0.30))

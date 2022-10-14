@@ -616,10 +616,10 @@ module toolkit
     integer  , intent(in)  :: n
     real(dp) , intent(in)  :: rho,mu,sigma,xvec(n)
     real(dp) , intent(out) :: pmat(n,n)
+    real(dp)               :: dmat(n)
     integer                :: i
     do i=1,n
-      pmat(i,:) = zero
-      call normaldist(xvec,mu+rho*xvec(i),sigma,n,pmat(i,:))
+      call normaldist(xvec,mu+rho*xvec(i),sigma,n,dmat) ; pmat(i,:) = dmat
     end do
     return
   end subroutine tauchen

@@ -310,10 +310,10 @@ module toolkit
   ! ----------------------------------------------------------------------------
   ! this function returns the mean of a variable "var".
 
-  function varmean(var,wvar,mask) result(meanvar)
+  function varmean(var,w,mask) result(meanvar)
 
     implicit none
-    real(dp) , optional :: wvar(:)
+    real(dp) , optional :: w(:)
     real(dp)            :: var(:),meanvar,weig(size(var))
     logical  , optional :: mask(:)
     logical             :: mask1(size(var,1))
@@ -330,10 +330,10 @@ module toolkit
       end if
     end if
 
-    if (present(wvar)) then
-      if (size(var).ne.size(wvar)) call error('error in varmean!! var and wvar have different size')
-      if (sum(wvar).lt.tolvl     ) call error('error in varmean!! wvar are zero')
-      weig(:) = wvar(:)
+    if (present(w)) then
+      if (size(var).ne.size(w)) call error('error in varmean!! var and w have different size')
+      if (sum(w).lt.tolvl     ) call error('error in varmean!! w are zero')
+      weig(:) = w(:)
     end if
 
     meanvar = sum(var(:)*weig(:),mask=mask1)/sum(weig,mask=mask1)
@@ -344,20 +344,57 @@ module toolkit
   ! ----------------------------------------------------------------------------
   ! this function returns the standard deviation of a variable "var"
 
-  function varstd(var,wvar,mask) result(stdvar)
+  function varvar(var,w,mask) result(varian)
 
     implicit none
     real(dp)            :: var(:)
-    real(dp) , optional :: wvar(:)
-    real(dp)            :: stdvar
+    real(dp) , optional :: w(:)
+    real(dp)            :: varian
     real(dp)            :: weig(size(var)),mvar
     logical  , optional :: mask(:)
     logical             :: mask1(size(var,1))
 
     weig(:) = one
     mask1   = .true.
-    stdvar  = zero
+    varian  = zero
     mvar    = zero
+
+    if (present(mask)) then
+      if (size(var).eq.size(mask)) then
+        mask1 = mask
+      else
+        call error('error in varvar: mask of incorrect size')
+      end if
+    end if
+
+    if (present(w)) then
+      if (size(var).ne.size(w)) call error('error in varvar!! var and w have different size')
+      if (sum(w).lt.tolvl     ) call error('error in varvar!! w are zero')
+      weig(:) = w(:)
+    end if
+
+    mvar   = varmean(var,weig,mask=mask1)
+    varian = sum(weig*((var-mvar)**dble(2.00)),mask=mask1)/sum(weig,mask=mask1)
+    return
+
+  end function varvar
+
+  ! ----------------------------------------------------------------------------
+  ! this function returns the standard deviation of a variable "var"
+
+  function varstd(var,w,mask) result(stdvar)
+
+    implicit none
+    real(dp)            :: var(:)
+    real(dp) , optional :: w(:)
+    real(dp)            :: stdvar
+    real(dp)            :: weig(size(var))
+    logical  , optional :: mask(:)
+    logical             :: mask1(size(var,1))
+
+    weig(:) = one
+    mask1   = .true.
+    stdvar  = zero
 
     if (present(mask)) then
       if (size(var).eq.size(mask)) then
@@ -367,14 +404,13 @@ module toolkit
       end if
     end if
 
-    if (present(wvar)) then
-      if (size(var).ne.size(wvar)) call error('error in varstd!! var and wvar have different size')
-      if (sum(wvar).lt.tolvl     ) call error('error in varstd!! wvar are zero')
-      weig(:) = wvar(:)
+    if (present(w)) then
+      if (size(var).ne.size(w)) call error('error in varstd!! var and w have different size')
+      if (sum(w).lt.tolvl     ) call error('error in varstd!! w are zero')
+      weig(:) = w(:)
     end if
 
-    mvar   = varmean(var,weig,mask=mask1)
-    stdvar = sqrt(sum(weig(:)*((var(:)-mvar)**dble(2.00)),mask=mask1)/sum(weig,mask=mask1))
+    stdvar = sqrt(varvar(var,weig,mask=mask1))
     return
 
   end function varstd
@@ -382,10 +418,10 @@ module toolkit
   ! ----------------------------------------------------------------------------
   ! this function returns the correlation coefficient between two variables "xvar1" and "xvar2"
 
-  function correlation(xvar1,xvar2,wvar,mask) result(corr)
+  function correlation(xvar1,xvar2,w,mask) result(corr)
 
     implicit none
-    real(dp) , optional :: wvar(:)
+    real(dp) , optional :: w(:)
     real(dp)            :: xvar1(:),xvar2(:),corr,weig(size(xvar1))
     real(dp)            :: aux1,aux2,aux3,aux4,aux5
     logical  , optional :: mask(:)
@@ -404,10 +440,10 @@ module toolkit
     end if
 
     if (size(xvar1).ne.size(xvar2)) call error('error in correaltion!! yvar and xvar of different sizes')
-    if (present(wvar)) then
-      if (size(xvar1).ne.size(wvar)) call error('error in correlation!! var and wvar have different size')
-      if (sum(wvar).lt.tolvl       ) call error('error in correlation!! wvar are zero')
-      weig(:) = wvar(:)
+    if (present(w)) then
+      if (size(xvar1).ne.size(w)) call error('error in correlation!! var and w have different size')
+      if (sum(w).lt.tolvl       ) call error('error in correlation!! w are zero')
+      weig(:) = w(:)
     end if
 
     aux1 = varmean(xvar1,weig,mask=mask1)
@@ -427,11 +463,11 @@ module toolkit
   ! ----------------------------------------------------------------------------
   ! this function returns the percentile "pct" for a distribution "xvec"
 
-  function percentile(xvec,pct,wvar,mask) result(cutoff)
+  function percentile(xvec,pct,w,mask) result(cutoff)
 
     implicit none
     real(dp)            :: xvec(:),pct
-    real(dp) , optional :: wvar(:)
+    real(dp) , optional :: w(:)
     real(dp)            :: cutoff
     real(dp)            :: weig(size(xvec))
     real(dp)            :: aux1,aux2,aux3,aux4
@@ -451,10 +487,10 @@ module toolkit
       end if
     end if
 
-    if (present(wvar)) then
-      if (size(xvec).ne.size(wvar)) call error('error in percentile!! var and wvar have different size')
-      if (sum(wvar).lt.tolvl      ) call error('error in percentile!! wvar are zero')
-      weig(:) = wvar(:)
+    if (present(w)) then
+      if (size(w).ne.size(w)) call error('error in percentile!! var and w have different size')
+      if (sum(w).lt.tolvl   ) call error('error in percentile!! w are zero')
+      weig(:) = w(:)
     end if
 
     if (pct.gt.one ) call error('error in percentile!! invalid percetile: larger than 100')
@@ -483,34 +519,42 @@ module toolkit
   ! the subroutine. The program will automatically call the corresponding subroutine
   ! depending on the number of variables and on the format of output variables
 
-  subroutine olsreg(coeffs,yvec,x1vec,x2vec,x3vec,x4vec,x5vec,x6vec,x7vec,x8vec,wvec,iprint)
+  subroutine olsreg(coeffs,yvec,x1vec,x2vec,x3vec,x4vec,x5vec,x6vec,x7vec,x8vec,w,mask,iprint)
     implicit none
     real(dp) , intent(out)           :: coeffs(:)
     real(dp) , intent(in)            :: yvec(:)
     real(dp) , intent(in)            :: x1vec(:)
-    real(dp) , intent(in) , optional :: x2vec(:)
-    real(dp) , intent(in) , optional :: x3vec(:)
-    real(dp) , intent(in) , optional :: x4vec(:)
-    real(dp) , intent(in) , optional :: x5vec(:)
-    real(dp) , intent(in) , optional :: x6vec(:)
-    real(dp) , intent(in) , optional :: x7vec(:)
-    real(dp) , intent(in) , optional :: x8vec(:)
-    real(dp) , intent(in) , optional :: wvec(:)
+    real(dp) , intent(in) , optional :: x2vec(:),x3vec(:),x4vec(:),x5vec(:),x6vec(:),x7vec(:),x8vec(:)
+    real(dp) , intent(in) , optional :: w(:)
+    logical  , intent(in) , optional :: mask(:)
     integer  , intent(in) , optional :: iprint
-    real(dp) , allocatable           :: xvars(:,:),xTx(:,:),ixTx(:,:),xTy(:)
+    real(dp) , allocatable           :: yvar(:),xvars(:,:),zvar(:)
+    real(dp) , allocatable           :: xTx(:,:),ixTx(:,:),xTy(:),wx(:,:)
     real(dp)                         :: wvar(size(yvec))
-    real(dp)                         :: evar(size(yvec))
+    real(dp) , allocatable           :: evar(:)
     real(dp)                         :: sdbeta(size(coeffs),size(coeffs))
     real(dp)                         :: sdcoefs(size(coeffs))
     real(dp)                         :: tstats(size(coeffs))
     real(dp)                         :: inter(size(coeffs),2)
-    integer                          :: j,i,nx ; nx = 1
+    real(dp)                         :: rsq,arsq
+    logical                          :: mask1(size(yvec))
+    integer                          :: j,i,no,nx ; nx = 1
 
     coeffs = zero
-
-    if (present(wvec)) then
-      if (size(wvec).eq.size(yvec)) then
-        wvar = wvec
+  
+    ! mask and weights
+    if (present(mask)) then
+      if (size(mask).eq.size(yvec)) then
+        mask1 = mask
+      else
+        call error('error in olsreg!! mask of incorrect size')
+      end if
+    else
+      mask1 = .true.
+    end if
+    if (present(w)) then
+      if (size(w).eq.size(yvec)) then
+        wvar = w
       else
         call error('error in olsreg!! weigths of incorrect size')
       end if
@@ -518,9 +562,7 @@ module toolkit
       wvar = one
     end if
 
-    if (sum(wvar).lt.tolvl) then
-      call error('error in olsreg!! weigths are zero')
-    end if
+    ! check vector dimensions
     if (size(yvec).ne.size(x1vec)) then
       call error('error in olsreg!! yvec and x1vec different observations')
     end if
@@ -546,61 +588,101 @@ module toolkit
       call error('error in olsreg!! yvec and x8vec different observations')
     end if ; end if
     
+    ! number of (valid) observations
+    no = count(mask1)
+
+    ! allocate y-variable and weigths
+    allocate(yvar(no)) ; yvar = pack(yvec,mask1)
+    allocate(zvar(no)) ; zvar = pack(wvar,mask1)
+
+    ! check weigths are positive    
+    if (sum(zvar).lt.tolvl) then
+      call error('error in olsreg!! weigths are zero')
+    end if
+
     ! with a constant term (one coefficient more than the number of variables)
     if (size(coeffs).eq.nx+1) then ; j = 1
-      allocate(xvars(size(yvec),nx+1)) ; xvars(:,1) = wvar(:)
+
+      allocate(xvars(no,nx+1))
+      xvars(:,1) = zvar/zvar
+      xvars(:,2) = pack(x1vec(:),mask1)
+
     ! with no constant term (same number of coefficients and variables)
     elseif (size(coeffs).eq.nx) then ; j = 0
-      allocate(xvars(size(yvec),nx))
+      
+      allocate(xvars(no,nx))
+      xvars(:,1) = pack(x1vec(:),mask1)
+
     ! error in the number of coefficients
     else
       call error('error in olsreg!! coeffs of incorrect size')
     end if
 
-    xvars(:,1+j) = x1vec(:)*wvar(:)
+    ! fill remaining variables
+    if (present(x2vec)) xvars(:,2+j) = pack(x2vec(:),mask1)
+    if (present(x3vec)) xvars(:,3+j) = pack(x3vec(:),mask1)
+    if (present(x4vec)) xvars(:,4+j) = pack(x4vec(:),mask1)
+    if (present(x5vec)) xvars(:,5+j) = pack(x5vec(:),mask1)
+    if (present(x6vec)) xvars(:,6+j) = pack(x6vec(:),mask1)
+    if (present(x7vec)) xvars(:,7+j) = pack(x7vec(:),mask1)
+    if (present(x8vec)) xvars(:,8+j) = pack(x8vec(:),mask1)
 
-    if (present(x2vec)) xvars(:,2+j) = x2vec(:)*wvar(:)
-    if (present(x3vec)) xvars(:,3+j) = x3vec(:)*wvar(:)
-    if (present(x4vec)) xvars(:,4+j) = x4vec(:)*wvar(:)
-    if (present(x5vec)) xvars(:,5+j) = x5vec(:)*wvar(:)
-    if (present(x6vec)) xvars(:,6+j) = x6vec(:)*wvar(:)
-    if (present(x7vec)) xvars(:,7+j) = x7vec(:)*wvar(:)
-    if (present(x8vec)) xvars(:,8+j) = x8vec(:)*wvar(:)
-
+    ! allocate matrices for betas
     allocate(xTx(size(xvars,2),size(xvars,2)))
     allocate(ixTx(size(xvars,2),size(xvars,2)))
     allocate(xTy(size(xvars,2)))
 
-    xTx    = matmul(transmat(xvars),xvars)
+    ! weigthed x-variables
+    allocate(wx(size(xvars,1),size(xvars,2)))
+    forall (i=1:no) wx(i,:) = xvars(i,:)*zvar(i)
+
+    ! compute betas
+    xTx    = matmul(transmat(xvars),wx)
     ixTx   = inverse(xTx)
-    xTy    = matmul(transmat(xvars),yvec(:)*wvar(:))
+    xTy    = matmul(transmat(xvars),yvar(:)*zvar(:))
     coeffs = matmul(ixTx,xTy)
 
-    if (present(iprint) .and. iprint.eq.1) then
+    if (present(iprint) .and. iprint.ne.0) then
 
-     evar    = yvec - matmul(xvars,coeffs)
-     sdbeta  = ixTx*( sum(evar(:)*evar(:)) / (dble(size(yvec)) - size(xvars,2)) )
-     sdcoefs = sqrt(diag(sdbeta))
-     tstats  = abs(coeffs(:)/sdcoefs(:))
-     inter(:,1) = coeffs - dble(1.96)*sdcoefs(:)
-     inter(:,2) = coeffs + dble(1.96)*sdcoefs(:)
+      allocate(evar(no))
 
-     write(*,99) '   '
-     write(*,99) ' -----------------------------------------------------------'
-     write(*,99) '                beta     sd(b)      minb      maxb    t-stat'
-     write(*,99) ' -----------------------------------------------------------'
-     if (j.eq.1) then
-      write(*,99) ' Constant ' ,coeffs(1),sdcoefs(1),inter(1,:),tstats(1)
-     end if
-     do i=1,nx
-      write(*,98) ' Var ' ,i, '    ',coeffs(i+j),sdcoefs(i+j),inter(i+j,:),tstats(i+j)
-     end do
-     write(*,99) ' -----------------------------------------------------------'
-     write(*,99) '   '
+      evar = yvar - matmul(xvars,coeffs)
+
+      sdbeta  = ixTx*( sum(zvar*evar*evar) / dble(no - size(xvars,2)) )
+      sdcoefs = sqrt(diag(sdbeta))
+      tstats  = abs(coeffs/sdcoefs)
+
+      inter(:,1) = coeffs - dble(1.9601068)*sdcoefs
+      inter(:,2) = coeffs + dble(1.9601068)*sdcoefs
+
+      rsq  = one - varvar(evar,w=zvar)/varvar(yvar,w=zvar)
+      arsq = one - ( (one-rsq)*dble(no-1)/dble(no-size(xvars,2)) )
+
+      write(*,99) '   '
+      write(*,99) '   '
+      write(*,'(a,i7)') '                               Number of variables = ',size(coeffs)
+      write(*,'(a,i7)') '                             Number of observatios = ',size(yvec)
+      write(*,'(a,i7)') '                       Number of valid observatios = ',no
+      write(*,'(a,f7.4)') '                                         R-squared = ',rsq
+      write(*,'(a,f7.4)') '                                Adjusted R-squared = ',arsq
+      write(*,99) '   '
+      write(*,99) ' -----------------------------------------------------------'
+      write(*,99) '                beta     sd(b)      minb      maxb    t-stat'
+      write(*,99) ' -----------------------------------------------------------'
+      if (j.eq.1) then
+        write(*,99) ' Constant ' ,coeffs(1),sdcoefs(1),inter(1,:),tstats(1)
+      end if
+      do i=1,nx
+        write(*,98) ' Var ' ,i, '    ',coeffs(i+j),sdcoefs(i+j),inter(i+j,:),tstats(i+j)
+      end do
+      write(*,99) ' -----------------------------------------------------------'
+      write(*,99) '   '
+
+      deallocate(evar)
 
     end if
 
-    deallocate(xvars,xTx,ixTx,xTy)
+    deallocate(xvars,xTx,ixTx,xTy,yvar,zvar)
 
     return
     99 format (a,f10.4,f10.4,f10.4,f10.4,f10.4)
@@ -616,10 +698,10 @@ module toolkit
     integer  , intent(in)  :: n
     real(dp) , intent(in)  :: rho,mu,sigma,xvec(n)
     real(dp) , intent(out) :: pmat(n,n)
-    real(dp)               :: dmat(n)
     integer                :: i
     do i=1,n
-      call normaldist(xvec,mu+rho*xvec(i),sigma,n,dmat) ; pmat(i,:) = dmat
+      pmat(i,:) = zero
+      call normaldist(xvec,mu+rho*xvec(i),sigma,n,pmat(i,:))
     end do
     return
   end subroutine tauchen

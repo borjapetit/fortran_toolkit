@@ -167,18 +167,19 @@ This functions returns a timing number that is robust to parallel computing. In 
 ```fortran
 elemental function multiplo(num,xx) result(mul)
   implicit none
-  integer :: num,xx,mul
+  integer :: num,xx
+  logical :: mul
 ```
 
 _Dependencies_: ```none```
 
-This function checks whether a number ```num0``` is a multiple of ```num1```. The result ```mul``` takes value 1 if ```num0``` is a multiple of ```num1```, and 0 otherwise.
+This function checks whether a number ```num0``` is a multiple of ```num1```. The result ```mul``` is a logical variable taking value ```.TRUE.``` if ```num0``` is a multiple of ```num1```, and ```.FALSE.``` otherwise.
 
 _Example_: check whether 25 and 27 are multiples of 5:
 
 ```fortran
-print * , multiplo(5,25)  ! result 1
-print * , multiplo(5,27)  ! result 0
+write(*,*) multiplo(5,25)  ! .TRUE.
+write(*,*) multiplo(5,27)  ! .FALSE.
 ```
 
 [(back to index)](#inicio)
@@ -190,18 +191,19 @@ print * , multiplo(5,27)  ! result 0
 ```fortran
 function iseven(num) result(ise)
   implicit none
-  integer :: num,ise
+  integer :: num
+  logical :: ise
 ```
 
 _Dependencies_: none
 
-This function checks whether a number ```num``` is even. The result ```ise``` takes value 1 if ```num``` is even, and 0 otherwise.
+This function checks whether a number ```num``` is even. The result ```ise``` is a logical variable taking value ```.TRUE.``` if ```num``` is even, and ```.FALSE.``` otherwise.
 
 _Example_: check whether 3 and 6 are eve:
 
 ```fortran
-check = iseven(3)  ! check = 0
-check = iseven(6)  ! check = 1
+write(*,*) iseven(3)  ! .FALSE.
+write(*,*) iseven(6)  ! .TRUE.
 ```
 
 [(back to index)](#inicio)
@@ -228,17 +230,17 @@ This subroutine prints an error message ```mess``` and interrupt the execution o
 <a name="varmean"></a>
 
 ```fortran
-function varmean(var,wvar,mask) result(meanvar)
+function varmean(var,w,mask) result(meanvar)
   implicit none
   real(kind=8)            :: var(:)
-  real(kind=8) , optional :: wvar(:)
+  real(kind=8) , optional :: w(:)
   real(kind=8)            :: meanvar
   logical      , optimal  :: mask
 ```
 
 _Dependencies_: none
 
-This function returns the mean of a variable ```var``` given some (optional) weigths ```wvar```. The user can also supply as ```mask``` to compute the conditional mean. If supplied, the vector ```wvar``` should have the same size as ```var```. If not supplied, the program assums uniform weigthing.
+This function returns the mean of a variable ```var``` given some (optional) weigths ```w```. The user can also supply as ```mask``` to compute the conditional mean. If supplied, the vector ```w``` should have the same size as ```var```. If not supplied, the program assums uniform weigthing.
 
 _Example_: compute the mean of a vector
 
@@ -254,7 +256,7 @@ mean = varmean(xvar, mask = xvar.gt.2.0d0 )  ! mean = 5.66
 ! with weigths
 xvar = (/ 1.0, 4.0, 4.0, 9.0 /)
 wvar = (/ 2.0, 4.0, 5.0, 2.0 /)
-mean = varmean(xvar,wvar)  ! mean = 4.3076
+mean = varmean(xvar,w = wvar)  ! mean = 4.3076
 ```
 
 [(back to index)](#inicio)
@@ -264,17 +266,17 @@ mean = varmean(xvar,wvar)  ! mean = 4.3076
 <a name="varstd"></a>
 
 ```fortran
-function varstd(var,wvar,mask) result(stdvar)
+function varstd(var,w,mask) result(stdvar)
   implicit none
   real(kind=8)            :: var(:)
-  real(kind=8) , optional :: wvar(:)
+  real(kind=8) , optional :: w(:)
   real(kind=8)            :: stdvar
   logical      , optimal  :: mask
 ```
 
 _Dependencies_: ```varmean```
 
-This function returns the stadard deviation of a variable ```var``` given some (optional) weigths ```wvar```. The user can also supply as ```mask``` to compute the conditional stadard deviation. If supplied, the vector ```wvar``` should have the same size as ```var```. If not supplied, the program assums uniform weigthing.
+This function returns the stadard deviation of a variable ```var``` given some (optional) weigths ```w```. The user can also supply as ```mask``` to compute the conditional stadard deviation. If supplied, the vector ```w``` should have the same size as ```var```. If not supplied, the program assums uniform weigthing.
 
 [(back to index)](#inicio)
 
@@ -283,9 +285,9 @@ This function returns the stadard deviation of a variable ```var``` given some (
 <a name="correlation"></a>
 
 ```fortran
-function correlation(xvar1,xvar2,wvar,mask) result(corr)
+function correlation(xvar1,xvar2,w,mask) result(corr)
   implicit none
-  real(kind=8) , optional :: wvar(:)
+  real(kind=8) , optional :: w(:)
   real(kind=8)            :: xvar1(:),xvar2(:)
   real(kind=8)            :: corr
   logical      , optimal  :: mask
@@ -293,7 +295,7 @@ function correlation(xvar1,xvar2,wvar,mask) result(corr)
 
 _Dependencies_: ```varmean```, ```varstd```
 
-This function returns the correlation coefficient between two variables ```xvar1``` and ```xvar2``` given some (optional) weigths ```wvar```. The user can also supply as ```mask``` to compute the conditional stadard deviation. If supplied, the vector ```wvar``` should have the same size as ```var```. If not supplied, the program assums uniform weigthing.
+This function returns the correlation coefficient between two variables ```xvar1``` and ```xvar2``` given some (optional) weigths ```w```. The user can also supply as ```mask``` to compute the conditional stadard deviation. If supplied, the vector ```w``` should have the same size as ```var```. If not supplied, the program assums uniform weigthing.
 
 [(back to index)](#inicio)
 
@@ -302,17 +304,17 @@ This function returns the correlation coefficient between two variables ```xvar1
 <a name="percentile"></a>
 
 ```fortran
-function percentile(xvec,pct,wvar,mask) result(cutoff)
+function percentile(xvec,pct,w,mask) result(cutoff)
   implicit none
   real(kind=8)            :: xvec(:),pct
-  real(kind=8) , optional :: wvar(:)
+  real(kind=8) , optional :: w(:)
   real(kind=8)            :: cutoff
   logical      , optimal  :: mask
 ```
 
 _Dependencies_: none
 
-This function returns the percentile ```pct``` for a distribution ```xvec```, given some (optional) weigths ```wvar```. The user can also supply as ```mask``` to compute the conditional correlation. If supplied, the vector ```wvar``` should have the same size as ```var```. If not supplied, the program assums uniform weigthing.
+This function returns the percentile ```pct``` for a distribution ```xvec```, given some (optional) weigths ```w```. The user can also supply as ```mask``` to compute the conditional correlation. If supplied, the vector ```w``` should have the same size as ```var```. If not supplied, the program assums uniform weigthing.
 
 _Example_: given a vector ```xvec``` with a sample of a variable ```x```, find the 60th percentile:
 
@@ -326,9 +328,20 @@ pc60 = percentile(xvec,60.0d0)
 ### olsreg
 <a name="olsreg"></a>
 
-returns the average of a variable, allowing for weigths
 
+```fortran
+subroutine olsreg(coeffs,yvec,x1vec,x2vec,...,x8vec,w,mask,iprint)
+  implicit none
+  real(kind=8) , intent(out)           :: coeffs(:)
+  real(kind=8) , intent(in)            :: yvec(:)
+  real(kind=8) , intent(in)            :: x1vec(:)
+  real(kind=8) , intent(in) , optional :: x2vec(:),x3vec(:),...,x8vec(:)
+  real(kind=8) , intent(in) , optional :: w(:)
+  logical      , intent(in) , optional :: mask(:)  
+  integer      , intent(in) , optional :: iprint
+```
 
+_Dependencies_: ```varmean```, ```varvar```
 
 
 

@@ -262,9 +262,10 @@ module toolkit
 
   function multiplo(num,xx) result(mul)
     implicit none
-    integer :: num,xx,mul
-    if (xx*floor(dble(num)/dble(xx)).eq.num) mul = 1
-    if (xx*floor(dble(num)/dble(xx)).ne.num) mul = 0
+    integer :: num,xx
+    logical :: mul
+    if (xx*floor(dble(num)/dble(xx)).eq.num) mul = .true.
+    if (xx*floor(dble(num)/dble(xx)).ne.num) mul = .false.
     return
   end function multiplo
 
@@ -273,7 +274,8 @@ module toolkit
 
   function iseven(num) result(ise)
     implicit none
-    integer :: num,ise
+    integer :: num
+    logical :: ise
     ise = multiplo(num,2)
     return
   end function iseven
@@ -771,6 +773,8 @@ module toolkit
       end do
       shock(i) = std*v/u + mu
     end do
+    q = sum(shock)/dble(size(shock))
+    shock = shock - q + mu
     return
   end subroutine randomnormal_vec
 

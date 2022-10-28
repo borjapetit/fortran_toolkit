@@ -758,20 +758,9 @@ module toolkit
     integer                :: i
     real(dp) , intent(out) :: shock(:)
     real(dp) , intent(in)  :: mu,std
-    real(dp)               :: u,v,q
-    real(dp) , parameter   :: s  = 0.449871 , t  = -0.386595 , a = 0.19600
-    real(dp) , parameter   :: r1 = 0.275970 , r2 =  0.278460 , b = 0.25472
+    real(dp)               :: q
     do i=1,size(shock)
-      do
-        call random_number(u)
-        call random_number(v)
-        v = 1.7156 * (v - half)
-        q = (u-s)**2 + (abs(v)-t)*(a*(abs(v)-t) - b*(u-s))
-        if (q < r1) exit
-        if (q > r2) cycle
-        if (v**2 < -dble(4.0)*log(u)*u**dble(2.00)) exit
-      end do
-      shock(i) = std*v/u + mu
+      call randomnormal_scalar(shock(i),mu,std)
     end do
     q = sum(shock)/dble(size(shock))
     shock = shock - q + mu
@@ -799,12 +788,12 @@ module toolkit
     xabs = abs(x)
     xsq  = a0*x**2
     if (xabs <= 1.28d0)then
-        f = a0-xabs*(a1-a2*xsq/(xsq+a3-a4/(xsq+a5+a6/(xsq+a7))))
+      f = a0-xabs*(a1-a2*xsq/(xsq+a3-a4/(xsq+a5+a6/(xsq+a7))))
     else if (xabs <= 12.7d0)then
-        f = b0*exp(-xsq)/(xabs-b1+b2/(xabs+b3+b4/(xabs-b5+b6/(xabs+b7-b8/ &
-                (xabs+b9+b10/(xabs+b11))))))
+      f = b0*exp(-xsq)/(xabs-b1+b2/(xabs+b3+b4/(xabs-b5+b6/(xabs+b7-b8/ &
+          (xabs+b9+b10/(xabs+b11))))))
     else
-        f = 0d0
+      f = 0d0
     end if
     if (x > 0d0) f = 1d0-f
     return

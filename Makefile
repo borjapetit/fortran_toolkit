@@ -9,4 +9,8 @@ model: $(files)
 check: $(files)
 	gfortran -fcheck=all -fbacktrace -Wall -g $(files) -o test
 
+clean:
+	rm -f *.mod
+	rm -f test
+
 # End of the makefile

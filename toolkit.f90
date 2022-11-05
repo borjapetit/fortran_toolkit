@@ -244,14 +244,16 @@ module toolkit
     v2(7) = dble(v1(7)            ) ! seconds
 
     ! measured in hours
-    if (present(mode) .and. mode.eq.3) then 
-      time = sum(v2)/dble(60*60)
-    ! measured in minutes
-    else if (present(mode) .and. mode.eq.2) then 
-      time = sum(v2)/dble(60)
-    ! measured in seconds
-    else 
-      time = sum(v2)
+    if (present(mode)) then
+      if (mode.eq.3) then 
+        time = sum(v2)/dble(60*60)
+      ! measured in minutes
+      else if (mode.eq.2) then 
+        time = sum(v2)/dble(60)
+      ! measured in seconds
+      else 
+        time = sum(v2)
+      end if
     end if
 
     return
@@ -309,16 +311,17 @@ module toolkit
   ! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-  ! ----------------------------------------------------------------------------
-  ! this function returns the mean of a variable "var".
-
   function varmean(var,w,mask) result(meanvar)
 
     implicit none
-    real(dp) , optional :: w(:)
-    real(dp)            :: var(:),meanvar,weig(size(var))
-    logical  , optional :: mask(:)
-    logical             :: mask1(size(var,1))
+    real(dp)               :: var(:),meanvar
+    real(dp) , optional    :: w(:)
+    logical  , optional    :: mask(:)
+    logical  , allocatable :: mask1(:)
+    real(dp) , allocatable :: weig(:)
+
+    allocate(weig(size(var)))
+    allocate(mask1(size(var)))
 
     weig(:) = one
     mask1   = .true.
@@ -340,6 +343,9 @@ module toolkit
 
     meanvar = sum(var(:)*weig(:),mask=mask1)/sum(weig,mask=mask1)
 
+    deallocate(weig)
+    deallocate(mask1)
+
     return
   end function varmean
 
@@ -349,12 +355,14 @@ module toolkit
   function varvar(var,w,mask) result(varian)
 
     implicit none
-    real(dp)            :: var(:)
-    real(dp) , optional :: w(:)
-    real(dp)            :: varian
-    real(dp)            :: weig(size(var)),mvar
-    logical  , optional :: mask(:)
-    logical             :: mask1(size(var,1))
+    real(dp)               :: var(:),varian,mvar
+    real(dp) , optional    :: w(:)
+    logical  , optional    :: mask(:)
+    logical  , allocatable :: mask1(:)
+    real(dp) , allocatable :: weig(:)
+
+    allocate(weig(size(var)))
+    allocate(mask1(size(var)))
 
     weig(:) = one
     mask1   = .true.
@@ -377,8 +385,11 @@ module toolkit
 
     mvar   = varmean(var,weig,mask=mask1)
     varian = sum(weig*((var-mvar)**dble(2.00)),mask=mask1)/sum(weig,mask=mask1)
-    return
 
+    deallocate(weig)
+    deallocate(mask1)
+
+    return
   end function varvar
 
   ! ----------------------------------------------------------------------------
@@ -387,12 +398,14 @@ module toolkit
   function varstd(var,w,mask) result(stdvar)
 
     implicit none
-    real(dp)            :: var(:)
-    real(dp) , optional :: w(:)
-    real(dp)            :: stdvar
-    real(dp)            :: weig(size(var))
-    logical  , optional :: mask(:)
-    logical             :: mask1(size(var,1))
+    real(dp)               :: var(:),stdvar
+    real(dp) , optional    :: w(:)
+    logical  , optional    :: mask(:)
+    logical  , allocatable :: mask1(:)
+    real(dp) , allocatable :: weig(:)
+
+    allocate(weig(size(var)))
+    allocate(mask1(size(var)))
 
     weig(:) = one
     mask1   = .true.
@@ -413,8 +426,11 @@ module toolkit
     end if
 
     stdvar = sqrt(varvar(var,weig,mask=mask1))
-    return
 
+    deallocate(weig)
+    deallocate(mask1)
+
+    return
   end function varstd
 
   ! ----------------------------------------------------------------------------
@@ -423,11 +439,15 @@ module toolkit
   function correlation(xvar1,xvar2,w,mask) result(corr)
 
     implicit none
-    real(dp) , optional :: w(:)
-    real(dp)            :: xvar1(:),xvar2(:),corr,weig(size(xvar1))
-    real(dp)            :: aux1,aux2,aux3,aux4,aux5
-    logical  , optional :: mask(:)
-    logical             :: mask1(size(xvar1,1))
+    real(dp) , optional    :: w(:)
+    real(dp)               :: xvar1(:),xvar2(:),corr
+    real(dp)               :: aux1,aux2,aux3,aux4,aux5
+    logical  , optional    :: mask(:)
+    logical  , allocatable :: mask1(:)
+    real(dp) , allocatable :: weig(:)
+
+    allocate(weig(size(xvar1)))
+    allocate(mask1(size(xvar1)))
 
     corr    = zero
     weig(:) = one
@@ -459,6 +479,9 @@ module toolkit
     aux5 = sum(weig(:)*( (xvar1(:) - aux1)*(xvar2(:) - aux3) ),mask=mask1)/sum(weig,mask=mask1)
     corr = aux5/(aux2*aux4)
 
+    deallocate(weig)
+    deallocate(mask1)
+
     return
   end function correlation
 
@@ -468,14 +491,16 @@ module toolkit
   function percentile(xvec,pct,w,mask) result(cutoff)
 
     implicit none
-    real(dp)            :: xvec(:),pct
-    real(dp) , optional :: w(:)
-    real(dp)            :: cutoff
-    real(dp)            :: weig(size(xvec))
-    real(dp)            :: aux1,aux2,aux3,aux4
-    integer             :: iter
-    logical  , optional :: mask(:)
-    logical             :: mask1(size(xvec,1))
+    real(dp)               :: xvec(:),pct,cutoff
+    real(dp)               :: aux1,aux2,aux3,aux4
+    integer                :: iter
+    real(dp) , optional    :: w(:)
+    logical  , optional    :: mask(:)
+    logical  , allocatable :: mask1(:)
+    real(dp) , allocatable :: weig(:)
+
+    allocate(weig(size(xvec)))
+    allocate(mask1(size(xvec)))
 
     weig(:) = one
     cutoff  = zero
@@ -510,6 +535,9 @@ module toolkit
 
     cutoff = half*(aux1+aux2)
 
+    deallocate(weig)
+    deallocate(mask1)
+
     return
   end function percentile
 
@@ -530,113 +558,84 @@ module toolkit
     real(dp) , intent(in) , optional :: w(:)
     logical  , intent(in) , optional :: mask(:)
     integer  , intent(in) , optional :: iprint
-    real(dp) , allocatable           :: yvar(:),xvars(:,:),zvar(:)
+    logical  , allocatable           :: mask1(:)
+    real(dp) , allocatable           :: yvar(:),xvars(:,:),zvar(:),wvar(:)
     real(dp) , allocatable           :: xTx(:,:),ixTx(:,:),xTy(:),wx(:,:)
-    real(dp)                         :: wvar(size(yvec))
-    real(dp) , allocatable           :: evar(:)
-    real(dp)                         :: sdbeta(size(coeffs),size(coeffs))
-    real(dp)                         :: sdcoefs(size(coeffs))
-    real(dp)                         :: tstats(size(coeffs))
-    real(dp)                         :: inter(size(coeffs),2)
-    real(dp)                         :: rsq,arsq
-    logical                          :: mask1(size(yvec))
-    integer                          :: j,i,no,nx ; nx = 1
+    real(dp) , allocatable           :: evar(:),sdbeta(:,:),sdcoefs(:),tstats(:),inter(:,:)
+    real(dp)                         :: rsq,arsq    
+    integer                          :: i,n0,no,nc,wc,nx ; nx = 1
 
+    n0     = size(yvec)
     coeffs = zero
-  
+
     ! mask and weights
+    allocate(mask1(n0)) ; mask1 = .true.
     if (present(mask)) then
-      if (size(mask).eq.size(yvec)) then
-        mask1 = mask
-      else
-        call error('error in olsreg!! mask of incorrect size')
-      end if
-    else
-      mask1 = .true.
+      if (size(mask).eq.n0) mask1 = mask
+      if (size(mask).ne.n0) call error('error in olsreg!! mask of incorrect size')      
     end if
+    allocate(wvar(n0)) ; wvar = one
     if (present(w)) then
-      if (size(w).eq.size(yvec)) then
-        wvar = w
-      else
-        call error('error in olsreg!! weigths of incorrect size')
-      end if
-    else
-      wvar = one
+      if (size(w).eq.n0) wvar = w
+      if (size(w).ne.n0) call error('error in olsreg!! weigths of incorrect size')
     end if
 
     ! check vector dimensions
-    if (size(yvec).ne.size(x1vec)) then
-      call error('error in olsreg!! yvec and x1vec different observations')
-    end if
-    if (present(x2vec)) then ; nx = 2 ; if (size(yvec).ne.size(x2vec)) then
-      call error('error in olsreg!! yvec and x2vec different observations')
-    end if ; end if
-    if (present(x3vec)) then ; nx = 3 ; if (size(yvec).ne.size(x3vec)) then
-      call error('error in olsreg!! yvec and x3vec different observations')
-    end if ; end if
-    if (present(x4vec)) then ; nx = 4 ; if (size(yvec).ne.size(x4vec)) then
-      call error('error in olsreg!! yvec and x4vec different observations')
-    end if ; end if
-    if (present(x5vec)) then ; nx = 5 ; if (size(yvec).ne.size(x5vec)) then
-      call error('error in olsreg!! yvec and x5vec different observations')
-    end if ; end if
-    if (present(x6vec)) then ; nx = 6 ; if (size(yvec).ne.size(x6vec)) then
-      call error('error in olsreg!! yvec and x6vec different observations')
-    end if ; end if
-    if (present(x7vec)) then ; nx = 7 ; if (size(yvec).ne.size(x7vec)) then
-      call error('error in olsreg!! yvec and x7vec different observations')
-    end if ; end if
-    if (present(x8vec)) then ; nx = 8 ; if (size(yvec).ne.size(x8vec)) then
-      call error('error in olsreg!! yvec and x8vec different observations')
-    end if ; end if
+    if (n0.ne.size(x1vec))   call error('error in olsreg!! yvec and x1vec different observations')
+    if (present(x2vec)) then ; nx = 2
+      if (n0.ne.size(x2vec)) call error('error in olsreg!! yvec and x2vec different observations')
+    if (present(x3vec)) then ; nx = 3
+      if (n0.ne.size(x3vec)) call error('error in olsreg!! yvec and x3vec different observations')
+    if (present(x4vec)) then ; nx = 4
+      if (n0.ne.size(x4vec)) call error('error in olsreg!! yvec and x4vec different observations')
+    if (present(x5vec)) then ; nx = 5
+      if (n0.ne.size(x5vec)) call error('error in olsreg!! yvec and x5vec different observations')
+    if (present(x6vec)) then ; nx = 6
+      if (n0.ne.size(x6vec)) call error('error in olsreg!! yvec and x6vec different observations')
+    if (present(x7vec)) then ; nx = 7
+      if (n0.ne.size(x7vec)) call error('error in olsreg!! yvec and x7vec different observations')
+    if (present(x8vec)) then ; nx = 8
+      if (n0.ne.size(x8vec)) call error('error in olsreg!! yvec and x8vec different observations')
+    end if ; end if ; end if ; end if ; end if ; end if ; end if
     
-    ! number of (valid) observations
-    no = count(mask1)
+    ! sizes
+    no = count(mask1)  ! number of observations
+    nc = size(coeffs)  ! number of coefficients
+    wc = nc-nx         ! with constant = 1, 0 if not
+
+    if (wc.ne.1 .and. wc.ne.0) then 
+      call error('error in olsreg!! wc different from 1 and 0')
+    end if
 
     ! allocate y-variable and weigths
-    allocate(yvar(no)) ; yvar = pack(yvec,mask1)
-    allocate(zvar(no)) ; zvar = pack(wvar,mask1)
-
+    allocate(xvars(no,nc)) ; xvars = zero
+    allocate(yvar(no))     ; yvar = pack(yvec,mask1)
+    allocate(zvar(no))     ; zvar = pack(wvar,mask1)
+    
     ! check weigths are positive    
-    if (sum(zvar).lt.tolvl) then
-      call error('error in olsreg!! weigths are zero')
-    end if
-
-    ! with a constant term (one coefficient more than the number of variables)
-    if (size(coeffs).eq.nx+1) then ; j = 1
-
-      allocate(xvars(no,nx+1))
-      xvars(:,1) = zvar/zvar
-      xvars(:,2) = pack(x1vec(:),mask1)
-
-    ! with no constant term (same number of coefficients and variables)
-    elseif (size(coeffs).eq.nx) then ; j = 0
-      
-      allocate(xvars(no,nx))
-      xvars(:,1) = pack(x1vec(:),mask1)
-
-    ! error in the number of coefficients
-    else
-      call error('error in olsreg!! coeffs of incorrect size')
-    end if
+    if (sum(zvar).lt.tolvl) call error('error in olsreg!! weigths are zero')
+    
+    ! fill constant (if exists) and first variable
+    if (wc.eq.1) xvars(:,1) = zvar/zvar
+    xvars(:,1+wc) = pack(x1vec(:),mask1)
 
     ! fill remaining variables
-    if (present(x2vec)) xvars(:,2+j) = pack(x2vec(:),mask1)
-    if (present(x3vec)) xvars(:,3+j) = pack(x3vec(:),mask1)
-    if (present(x4vec)) xvars(:,4+j) = pack(x4vec(:),mask1)
-    if (present(x5vec)) xvars(:,5+j) = pack(x5vec(:),mask1)
-    if (present(x6vec)) xvars(:,6+j) = pack(x6vec(:),mask1)
-    if (present(x7vec)) xvars(:,7+j) = pack(x7vec(:),mask1)
-    if (present(x8vec)) xvars(:,8+j) = pack(x8vec(:),mask1)
-
-    ! allocate matrices for betas
-    allocate(xTx(size(xvars,2),size(xvars,2)))
-    allocate(ixTx(size(xvars,2),size(xvars,2)))
-    allocate(xTy(size(xvars,2)))
+    if (present(x2vec)) xvars(:,2+wc) = pack(x2vec(:),mask1)
+    if (present(x3vec)) xvars(:,3+wc) = pack(x3vec(:),mask1)
+    if (present(x4vec)) xvars(:,4+wc) = pack(x4vec(:),mask1)
+    if (present(x5vec)) xvars(:,5+wc) = pack(x5vec(:),mask1)
+    if (present(x6vec)) xvars(:,6+wc) = pack(x6vec(:),mask1)
+    if (present(x7vec)) xvars(:,7+wc) = pack(x7vec(:),mask1)
+    if (present(x8vec)) xvars(:,8+wc) = pack(x8vec(:),mask1)
 
     ! weigthed x-variables
-    allocate(wx(size(xvars,1),size(xvars,2)))
-    forall (i=1:no) wx(i,:) = xvars(i,:)*zvar(i)
+    allocate(wx(no,nc))
+    do i=1,no
+      wx(i,:) = xvars(i,:)*zvar(i)
+    end do
+
+    ! allocate matrices for betas
+    allocate(xTx(nc,nc),ixTx(nc,nc),xTy(nc))
 
     ! compute betas
     xTx    = matmul(transmat(xvars),wx)
@@ -644,13 +643,12 @@ module toolkit
     xTy    = matmul(transmat(xvars),yvar(:)*zvar(:))
     coeffs = matmul(ixTx,xTy)
 
-    if (present(iprint) .and. iprint.ne.0) then
+    if (present(iprint)) then ; if(iprint.ne.0) then
 
-      allocate(evar(no))
+      allocate(evar(no),sdbeta(nc,nc),sdcoefs(nc),tstats(nc),inter(nc,2))
 
-      evar = yvar - matmul(xvars,coeffs)
-
-      sdbeta  = ixTx*( sum(zvar*evar*evar) / dble(no - size(xvars,2)) )
+      evar    = yvar - matmul(xvars,coeffs)
+      sdbeta  = ixTx*( sum(zvar*evar*evar) / dble(no-nc) )
       sdcoefs = sqrt(diag(sdbeta))
       tstats  = abs(coeffs/sdcoefs)
 
@@ -658,33 +656,33 @@ module toolkit
       inter(:,2) = coeffs + dble(1.9601068)*sdcoefs
 
       rsq  = one - varvar(evar,w=zvar)/varvar(yvar,w=zvar)
-      arsq = one - ( (one-rsq)*dble(no-1)/dble(no-size(xvars,2)) )
+      arsq = one - ( (one-rsq)*dble(no-1)/dble(no-nc) )
 
       write(*,99) '   '
       write(*,99) '   '
-      write(*,'(a,i7)') '                               Number of variables = ',size(coeffs)
-      write(*,'(a,i7)') '                             Number of observatios = ',size(yvec)
-      write(*,'(a,i7)') '                       Number of valid observatios = ',no
+      write(*,'(a,i7  )') '                               Number of variables = ',nc
+      write(*,'(a,i7  )') '                             Number of observatios = ',n0
+      write(*,'(a,i7  )') '                       Number of valid observatios = ',no
       write(*,'(a,f7.4)') '                                         R-squared = ',rsq
       write(*,'(a,f7.4)') '                                Adjusted R-squared = ',arsq
       write(*,99) '   '
       write(*,99) ' -----------------------------------------------------------'
       write(*,99) '                beta     sd(b)      minb      maxb    t-stat'
       write(*,99) ' -----------------------------------------------------------'
-      if (j.eq.1) then
-        write(*,99) ' Constant ' ,coeffs(1),sdcoefs(1),inter(1,:),tstats(1)
+      if (wc.eq.1) then
+        write(*,99) ' Constant ' ,coeffs(wc),sdcoefs(wc),inter(wc,:),tstats(wc)
       end if
       do i=1,nx
-        write(*,98) ' Var ' ,i, '    ',coeffs(i+j),sdcoefs(i+j),inter(i+j,:),tstats(i+j)
+        write(*,98) ' Var ' ,i, '    ',coeffs(i+wc),sdcoefs(i+wc),inter(i+wc,:),tstats(i+wc)
       end do
       write(*,99) ' -----------------------------------------------------------'
       write(*,99) '   '
 
-      deallocate(evar)
+      deallocate(evar,sdbeta,sdcoefs,tstats,inter)
 
-    end if
+    end if ; end if
 
-    deallocate(xvars,xTx,ixTx,xTy,yvar,zvar)
+    deallocate(xvars,xTx,ixTx,xTy,yvar,zvar,mask1,wvar)
 
     return
     99 format (a,f10.4,f10.4,f10.4,f10.4,f10.4)
@@ -817,148 +815,65 @@ module toolkit
   ! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-  ! ----------------------------------------------------------------------------
-  ! these functions returns a vector with all the elements of a matrix. the
-  ! parameter "byrow" controls how the matrix is vectorize:
-  !
-  !    byrow = 0 (default)           byrow = 1
-  !
-  !   | a b |       | a |       | a b |       | a |
-  !   | c d |  -->  | c |       | c d |  -->  | b |
-  !                 | b |                     | c |
-  !                 | d |                     | d |
-  !
+    ! ----------------------------------------------------------------------------
+  ! these functions returns a vector with all the elements of a matrix.
   ! the function allows both double precission and integer matrices of
   ! 2-, 3- and 4-dimensions
 
-  function vectorize_dp_2d(mat,byrow) result(vec)
+  function vectorize_dp_2d(mat) result(vec)
     implicit none
-    integer            :: i,j,k
-    integer , optional :: byrow
-    real(dp)           :: mat(:,:),vec(size(mat,1)*size(mat,2)) ; k = 0
-    if (present(byrow) .and. byrow.eq.1) then
-      do j=1,size(mat,2) ; do i=1,size(mat,1)
-        k = k + 1 ; vec(k) = mat(i,j)
-      end do ; end do
-    else
-      do i=1,size(mat,1) ; do j=1,size(mat,2)
-        k = k + 1 ; vec(k) = mat(i,j)
-      end do ; end do
-    end if
+    real(dp) :: mat(:,:)
+    real(dp) :: vec(size(mat,1)*size(mat,2)) 
+    vec = reshape(mat,(/size(vec)/))
     return
   end function vectorize_dp_2d
-  function vectorize_dp_3d(mat,byrow) result(vec)
+  function vectorize_dp_3d(mat) result(vec)
     implicit none
-    integer            :: i,j,p,k
-    integer , optional :: byrow
-    real(dp)           :: mat(:,:,:),vec(size(mat,1)*size(mat,2)*size(mat,3)) ; k = 0
-    if (present(byrow) .and. byrow.eq.1) then
-      do p=1,size(mat,2) ; do j=1,size(mat,2) ; do i=1,size(mat,1)
-        k = k + 1 ; vec(k) = mat(i,j,p)
-      end do ; end do ; end do
-    else
-      do i=1,size(mat,1) ; do j=1,size(mat,2) ; do p=1,size(mat,3)
-        k = k + 1 ; vec(k) = mat(i,j,p)
-      end do ; end do ; end do
-    end if
+    real(dp) :: mat(:,:,:)
+    real(dp) :: vec(size(mat,1)*size(mat,2)*size(mat,3)) 
+    vec = reshape(mat,(/size(vec)/))
     return
   end function vectorize_dp_3d
-  function vectorize_dp_4d(mat,byrow) result(vec)
+  function vectorize_dp_4d(mat) result(vec)
     implicit none
-    integer            :: i,j,p,n,k
-    integer , optional :: byrow
-    real(dp)           :: mat(:,:,:,:),vec(size(mat,1)*size(mat,2)*size(mat,3)*size(mat,4)) ; k = 0
-    if (present(byrow) .and. byrow.eq.1) then
-      do n=1,size(mat,4) ; do p=1,size(mat,3) ; do j=1,size(mat,2) ; do i=1,size(mat,1)
-        k = k + 1 ; vec(k) = mat(i,j,p,n)
-      end do ; end do ; end do ; end do
-    else
-      do i=1,size(mat,1) ; do j=1,size(mat,2) ; do p=1,size(mat,3) ; do n=1,size(mat,4)
-        k = k + 1 ; vec(k) = mat(i,j,p,n)
-      end do ; end do ; end do ; end do
-    end if
+    real(dp) :: mat(:,:,:,:)
+    real(dp) :: vec(size(mat,1)*size(mat,2)*size(mat,3)*size(mat,4)) 
+    vec = reshape(mat,(/size(vec)/))
     return
   end function vectorize_dp_4d
-  function vectorize_dp_5d(mat,byrow) result(vec)
+  function vectorize_dp_5d(mat) result(vec)
     implicit none
-    integer            :: i,j,p,n,k,w
-    integer , optional :: byrow
-    real(dp)           :: mat(:,:,:,:,:)
-    real(dp)           :: vec(size(mat,1)*size(mat,2)*size(mat,3)*size(mat,4)*size(mat,5)) ; k = 0
-    if (present(byrow) .and. byrow.eq.1) then
-      do w=1,size(mat,4) ; do n=1,size(mat,4) ; do p=1,size(mat,3) ; do j=1,size(mat,2) ; do i=1,size(mat,1)
-        k = k + 1 ; vec(k) = mat(i,j,p,n,w)
-      end do ; end do ; end do ; end do ; end do
-    else
-      do i=1,size(mat,1) ; do j=1,size(mat,2) ; do p=1,size(mat,3) ; do n=1,size(mat,4) ; do w=1,size(mat,5)
-        k = k + 1 ; vec(k) = mat(i,j,p,n,w)
-      end do ; end do ; end do ; end do ; end do
-    end if
+    real(dp) :: mat(:,:,:,:,:)
+    real(dp) :: vec(size(mat,1)*size(mat,2)*size(mat,3)*size(mat,4)*size(mat,5))
+    vec = reshape(mat,(/size(vec)/))
     return
   end function vectorize_dp_5d
-  function vectorize_int_2d(mat,byrow) result(vec)
+  function vectorize_int_2d(mat) result(vec)
     implicit none
-    integer            :: i,j,k
-    integer , optional :: byrow
-    integer            :: mat(:,:),vec(size(mat,1)*size(mat,2)) ; k = 0
-    if (present(byrow) .and. byrow.eq.1) then
-      do j=1,size(mat,2) ; do i=1,size(mat,1)
-        k = k + 1 ; vec(k) = mat(i,j)
-      end do ; end do
-    else
-      do i=1,size(mat,1) ; do j=1,size(mat,2)
-        k = k + 1 ; vec(k) = mat(i,j)
-      end do ; end do
-    end if
+    integer :: mat(:,:)
+    integer :: vec(size(mat,1)*size(mat,2))
+    vec = reshape(mat,(/size(vec)/))
     return
   end function vectorize_int_2d
-  function vectorize_int_3d(mat,byrow) result(vec)
+  function vectorize_int_3d(mat) result(vec)
     implicit none
-    integer            :: i,j,p,k
-    integer , optional :: byrow
-    integer            :: mat(:,:,:),vec(size(mat,1)*size(mat,2)*size(mat,3)) ; k = 0
-    if (present(byrow) .and. byrow.eq.1) then
-      do p=1,size(mat,3) ; do j=1,size(mat,2) ; do i=1,size(mat,1)
-        k = k + 1 ; vec(k) = mat(i,j,p)
-      end do ; end do ; end do
-    else
-      do i=1,size(mat,1) ; do j=1,size(mat,2) ; do p=1,size(mat,3)
-        k = k + 1 ; vec(k) = mat(i,j,p)
-      end do ; end do ; end do
-    end if
+    integer :: mat(:,:,:)
+    integer :: vec(size(mat,1)*size(mat,2)*size(mat,3)) 
+    vec = reshape(mat,(/size(vec)/))
     return
   end function vectorize_int_3d
-  function vectorize_int_4d(mat,byrow) result(vec)
+  function vectorize_int_4d(mat) result(vec)
     implicit none
-    integer            :: i,j,p,n,k
-    integer , optional :: byrow
-    integer            :: mat(:,:,:,:),vec(size(mat,1)*size(mat,2)*size(mat,3)*size(mat,4)) ; k = 0
-    if (present(byrow) .and. byrow.eq.1) then
-      do n=1,size(mat,4) ; do p=1,size(mat,3) ; do j=1,size(mat,2) ; do i=1,size(mat,1)
-        k = k + 1 ; vec(k) = mat(i,j,p,n)
-      end do ; end do ; end do ; end do
-    else
-      do i=1,size(mat,1) ; do j=1,size(mat,2) ; do p=1,size(mat,3) ; do n=1,size(mat,4)
-        k = k + 1 ; vec(k) = mat(i,j,p,n)
-      end do ; end do ; end do ; end do
-    end if
+    integer :: mat(:,:,:,:)
+    integer :: vec(size(mat,1)*size(mat,2)*size(mat,3)*size(mat,4))
+    vec = reshape(mat,(/size(vec)/))
     return
   end function vectorize_int_4d
-  function vectorize_int_5d(mat,byrow) result(vec)
+  function vectorize_int_5d(mat) result(vec)
     implicit none
-    integer            :: i,j,p,n,k,w
-    integer , optional :: byrow
-    integer            :: mat(:,:,:,:,:)
-    integer            :: vec(size(mat,1)*size(mat,2)*size(mat,3)*size(mat,4)*size(mat,5)) ; k = 0
-    if (present(byrow) .and. byrow.eq.1) then
-      do w=1,size(mat,4) ; do n=1,size(mat,4) ; do p=1,size(mat,3) ; do j=1,size(mat,2) ; do i=1,size(mat,1)
-        k = k + 1 ; vec(k) = mat(i,j,p,n,w)
-      end do ; end do ; end do ; end do ; end do
-    else
-      do i=1,size(mat,1) ; do j=1,size(mat,2) ; do p=1,size(mat,3) ; do n=1,size(mat,4) ; do w=1,size(mat,5)
-        k = k + 1 ; vec(k) = mat(i,j,p,n,w)
-      end do ; end do ; end do ; end do ; end do
-    end if
+    integer :: mat(:,:,:,:,:)
+    integer :: vec(size(mat,1)*size(mat,2)*size(mat,3)*size(mat,4)*size(mat,5))
+    vec = reshape(mat,(/size(vec)/))
     return
   end function vectorize_int_5d
 
@@ -970,7 +885,7 @@ module toolkit
     implicit none
     real(dp) :: vec0(:),vec1(size(vec0))
     integer  :: i
-    forall (i=1:size(vec0)) vec1(i) = sum(vec0(1:i))
+    vec1 = vec0(i) ; do i=2,size(vec0) ; vec1(i) = sum(vec0(1:i)) ; end do
     return
   end function cumsum
 

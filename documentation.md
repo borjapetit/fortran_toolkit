@@ -13,11 +13,12 @@ General propuse:
 
 Statistics:
 
-- [```varmean```](#varmean): returns the average of a variable, allowing for weigths
-- [```varstd```](#varstd): returns the standard deviation of a variable, allowing for weigths
-- [```correlation```](#correlation): returns the correlation of two variables, allowing for weigths
-- [```percentile```](#percentile): returns the i-th percentile of a variables, allowing for weigths
-- [```olsreg```](#olsreg): returns the ols coefficients of a n-var regression (with n<=8), allowing for weigths
+- [```varmean```](#varmean): returns the average of a variable, allowing for weigths and mask
+- [```varvar```](#varvar): returns the variance of a variable, allowing for weigths and mask
+- [```varstd```](#varstd): returns the standard deviation of a variable, allowing for weigths and mask
+- [```correlation```](#correlation): returns the correlation of two variables, allowing for weigths and mask
+- [```percentile```](#percentile): returns the i-th percentile of a variables, allowing for weigths and mask
+- [```olsreg```](#olsreg): returns the ols coefficients of a n-var regression (with n<=8), allowing for weigths and mask
 - [```tauchen```](#tauchen): returns the transition matrix for a discretized ar(1) process
 - [```normaldist```](#normaldist): returns the distribution for a nomral random variable
 - [```randomnormal```](#randomnormal): returns a random draw for a nomal distribution
@@ -39,9 +40,9 @@ Optimization
 - [```brent```](#brent): Brent method
 - [```normalize```](#normalize): transform a bounded variable into an unbounded one [for optimizaton]
 - [```denormalize```](#denormalize): transform a undonded variable into an counded one [for optimizaton]
-- [```broyden```](#broyden): updates a Jacobian matrix using the Broyden's method
+- [```broyden```](#broyden): updates a Jacobian matrix using the Broyden's method.
 
-## General purpose
+---
 
 ### grid
 <a name="grid"></a>
@@ -76,6 +77,8 @@ vector = grid( 1.d0 , -1.0d0 , 400 , 2.0d0 )
 
 [(back to index)](#inicio)
 
+---
+
 ### interpolation
 <a name="interpolation"></a>
 
@@ -104,6 +107,7 @@ This subroutine is mainly used by the function ```interpolate```.
 
 [(back to index)](#inicio)
 
+---
 
 ### interpolate
 <a name="interpolate"></a>
@@ -138,6 +142,7 @@ xi = interpolate(x_0,y_0,z_0,x,y,z,mat)
 
 [(back to index)](#inicio)
 
+---
 
 ### timing
 <a name="timing"></a>
@@ -160,6 +165,7 @@ This functions returns a timing number that is robust to parallel computing. In 
 
 [(back to index)](#inicio)
 
+---
 
 ### multiplo
 <a name="multiplo"></a>
@@ -184,6 +190,7 @@ write(*,*) multiplo(5,27)  ! .FALSE.
 
 [(back to index)](#inicio)
 
+---
 
 ### iseven
 <a name="iseven"></a>
@@ -208,6 +215,8 @@ write(*,*) iseven(6)  ! .TRUE.
 
 [(back to index)](#inicio)
 
+---
+
 ### error
 <a name="error"></a>
 
@@ -221,10 +230,7 @@ _Dependencies_: none
 
 This subroutine prints an error message ```mess``` and interrupt the execution of the program until the user type an interger.
 
-  
-  
-
-## Statistics
+---
 
 ### varmean
 <a name="varmean"></a>
@@ -232,13 +238,13 @@ This subroutine prints an error message ```mess``` and interrupt the execution o
 ```fortran
 function varmean(var,w,mask) result(meanvar)
   implicit none
-  real(kind=8)            :: var(:)
-  real(kind=8) , optional :: w(:)
   real(kind=8)            :: meanvar
-  logical      , optimal  :: mask
-```
+  real(kind=8)            :: var(:)
+  real(kind=8) , optional :: w(:)     ! same length of "var"
+  logical      , optional :: mask(:)  ! same length of "var"
 
-_Dependencies_: none
+  ! Internal dependencies: none
+```
 
 This function returns the mean of a variable ```var``` given some (optional) weigths ```w```. The user can also supply as ```mask``` to compute the conditional mean. If supplied, the vector ```w``` should have the same size as ```var```. If not supplied, the program assums uniform weigthing.
 
@@ -261,6 +267,36 @@ mean = varmean(xvar,w = wvar)  ! mean = 4.3076
 
 [(back to index)](#inicio)
 
+---
+
+### varvar
+<a name="varvar"></a>
+
+```fortran
+function varvar(var,w,mask) result(variance)
+  implicit none
+  real(kind=8)            :: variance
+  real(kind=8)            :: var(:)
+  real(kind=8) , optional :: w(:)     ! same length of "var"
+  logical      , optional :: mask(:)  ! same length of "var"
+
+  ! Internal dependencies: varmean
+```
+
+This function returns the variance of a variable ```var``` given some (optional) weigths ```w```. The user can also supply as ```mask``` to compute the conditional mean. If supplied, the vector ```w``` should have the same size as ```var```. If not supplied, the program assums uniform weigthing.
+
+_Example_: compute the variance of a vector
+
+```fortran
+! without weigths
+xvar = (/ 1.0, 4.0, 4.0, 9.0 /)
+mean = varmean(xvar)  ! mean = 4.5
+var  = varvar(xvar)   ! var  = 11.0
+```
+
+[(back to index)](#inicio)
+
+---
 
 ### varstd
 <a name="varstd"></a>
@@ -268,18 +304,19 @@ mean = varmean(xvar,w = wvar)  ! mean = 4.3076
 ```fortran
 function varstd(var,w,mask) result(stdvar)
   implicit none
-  real(kind=8)            :: var(:)
-  real(kind=8) , optional :: w(:)
   real(kind=8)            :: stdvar
-  logical      , optimal  :: mask
-```
+  real(kind=8)            :: var(:)
+  real(kind=8) , optional :: w(:)     ! same length as "var"
+  logical      , optional :: mask(:)  ! same length as "var"
 
-_Dependencies_: ```varmean```
+  ! Internal dependencies: varvar
+```
 
 This function returns the stadard deviation of a variable ```var``` given some (optional) weigths ```w```. The user can also supply as ```mask``` to compute the conditional stadard deviation. If supplied, the vector ```w``` should have the same size as ```var```. If not supplied, the program assums uniform weigthing.
 
 [(back to index)](#inicio)
 
+---
 
 ### correlation
 <a name="correlation"></a>
@@ -287,18 +324,19 @@ This function returns the stadard deviation of a variable ```var``` given some (
 ```fortran
 function correlation(xvar1,xvar2,w,mask) result(corr)
   implicit none
-  real(kind=8) , optional :: w(:)
-  real(kind=8)            :: xvar1(:),xvar2(:)
   real(kind=8)            :: corr
-  logical      , optimal  :: mask
-```
+  real(kind=8)            :: xvar1(:),xvar2(:)  ! both vectors should have the same length
+  real(kind=8) , optional :: w(:)               ! same length of "xvar1" and "xvar2"
+  logical      , optional :: mask               ! same length of "xvar1" and "xvar2"
 
-_Dependencies_: ```varmean```, ```varstd```
+  ! Internal dependencies: varmean, varstd
+```
 
 This function returns the correlation coefficient between two variables ```xvar1``` and ```xvar2``` given some (optional) weigths ```w```. The user can also supply as ```mask``` to compute the conditional stadard deviation. If supplied, the vector ```w``` should have the same size as ```var```. If not supplied, the program assums uniform weigthing.
 
 [(back to index)](#inicio)
 
+---
 
 ### percentile
 <a name="percentile"></a>
@@ -306,13 +344,14 @@ This function returns the correlation coefficient between two variables ```xvar1
 ```fortran
 function percentile(xvec,pct,w,mask) result(cutoff)
   implicit none
-  real(kind=8)            :: xvec(:),pct
-  real(kind=8) , optional :: w(:)
   real(kind=8)            :: cutoff
-  logical      , optimal  :: mask
-```
+  real(kind=8)            :: xvec(:)
+  real(kind=8)            :: pct
+  real(kind=8) , optional :: w(:)     ! same length of "xvec"
+  logical      , optional :: mask(:)  ! same length of "xvec"
 
-_Dependencies_: none
+  ! Internal dependencies: none
+```
 
 This function returns the percentile ```pct``` for a distribution ```xvec```, given some (optional) weigths ```w```. The user can also supply as ```mask``` to compute the conditional correlation. If supplied, the vector ```w``` should have the same size as ```var```. If not supplied, the program assums uniform weigthing.
 
@@ -324,6 +363,7 @@ pc60 = percentile(xvec,60.0d0)
 
 [(back to index)](#inicio)
 
+---
 
 ### olsreg
 <a name="olsreg"></a>
@@ -336,17 +376,16 @@ subroutine olsreg(coeffs,yvec,x1vec,x2vec,...,x8vec,w,mask,iprint)
   real(kind=8) , intent(in)            :: yvec(:)
   real(kind=8) , intent(in)            :: x1vec(:)
   real(kind=8) , intent(in) , optional :: x2vec(:),x3vec(:),...,x8vec(:)
-  real(kind=8) , intent(in) , optional :: w(:)
-  logical      , intent(in) , optional :: mask(:)  
+  real(kind=8) , intent(in) , optional :: w(:)     ! same length of "yvec"
+  logical      , intent(in) , optional :: mask(:)  ! same length of "yvec"
   integer      , intent(in) , optional :: iprint
+
+  ! Internal dependencies: varmean, varvar
 ```
-
-_Dependencies_: ```varmean```, ```varvar```
-
-
 
 [(back to index)](#inicio)
 
+---
 
 ### tauchen
 <a name="tauchen"></a>
@@ -357,9 +396,9 @@ subroutine tauchen(xvec,rho,mu,sigma,n,pmat)
   integer     , intent(in)  :: n
   real(kind=8), intent(in)  :: rho,mu,sigma,xvec(n)
   real(kind=8), intent(out) :: pmat(n,n)
-```
 
-_Dependencies_: ```normaldist```
+  ! Internal dependencies: normaldist
+```
 
 This function returns the transition matrix for a discretized AR(1) process of the form:
 $$x' = \mu + \rho x + \sigma \epsilon, \hspace{0.2cm} \epsilon \sim N(0,1)$$
@@ -367,6 +406,7 @@ The vector with values of $x$, ```xvec```, if of dimension ```n``` and does not 
 
 [(back to index)](#inicio)
 
+---
 
 ### normaldist
 <a name="normaldist"></a>
@@ -377,15 +417,15 @@ subroutine normaldist(xvec,mu,sigma,n,dist)
   integer     , intent(in)  :: n
   real(kind=8), intent(in)  :: mu,sigma,xvec(n)
   real(kind=8), intent(out) :: dist(n)
-```
 
-_Dependencies_: ```cdfn```
+  ! Internal dependencies: cdfn
+```
 
 This function returns the distribution of a normal random variable with mean ```mu``` and standadrd deviation ```sigma```.
 
-
 [(back to index)](#inicio)
 
+---
 
 ### randomnormal
 <a name="randomnormal"></a>
@@ -395,17 +435,17 @@ subroutine randomnormal(shock,mu,std)
   implicit none
   real(kind=8) , intent(in)  :: mu,std
   real(kind=8) , intent(out) :: shock ! or shock(:)
-```
 
-_Dependencies_: none
+  ! Internal dependencies: none
+```
 
 This function returns a random number draw from a distribution $N(\mu,\sigma)$. The output, ```shock```, can either be a scalar or a vector of dimension-$n$.
 
 _Note_: ```randomnormal``` is an interface that calls ```randomnormal_scalar``` or ```randomnormal_vec``` depending on whether ```shock``` is a scalar or a vector.
 
-
 [(back to index)](#inicio)
 
+---
 
 ### cdfn
 <a name="cdfn"></a>
@@ -415,9 +455,9 @@ elemental function cdfn(x) result(f)
   implicit none
   real(kind=8), intent(in) :: x
   real(kind=8)             :: f
-```
 
-_Dependencies_: none
+  ! Internal dependencies: none
+```
 
 This function returns the cdf of a standard normal distribution, ```f``` $=\Phi(x)$. This subroutine is defined as ```elemental```, which implies that it can be call for both scalars and arrays.
 
@@ -438,22 +478,21 @@ print * , 'Result =', cdf(vec)   ! Result = 0.500 0.158
 
 [(back to index)](#inicio)
 
-## Linear algebra
+---
 
 ### vect
 <a name="vect"></a>
 
 ```fortran
-function vec(mat,byrow) result(vec)
+function vec(mat) result(vec)
   implicit none
-  real(kind=8)       :: mat(:,:,...,:)
-  real(kind=8)       :: vec(:)
-  integer , optional :: byrow
+  real(kind=8)  :: mat(:,:,...,:)
+  real(kind=8)  :: vec(:)
+
+  ! Internal dependencies: none
 ```
 
-_Dependencies_: none
-
-This function returns a 1-dimensional array ```vec``` with all the elements of a user-supplied ```n```-dimensional array ```mat```, where ```n```$\leq5$. The optional argument ```byrow``` controls the order in which the elements of ```mat``` are stacked (see an example below).
+This function returns a 1-dimensional array ```vec``` with all the elements of a user-supplied ```n```-dimensional array ```mat```, where ```n```$\leq5$.
 
 _Example 1_:
 
@@ -465,15 +504,12 @@ vec = vect(mat)
 
 print * , 'vec =', vec   ! vec =  1.00  3.00  2.00  4.00
 
-vec = vect(mat,byrow=1)
-
-print * , 'vec =', vec   ! vec =  1.00  2.00  3.00  4.00
-
 ```
 
 
 [(back to index)](#inicio)
 
+---
 
 ### cumsum
 <a name="cumsum"></a>
@@ -482,9 +518,9 @@ print * , 'vec =', vec   ! vec =  1.00  2.00  3.00  4.00
 function cumsum(vec0) result(vec1)
   implicit none
   real(kind=8) :: vec0(:),vec1(size(vec0))
-```
 
-_Dependencies_: none
+  ! Dependencies: none
+```
 
 Returns the cummulative sum of a vector ```vec0```.
 
@@ -500,6 +536,8 @@ print * , 'vec1 = ', vec1   ! vec1 =  1.00  3.00  4.00  7.00
 
 [(back to index)](#inicio)
 
+---
+
 
 ### diag
 <a name="diag"></a>
@@ -508,9 +546,10 @@ print * , 'vec1 = ', vec1   ! vec1 =  1.00  3.00  4.00  7.00
 function diag(mat) result(vec)
   implicit none
   real(kind=8) :: mat(:,:),vec(size(mat,dim=1))
+
+  ! Dependencies: none
 ```
 
-_Dependencies_: none
 
 This function returns the main diagonal of a matric ```mat```.
 
@@ -528,6 +567,7 @@ print * , 'vec = ', vec   ! vec =  1.00  3.00  3.00
 
 [(back to index)](#inicio)
 
+---
 
 ### transmat
 <a name="transmat"></a>
@@ -547,6 +587,7 @@ This function returns the transpose of a matrix ```mat```.
 
 [(back to index)](#inicio)
 
+---
 
 ### inverse
 <a name="inverse"></a>
@@ -566,8 +607,7 @@ This function returns the inverse of a squared matrix ```mat```.
 
 [(back to index)](#inicio)
 
-
-## Optimization
+---
 
 ### simplex
 <a name="simplex"></a>
@@ -590,6 +630,7 @@ _Dependencies_: none
 
 [(back to index)](#inicio)
 
+---
 
 ### lmmin
 <a name="lmmin"></a>
@@ -618,6 +659,7 @@ _Dependencies_: ```broyden```, ```inverse```
 
 [(back to index)](#inicio)
 
+---
 
 ### golden
 <a name="golden"></a>
@@ -641,6 +683,7 @@ _Dependencies_: none
 
 [(back to index)](#inicio)
 
+---
 
 ### brent
 <a name="brent"></a>
@@ -665,6 +708,7 @@ _Dependencies_: none
 
 [(back to index)](#inicio)
 
+---
 
 ### normalize
 <a name="normalize"></a>
@@ -686,6 +730,7 @@ to return an unbounded variable ```y```.
 
 [(back to index)](#inicio)
 
+---
 
 ### denormalize
 <a name="denormalize"></a>
@@ -714,6 +759,7 @@ call denormalize ( betau , beta , 1.0d0 , 0.0d0 )
 
 [(back to index)](#inicio)
 
+---
 
 ### broyden
 <a name="broyden"></a>
@@ -737,4 +783,5 @@ You can learn more about this method in this [link](https://en.wikipedia.org/wik
 
 [(back to index)](#inicio)
 
+---
 

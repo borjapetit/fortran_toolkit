@@ -17,4 +17,3 @@ This functions returns a timing number that is robust to parallel computing. In 
 **Dependencies**: none
 
 [(back to index)](index.md)
-

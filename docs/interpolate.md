@@ -1,4 +1,3 @@
-
 ## interpolate
 
 ```fortran
@@ -30,6 +29,3 @@ xi = interpolate(x_0,y_0,z_0,x,y,z,mat)
 **Dependencies**: [```interpolation```](interpolation.md)
 
 [(back to index)](index.md)
-
----
-

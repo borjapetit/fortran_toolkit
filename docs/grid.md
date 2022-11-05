@@ -1,4 +1,4 @@
-### grid
+## grid
 
 ```fortran
 function grid(maxv,minv,n,s) result(v)
@@ -7,8 +7,6 @@ function grid(maxv,minv,n,s) result(v)
   real(kind=8) , optional :: s
   integer                 :: n
 ```
-
-_Dependencies_: none
 
 This function creates a grid of ```n``` points between ```maxv``` and ```minv``` with a curvature of ```s```
 
@@ -27,5 +25,7 @@ _Example_ 2: create a quadratic grid with 500 points between -1 and 1:
 ```fortran
 vector = grid( 1.d0 , -1.0d0 , 400 , 2.0d0 )  
 ```
+
+**Dependencies**: none
 
 [(back to index)](index.md)

@@ -9,8 +9,6 @@ subroutine interpolation(pos,wth,xnow,xgrid)
   integer     , intent(out) :: pos
 ```
 
-_Dependencies_: none
-
 This subroutine finds the closest point in a given grid and return its position and the relative distance.
 
 _Example_: consider a vector ```vec = [1,2,3]```. We can use ```interpolation``` to find the closest point of ```xnow = 2.3```:
@@ -23,5 +21,7 @@ call interpolation(pos,wth,2.3,vec)
 ```
 
 This subroutine is mainly used by the function [```interpolate```](interpolate.md).
+
+**Dependencies**: none
 
 [(back to index)](index.md)

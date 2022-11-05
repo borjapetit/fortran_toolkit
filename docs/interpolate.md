@@ -10,8 +10,6 @@ function interpolate(x1,x2,...,xn,y1,y2,...,yn,mat) result(xi)
   real(kind=8) :: mat(:,:,...,:)
 ```
 
-_Dependencies_: ```interpolation```
-
 This function returns the linearly interpolated value of an n-dimensional function. The variables ```x1```, ```x2```, ..., ```xn``` are the values of the variables to be interpolated over their coresponding grids ```y1```, ```y2```, ...., ```yn```, and ```mat``` is an n-dimensional array with the results.
 
 - The array ```mat``` must have at most, dimension 6 (so ```n```$\leq6$).
@@ -28,6 +26,8 @@ _Example 2_: We have a 3-dimensional array ```mat``` whose $(i,j,k)$-element is 
 ```fortran
 xi = interpolate(x_0,y_0,z_0,x,y,z,mat)
 ```
+
+**Dependencies**: [```interpolation```](interpolation.md)
 
 [(back to index)](#inicio)
 

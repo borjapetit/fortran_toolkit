@@ -8,4 +8,4 @@ This Fortran code provides a list of functions and subroutines that I typically 
 
 Efficiency of the algorithms is not guaranteed, and the code is distributed under the MIT license.
 
-For a complete list of functions and subroutines, please check  [documentation page](docs/documentation.md).
+For a complete list of functions and subroutines, please check  [documentation page](docs/index.md).

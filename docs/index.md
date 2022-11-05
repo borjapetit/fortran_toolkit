@@ -3,8 +3,8 @@
 
 General propuse:
 
-- [```grid```](#grid): generate a grid for a continuous variable.
-- [```interpolation```](#interpolation): interpolate a value over a grid, returning position and distance.
+- [```grid```](grid.md): generate a grid for a continuous variable.
+- [```interpolation```](interpolation.md): interpolate a value over a grid, returning position and distance.
 - [```interpolate```](#interpolate): linearly interpolate a value over an n-dimensional grid, with n <= 6.
 - [```timing```](#timing): returns the number of seconds since 00:00h of the 1st day of the month (_robust to parelalization_).
 - [```multiplo```](#multiplo): returns 1 if an integer is a multiple of another user-provided integer.

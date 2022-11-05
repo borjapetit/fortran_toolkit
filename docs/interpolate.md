@@ -15,13 +15,13 @@ This function returns the linearly interpolated value of an n-dimensional functi
 - The array ```mat``` must have at most, dimension 6 (so ```n```$\leq6$).
 - If ```xn```$<\min$(```yn```) the subroutine takes $\min($```yn```$)$ as the value of ```x```.
 
-_Example 1_: We have a 2-dimensional array ```mat``` whose $(i,j)$-element is the value of some function $f$ evaluated at the $i$-element of the vector $x$, and the $j$-element of the vector $y$. Then, we can interpolate the value of $f$ at $(x_0,y_0)$ using the ```interpolate```:
+_Example 1_: We have a 2-dimensional array ```mat``` whose $(i,j)$-element is the value of some function $f$ evaluated at the $i$-element of the vector $x$, and the $j$-element of the vector $y$. Then, we can interpolate the value of $f$ at $(x_0,y_0)$ as:
 
 ```fortran
 xi = interpolate(x_0,y_0,x,y,mat)
 ```
 
-_Example 2_: We have a 3-dimensional array ```mat``` whose $(i,j,k)$-element is the value of some function $f$ evaluated at the $i$-element of the vector $x$, the $j$-element of the vector $y$, and the $k$-element of the vecor $z$. Then, we can interpolate the value of $f$ at $(x_0,y_0,z_0)$ using the ```interpolate```:
+_Example 2_: We have a 3-dimensional array ```mat``` whose $(i,j,k)$-element is the value of some function $f$ evaluated at the $i$-element of the vector $x$, the $j$-element of the vector $y$, and the $k$-element of the vecor $z$. Then, we can interpolate the value of $f$ at $(x_0,y_0,z_0)$ as:
 
 ```fortran
 xi = interpolate(x_0,y_0,z_0,x,y,z,mat)

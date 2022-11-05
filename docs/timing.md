@@ -1,151 +1,5 @@
-# A Toolkit for Fortran90
-<a name="inicio"></a>
-
-General propuse:
-
-- [```grid```](grid.md): generate a grid for a continuous variable.
-- [```interpolation```](interpolation.md): interpolate a value over a grid, returning position and distance.
-- [```interpolate```](interpolate.md): linearly interpolate a value over an n-dimensional grid, with n <= 6.
-- [```timing```](timing.md): returns the number of seconds since 00:00h of the 1st day of the month (_robust to parelalization_).
-- [```multiplo```](#multiplo): returns 1 if an integer is a multiple of another user-provided integer.
-- [```iseven```](#iseven): returns 1 if a user-provided integer is even.
-- [```error```](#error): print error message and interrupt execution.
-
-Statistics:
-
-- [```varmean```](#varmean): returns the average of a variable, allowing for weigths and mask
-- [```varvar```](#varvar): returns the variance of a variable, allowing for weigths and mask
-- [```varstd```](#varstd): returns the standard deviation of a variable, allowing for weigths and mask
-- [```correlation```](#correlation): returns the correlation of two variables, allowing for weigths and mask
-- [```percentile```](#percentile): returns the i-th percentile of a variables, allowing for weigths and mask
-- [```olsreg```](#olsreg): returns the ols coefficients of a n-var regression (with n<=8), allowing for weigths and mask
-- [```tauchen```](#tauchen): returns the transition matrix for a discretized ar(1) process
-- [```normaldist```](#normaldist): returns the distribution for a nomral random variable
-- [```randomnormal```](#randomnormal): returns a random draw for a nomal distribution
-- [```cdfn```](#cdfn): retutns the cdf of a nomabl distribution.
-
-Linear algebra:
-
-- [```vect```](#vect): transform a matrix of NxM into a vector of NxM rows
-- [```cumsum```](#cumsum): returns the vector with cummulative sum of a vector (as Matlab's cumsum function)
-- [```diag```](#diag): returns the main diagonal of a matrix
-- [```transmat```](#transmat): returns the transpose of a square matrix
-- [```inverse```](#inverse): returns the invesrse of a sqaured matrix
-
-Optimization
-
-- [```simplex```](#simplex): Simplex algorithm
-- [```lmmin```](#lmmin): Levenberg–Marquardt algorithm
-- [```golden```](#golden): Golden search algorithm
-- [```brent```](#brent): Brent method
-- [```normalize```](#normalize): transform a bounded variable into an unbounded one [for optimizaton]
-- [```denormalize```](#denormalize): transform a undonded variable into an counded one [for optimizaton]
-- [```broyden```](#broyden): updates a Jacobian matrix using the Broyden's method.
-
----
-
-### grid
-<a name="grid"></a>
-
-```fortran
-function grid(maxv,minv,n,s) result(v)
-  implicit none
-  real(kind=8)            :: maxv,minv,v(n)
-  real(kind=8) , optional :: s
-  integer                 :: n
-```
-
-_Dependencies_: none
-
-This function creates a grid of ```n``` points between ```maxv``` and ```minv``` with a curvature of ```s```
-
-- if ```s```$=1$: linear grid _(default)_
-- if ```s```$>1$: more grids points around ```maxv```
-- if ```s```$<1$: more grids points around ```min```
-
-_Example_ 1: create a linear grid with 100 points between 0 and 10:
-
-```fortran
-vector = grid( 10.d0 , 0.0d0 , 100 )  
-```
-
-_Example_ 2: create a quadratic grid with 500 points between -1 and 1:
-
-```fortran
-vector = grid( 1.d0 , -1.0d0 , 400 , 2.0d0 )  
-```
-
-[(back to index)](#inicio)
-
----
-
-### interpolation
-<a name="interpolation"></a>
-
-```fortran
-subroutine interpolation(pos,wth,xnow,xgrid)
-  implicit none
-  real(kind=8), intent(in)  :: xnow,xgrid(:)
-  real(kind=8), intent(out) :: wth
-  integer     , intent(out) :: pos
-```
-
-_Dependencies_: none
-
-This subroutine finds the closest point in a given grid and return its position and the relative distance.
-
-_Example_: consider a vector ```vec = [1,2,3]```. We can use ```interpolation``` to find the closest point of ```xnow = 2.3```:
-
-```fortran
-call interpolation(pos,wth,2.3,vec)
-
-! Results: pos = 3, wth = 0.3
-! 2.3 = vec(pos)*wth + vec(pos-1)*(one-wth) = 3*0.3 + 2*0.7
-```
-
-This subroutine is mainly used by the function ```interpolate```.
-
-[(back to index)](#inicio)
-
----
-
-### interpolate
-<a name="interpolate"></a>
-
-```fortran
-function interpolate(x1,x2,...,xn,y1,y2,...,yn,mat) result(xi)
-  implicit none
-  real(kind=8) :: xi
-  real(kind=8) :: x1,x2,...,xn
-  real(kind=8) :: y1(:),y2(:),...,yn(:)
-  real(kind=8) :: mat(:,:,...,:)
-```
-
-_Dependencies_: ```interpolation```
-
-This function returns the linearly interpolated value of an n-dimensional function. The variables ```x1```, ```x2```, ..., ```xn``` are the values of the variables to be interpolated over their coresponding grids ```y1```, ```y2```, ...., ```yn```, and ```mat``` is an n-dimensional array with the results.
-
-- The array ```mat``` must have at most, dimension 6 (so ```n```$\leq6$).
-- If ```xn```$<\min$(```yn```) the subroutine takes $\min($```yn```$)$ as the value of ```x```.
-
-_Example 1_: We have a 2-dimensional array ```mat``` whose $(i,j)$-element is the value of some function $f$ evaluated at the $i$-element of the vector $x$, and the $j$-element of the vector $y$. Then, we can interpolate the value of $f$ at $(x_0,y_0)$ using the ```interpolate```:
-
-```fortran
-xi = interpolate(x_0,y_0,x,y,mat)
-```
-
-_Example 2_: We have a 3-dimensional array ```mat``` whose $(i,j,k)$-element is the value of some function $f$ evaluated at the $i$-element of the vector $x$, the $j$-element of the vector $y$, and the $k$-element of the vecor $z$. Then, we can interpolate the value of $f$ at $(x_0,y_0,z_0)$ using the ```interpolate```:
-
-```fortran
-xi = interpolate(x_0,y_0,z_0,x,y,z,mat)
-```
-
-[(back to index)](#inicio)
-
----
 
 ### timing
-<a name="timing"></a>
 
 ```fortran
 function timing(mode) result(time)
@@ -154,14 +8,13 @@ function timing(mode) result(time)
   real(kind=8)       :: time
 ```
 
-_Dependencies_: ```none```
-
 This functions returns a timing number that is robust to parallel computing. In particular, it returns the number of seconds since 00:00h of the 1st day of the month. The variable ```mode``` controls how time is measured:
 
 - If ```mode``` = 1, time is measured in seconds (default).
 - If ```mode``` = 2, time is measures in minutes.
 - If ```mode``` = 3, time is measured in hours
 
+**Dependencies**: none
 
 [(back to index)](#inicio)
 

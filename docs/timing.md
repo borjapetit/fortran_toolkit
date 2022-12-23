@@ -1,4 +1,3 @@
-
 ## timing
 
 ```fortran

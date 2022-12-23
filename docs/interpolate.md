@@ -13,6 +13,7 @@ This function returns the linearly interpolated value of an n-dimensional functi
 
 - The array ```mat``` must have at most, dimension 6 (so ```n```$\leq6$).
 - If ```xn```$<\min$(```yn```) the subroutine takes $\min($```yn```$)$ as the value of ```x```.
+- If ```xn```$>\max$(```yn```) the subroutine takes $\max($```yn```$)$ as the value of ```x```.
 
 _Example 1_: We have a 2-dimensional array ```mat``` whose $(i,j)$-element is the value of some function $f$ evaluated at the $i$-element of the vector $x$, and the $j$-element of the vector $y$. Then, we can interpolate the value of $f$ at $(x_0,y_0)$ as:
 

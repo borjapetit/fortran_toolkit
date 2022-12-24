@@ -10,7 +10,7 @@ This Fortran code provides a list of functions and subroutines that I typically 
 
 Efficiency of the algorithms is not guaranteed, and the code is distributed under the MIT license.
 
-You can download the code from this [link](https://github.com/borjapetit/fortran_toolkit/blob/main/src/toolkit.f90).
+You can download the code from this [link](https://borjapetit.github.io/fortran_toolkit/src/toolkit.f90).
 
 ### General propuse
 

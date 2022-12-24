@@ -1,4 +1,5 @@
 .DS_*
 test
+test_optim
 test.*
 *.mod

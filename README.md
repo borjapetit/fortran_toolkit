@@ -9,10 +9,7 @@ This Fortran code provides a list of functions and subroutines that I typically 
 
 Efficiency of the algorithms is not guaranteed, and the code is distributed under the MIT license.
 
-For a complete list of functions and subroutines, please check  [documentation page](docs/index.md).
-
-
-## General propuse
+### General propuse
 
 - [```grid```](docs/grid.md): generate a grid for a continuous variable.
 - [```interpolation```](docs/interpolation.md): interpolate a value over a grid, returning position and distance.
@@ -22,7 +19,7 @@ For a complete list of functions and subroutines, please check  [documentation p
 - [```iseven```](docs/iseven.md): returns 1 if a user-provided integer is even.
 - [```error```](docs/error.md): print error message and interrupt execution.
 
-## Statistics
+### Statistics
 
 The toolkit contians functions to compute basic **summary statistics** (mean, variance, standard deviation and correlation). All of them allow for weigths. the user can compute them either unconditionally or conditionally, using a ```mask```.
 
@@ -37,14 +34,14 @@ The toolkit contians functions to compute basic **summary statistics** (mean, va
 - [```randomnormal```](docs/randomnormal.md): returns a random draw for a nomal distribution
 - [```cdfn```](docs/cdfn.md): retutns the cdf of a nomabl distribution.
 
-## Linear algebra
+### Linear algebra
 
 - [```vect```](docs/vect.md): transform a matrix of NxM into a vector of NxM rows
 - [```cumsum```](docs/cumsum.md): returns the vector with cummulative sum of a vector (as Matlab's cumsum function)
 - [```diag```](docs/diag.md): returns the main diagonal of a matrix
 - [```inverse```](docs/inverse.md): returns the invesrse of a sqaured matrix
 
-## Optimization
+### Optimization
 
 Algorithms for single-valued univariate equations:
 

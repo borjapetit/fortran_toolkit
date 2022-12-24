@@ -672,9 +672,9 @@ module toolkit
     allocate(xTx(nc,nc),ixTx(nc,nc),xTy(nc))
 
     ! compute betas
-    xTx    = matmul(transmat(xvars),wx)
+    xTx    = matmul(transpose(xvars),wx)
     ixTx   = inverse(xTx)
-    xTy    = matmul(transmat(xvars),yvar(:)*zvar(:))
+    xTy    = matmul(transpose(xvars),yvar(:)*zvar(:))
     coeffs = matmul(ixTx,xTy)
 
     ! if iprint is different from zero, the subroutine prints a regression table
@@ -943,20 +943,6 @@ module toolkit
     end do
     return
   end function diag
-
-  ! ----------------------------------------------------------------------------
-  ! returns the transpose of a matrix "mat"
-
-  function transmat(mat) result(matt)
-    implicit none
-    real(dp) :: mat(:,:),matt(size(mat,2),size(mat,1))
-    integer  :: i
-    matt = zero ; 
-    do i=1,size(mat,1) 
-      matt(:,i) = mat(i,:)
-    end do
-    return
-  end function transmat
 
   ! ----------------------------------------------------------------------------
   ! compute the inverse of a sqaure matrix "m"
@@ -1525,7 +1511,6 @@ module toolkit
     94 format ('  iterations = ',i4)
     93 format ('  error      = ',f10.4)
     92 format ('  reduction  = ',f10.4)
-
   end subroutine simplex
 
   ! ----------------------------------------------------------------------------
@@ -1577,6 +1562,7 @@ module toolkit
 
     implicit none
 
+    ! function to minimize
     external                         :: func
     
     ! outputs
@@ -1706,10 +1692,8 @@ module toolkit
         ! shock the i-th parameter
         xj(:,i) = xb(:)
         if (x(i).le.zero) then
-          !xj(i,i) = xb(i) - min(shck(i),shck(i)*max(0.30,eb))*abs(xb(i))
           xj(i,i) = xb(i) - shck(i)*abs(xb(i))
         elseif (x(i).ge.zero) then
-          !xj(i,i) = xb(i) + min(shck(i),shck(i)*max(0.30,eb))*abs(xb(i))
           xj(i,i) = xb(i) + shck(i)*abs(xb(i))
         end if
 
@@ -1796,20 +1780,13 @@ module toolkit
     2 continue
 
     ! compute new point
+    jj = matmul(transpose(j),j) 
+    jt = matmul(transpose(j),yb)
     do i=1,n
-      do k=1,n
-        jj(i,k) = sum(j(:,i)*j(:,k))
-      end do
-      jt(i) = sum(j(:,i)*yb(:))
+      jj(i,i) = (one+da)*jj(i,i)
     end do
-    ja = jj
-    do i=1,n
-      ja(i,i) = (one+da)*jj(i,i)
-    end do
-    ij = inverse(ja)
-    do i=1,n
-      x1(i) = xb(i) - sum(ij(i,:)*jt(:))
-    end do
+    ij = inverse(jj)
+    x1 = xb - matmul(ij,jt)
 
     ! if jacobian is too close to zero, return
     if (maxval(abs(jt)).lt.toler) goto 11

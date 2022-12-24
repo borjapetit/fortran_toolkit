@@ -32,12 +32,11 @@ sdasdas
 - [```randomnormal```](randomnormal.md): returns a random draw for a nomal distribution
 - [```cdfn```](cdfn.md): retutns the cdf of a nomabl distribution.
 
-## Linear algebra:
+## Linear algebra
 
 - [```vect```](vect.md): transform a matrix of NxM into a vector of NxM rows
 - [```cumsum```](cumsum.md): returns the vector with cummulative sum of a vector (as Matlab's cumsum function)
 - [```diag```](diag.md): returns the main diagonal of a matrix
-- [```transmat```](transmat.md): returns the transpose of a square matrix
 - [```inverse```](inverse.md): returns the invesrse of a sqaured matrix
 
 ## Optimization

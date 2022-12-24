@@ -1,4 +1,4 @@
-## error
+# error
 
 ```fortran
 subroutine error(mess)

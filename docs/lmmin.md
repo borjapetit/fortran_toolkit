@@ -1,4 +1,4 @@
-## lmmin
+# lmmin
 
 ```fortran
 subroutine lmmin_states_both(func,x,y,iy,ind,x0,itermax,damp,tol,toleach,shock,usebro,iprint)
@@ -18,6 +18,6 @@ subroutine lmmin_states_both(func,x,y,iy,ind,x0,itermax,damp,tol,toleach,shock,u
   integer      , intent(in) , optional :: usebro      ! indicator for the use of Broyden method to update Jacobian
 ```
 
-_Dependencies_: ```broyden```, ```inverse```
+**Dependencies**: [```inverse```](inverse.md)
 
-[(back to index)](inicio.md)
+[(back to index)](index.md)

@@ -1,11 +1,9 @@
-## diag
+# diag
 
 ```fortran
 function diag(mat) result(vec)
   implicit none
   real(kind=8) :: mat(:,:),vec(size(mat,dim=1))
-
-  ! Dependencies: none
 ```
 
 This function returns the main diagonal of a matric ```mat```.
@@ -22,4 +20,6 @@ vec = diag(mat)
 print * , 'vec = ', vec   ! vec =  1.00  3.00  3.00
 ```
 
-[(back to index)](inicio.md)
+**Dependencies**: none
+
+[(back to index)](index.md)

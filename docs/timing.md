@@ -1,4 +1,4 @@
-## timing
+# timing
 
 ```fortran
 function timing(mode) result(time)

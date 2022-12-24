@@ -1,4 +1,4 @@
-## simplex
+# simplex
 
 ```fortran
 subroutine simplex(func,x,y,iy,ind,x0,itermax,tol,iprint)
@@ -14,6 +14,6 @@ subroutine simplex(func,x,y,iy,ind,x0,itermax,tol,iprint)
   integer      , intent(in) , optional :: iprint      ! indicator for printing behaviour
 ```
 
-_Dependencies_: none
+**Dependencies**: none
 
-[(back to index)](inicio.md)
+[(back to index)](index.md)

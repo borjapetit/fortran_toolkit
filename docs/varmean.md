@@ -1,4 +1,4 @@
-## varmean
+# varmean
 
 ```fortran
 function varmean(var,w,mask) result(meanvar)
@@ -9,24 +9,15 @@ function varmean(var,w,mask) result(meanvar)
   logical      , optional :: mask(:)  ! same length of "var"
 ```
 
-This function returns the mean of a variable ```var``` given some (optional) weigths ```w```. The user can also supply a ```mask``` to compute the conditional mean. If supplied, the vector ```w``` should have the same size as ```var```. If not supplied, the program assums uniform weigthing.
+This function returns the mean of a variable ```var``` given some (optional) weigths ```w```. If supplied, the vector ```w``` should have the same size as ```var```. If not supplied, the program assums uniform weigthing.
 
-_Example_: compute the mean of a vector
+The user can also supply a ```mask``` to compute the conditional mean. The input ```mask``` is a logical array of the same size of ```var```. For example:
 
 ```fortran
-! without weigths
-xvar = (/ 1.0, 4.0, 4.0, 9.0 /)
-mean = varmean(xvar)  ! mean = 4.5
-
-! without weigths and conditional on xvar>2
-xvar = (/ 1.0, 4.0, 4.0, 9.0 /)
-mean = varmean(xvar , mask = xvar.gt.2.0d0 )  ! mean = 5.66
-
-! with weigths
-xvar = (/ 1.0, 4.0, 4.0, 9.0 /)
-wvar = (/ 2.0, 4.0, 5.0, 2.0 /)
-mean = varmean(xvar , w = wvar)  ! mean = 4.3076
+mean = varmean(var,mask = var.gt.0.0d0 .and. var.lt.5.0d0)
 ```
+
+This computes the mean of ```var``` conditional on ```var``` being between 0 and 5.
 
 **Dependencies**: none
 

@@ -1,4 +1,4 @@
-## denormalize
+# denormalize
 
 ```fortran
 subroutine denormalize(y,x,xmax,xmin)
@@ -7,9 +7,7 @@ subroutine denormalize(y,x,xmax,xmin)
   real(kind=8) , intent(out) :: x
 ```
 
-_Dependencies_: none
-
-This subroutine takes an unbounded varibale ```y``` and applies the transformation 
+This subroutine takes an unbounded varibale ```y``` and applies the transformation
 $$ \texttt{x} = \texttt{xmin} + \left(\frac{\exp(y)}{1+\exp(y)} \right)(\texttt{xmax}-\texttt{xmin}) $$
 to return a bounded variable ```x```, contrained to be between ```xmin``` and ```xmax```.
 
@@ -22,4 +20,6 @@ call denormalize ( betau , beta , 1.0d0 , 0.0d0 )
 
 **Note**: This subroutine is useful to use stadard optimization algorithms for contrained problems. For isntance, one can use the Simplex method to minimize a function of ```x```, where ```x``` should be in the unit interval, by making use of ```normalize``` and ```denormalize```.
 
-[(back to index)](inicio.md)
+**Dependencies**: none
+
+[(back to index)](index.md)

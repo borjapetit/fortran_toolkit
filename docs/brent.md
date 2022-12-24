@@ -1,6 +1,6 @@
-## brent
+# brent
 
-Find the root of a single-valued univariate equation. The user must supply a function $f(x)$, and a maximum and minimum value of $x$, such that $x^*\in[x_0,x_1]$, with $f(x^*)=0$. 
+Find the root of a single-valued univariate equation. The user must supply a function $f(x)$, and a maximum and minimum value of $x$, such that $x^*\in[x_0,x_1]$, with $f(x^*)=0$.
 
 **Dependencies**: none
 
@@ -8,13 +8,13 @@ Find the root of a single-valued univariate equation. The user must supply a fun
 
 ---
 
-### Sintax
+## Sintax
 
 ```fortran
 subroutine brent(func,x,numiter,exitcode,x0,x1,itermax,tol,iprint)
 ```
 
-### Inputs
+## Inputs
 
 ```fortran
 external                :: func    ! user-supplied function
@@ -30,7 +30,7 @@ integer      , optional :: iprint  ! detault = 0
 !   iprint = 2: print main results and each iteration
 ```
 
-### Outputs
+## Outputs
 
 ```fortran
 real(kind=8) :: x         ! root
@@ -42,7 +42,7 @@ integer      :: exitcode  ! exit code
 ! exitcode = 2: maximum number of function evaluations reached
 ```
 
-### Example
+## Example
 
 ```fortran
 program example

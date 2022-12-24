@@ -448,53 +448,70 @@ module toolkit
     implicit none
     real(dp) , optional    :: w(:)
     real(dp)               :: xvar1(:),xvar2(:),corr
-    real(dp)               :: aux1,aux2,aux3,aux4,aux5
+    real(dp)               :: aux1,aux2,aux3,aux4
     logical  , optional    :: mask(:)
-    logical  , allocatable :: mask1(:)
-    real(dp) , allocatable :: weig(:)
-
-    allocate(weig(size(xvar1)))
-    allocate(mask1(size(xvar1)))
+    real(dp) , allocatable :: weig(:),weig1(:)
+    real(dp) , allocatable :: vect1(:),vect2(:)
 
     ! initialize
-    corr    = zero
-    weig(:) = one
-    mask1   = .true.
+    corr = zero
   
+    ! check vector dimensions
+    if (size(xvar1).ne.size(xvar2)) then
+      call error('error in correaltion!! yvar and xvar of different sizes')
+    end if
+
+    ! check weigths
+    allocate(weig(size(xvar1)))
+    if (present(w)) then
+      if (size(xvar1).ne.size(w)) then
+        call error('error in correlation!! var and w have different size')
+      end if
+      if (sum(w).lt.tolvl) then
+        call error('error in correlation!! w are zero')
+      end if
+      weig(:) = w(:)
+    else
+      weig(:) = one
+    end if
+
     ! check mask
     if (present(mask)) then
       if (size(xvar1).eq.size(mask)) then
-        mask1 = mask
+        allocate(vect1(count(mask)),vect2(count(mask)),weig1(count(mask)))
+        vect1 = pack(xvar1,mask)
+        vect2 = pack(xvar2,mask)
+        weig1 = pack(weig,mask)
       else
         call error('error in varmean: mask of incorrect size')
       end if
-    end if
-
-    ! check vector dimensions
-    if (size(xvar1).ne.size(xvar2)) call error('error in correaltion!! yvar and xvar of different sizes')
-
-    ! check weigths
-    if (present(w)) then
-      if (size(xvar1).ne.size(w)) call error('error in correlation!! var and w have different size')
-      if (sum(w).lt.tolvl       ) call error('error in correlation!! w are zero')
-      weig(:) = w(:)
+    else
+      allocate(vect1(size(xvar1)),vect2(size(xvar1)),weig1(size(xvar1)))
+      vect1 = xvar1
+      vect2 = xvar2
+      weig1 = weig
     end if
 
     ! compute means and stds
-    aux1 = varmean(xvar1,weig,mask=mask1)
-    aux2 = varstd(xvar1,weig,mask=mask1)
-    aux3 = varmean(xvar2,weig,mask=mask1)
-    aux4 = varstd(xvar2,weig,mask=mask1)
+    aux1 = varmean(vect1,weig1)
+    aux2 = varstd(vect1,weig1)
+    aux3 = varmean(vect2,weig1)
+    aux4 = varstd(vect2,weig1)
 
     ! check whether any of the variables is a constant
-    if (aux2.lt.tolvl) call error('error in correlation!! xvar1 is a constant')
-    if (aux4.lt.tolvl) call error('error in correlation!! xvar2 is a constant')
+    if (aux2.lt.tolvl) then
+      call error('error in correlation!! xvar1 is a constant')
+    end if
+    if (aux4.lt.tolvl) then
+      call error('error in correlation!! xvar2 is a constant')
+    end if
 
-    aux5 = sum(weig(:)*( (xvar1(:) - aux1)*(xvar2(:) - aux3) ),mask=mask1)/sum(weig,mask=mask1)
-    corr = aux5/(aux2*aux4)
+    corr = (sum( weig1(:)*(vect1(:) - aux1)*(vect1(:) - aux3) )/sum(weig1))/(aux2*aux4)
 
     deallocate(weig)
-    deallocate(mask1)
+    deallocate(weig1)
+    deallocate(vect1)
+    deallocate(vect2)
 
     return
   end function correlation
@@ -572,7 +589,7 @@ module toolkit
   ! different from zero, the subroutine prints a regression table with additional
   ! statistics (t-stats, Rsquared, etc).
 
-  subroutine olsreg(coeffs,yvec,x1vec,x2vec,x3vec,x4vec,x5vec,x6vec,x7vec,x8vec,w,mask,iprint)
+  subroutine olsreg(coeffs,yvec,x1vec,x2vec,x3vec,x4vec,x5vec,x6vec,x7vec,x8vec,w,mask,table)
     implicit none
     real(dp) , intent(out)           :: coeffs(:)
     real(dp) , intent(in)            :: yvec(:)
@@ -586,7 +603,7 @@ module toolkit
     real(dp) , intent(in) , optional :: x8vec(:)
     real(dp) , intent(in) , optional :: w(:)
     logical  , intent(in) , optional :: mask(:)
-    integer  , intent(in) , optional :: iprint
+    integer  , intent(in) , optional :: table
     logical  , allocatable           :: mask1(:)
     real(dp) , allocatable           :: yvar(:)
     real(dp) , allocatable           :: xvars(:,:)
@@ -678,8 +695,8 @@ module toolkit
     coeffs = matmul(ixTx,xTy)
 
     ! if iprint is different from zero, the subroutine prints a regression table
-    if (present(iprint)) then
-    if(iprint.ne.0) then
+    if (present(table)) then
+    if(table.eq.1) then
 
       allocate(evar(no),sdbeta(nc,nc),sdcoefs(nc),tstats(nc),inter(nc,2))
 

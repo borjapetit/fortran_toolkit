@@ -1,4 +1,4 @@
-## broyden
+# broyden
 
 ```fortran
 subroutine broyden(j1,j0,x1,x0,f1,f0)
@@ -17,4 +17,6 @@ Imagine we have an $m$-dimensional function $f$ in $n$ unknows. We evaluate two 
 
 You can learn more about this method in this [link](https://en.wikipedia.org/wiki/Broyden%27s_method).
 
-[(back to index)](inicio.md)
+**Dependencies**: none
+
+[(back to index)](index.md)

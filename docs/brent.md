@@ -1,8 +1,9 @@
-# brent
 
-Find the root of a single-valued univariate equation. The user must supply a function $f(x)$, and a maximum and minimum value of $x$, such that $x^*\in[x_0,x_1]$, with $f(x^*)=0$.
+### brent
 
 **Dependencies**: none
+
+Find the root of a single-valued univariate equation. The user must supply a function $f(x)$, and a maximum and minimum value of $x$, such that $x^*\in[x_0,x_1]$, with $f(x^*)=0$.
 
 [(back to index)](inicio.md)
 

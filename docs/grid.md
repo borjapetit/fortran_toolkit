@@ -1,4 +1,7 @@
-# grid
+
+### grid
+
+**Dependencies**: none
 
 ```fortran
 function grid(maxv,minv,n,s) result(v)
@@ -25,7 +28,5 @@ _Example_ 2: create a quadratic grid with 500 points between -1 and 1:
 ```fortran
 vector = grid( 1.d0 , -1.0d0 , 400 , 2.0d0 )  
 ```
-
-**Dependencies**: none
 
 [(back to index)](index.md)

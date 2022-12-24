@@ -18,7 +18,6 @@ write(*,*) iseven(3)  ! .FALSE.
 write(*,*) iseven(6)  ! .TRUE.
 ```
 
-**Dependencies**: 
- [```multiplo```](multiplo.md)
+**Dependencies**: [```multiplo```](multiplo.md)
 
 [(back to index)](index.md)

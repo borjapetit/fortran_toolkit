@@ -1,4 +1,4 @@
-## normaldist
+# normaldist
 
 ```fortran
 subroutine normaldist(xvec,mu,sigma,n,dist)

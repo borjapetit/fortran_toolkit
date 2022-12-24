@@ -1,4 +1,4 @@
-## multiplo
+# multiplo
 
 ```fortran
 elemental function multiplo(num,xx) result(mul)

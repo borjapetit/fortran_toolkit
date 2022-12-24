@@ -1,4 +1,4 @@
-## varvar
+# varvar
 
 ```fortran
 function varvar(var,w,mask) result(variance)

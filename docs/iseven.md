@@ -1,4 +1,4 @@
-## iseven
+# iseven
 
 ```fortran
 function iseven(num) result(ise)

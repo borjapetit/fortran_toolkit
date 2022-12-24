@@ -1,5 +1,7 @@
 .DS_*
-test
+test_gral
 test_optim
 test.*
 *.mod
+Makefile
+

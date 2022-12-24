@@ -10,7 +10,6 @@ mat0(:,2) = (/3,4/)
 vec = grid(10.0d0,1.0d0,10)
 
 print * , diag(mat0)
-print * , transmat(mat0)
 print * , cumsum(vect(mat0))
 print * , vec
 
@@ -52,8 +51,8 @@ subroutine test_ols
   write(*,98) ' '
   write(*,97) ' Num. Obs:' , nn
   write(*,98) ' '
-  write(*,98) ' With a constant ' ; call olsreg(b,y,x1,x2,x3,iprint=1)
-  write(*,98) ' With no constant' ; call olsreg(b(1:3),y,x1,x2,x3,iprint=1)
+  write(*,98) ' With a constant ' ; call olsreg(b,y,x1,x2,x3,table=1)
+  write(*,98) ' With no constant' ; call olsreg(b(1:3),y,x1,x2,x3,table=1)
   write(*,98) ' '
   98 format (a,4(f7.2))
   97 format (a,i7)

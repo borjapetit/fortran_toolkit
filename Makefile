@@ -1,13 +1,9 @@
 
 # Start of the makefile
 
-files = toolkit.f90 test_toolkit.f90
-
-model: $(files)
-	gfortran -O3 $(files) -o test
-
-check: $(files)
-	gfortran -fcheck=all -fbacktrace -Wall -g $(files) -o test
+model:
+	gfortran -O3 src/toolkit.f90 src/test_toolkit.f90 -o src/test_gral
+	gfortran -O3 src/toolkit.f90 src/test_optim.f90 -o src/test_optim
 
 clean:
 	rm -f *.mod

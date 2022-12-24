@@ -20,12 +20,14 @@ mean = varmean(xvar)  ! mean = 4.5
 
 ! without weigths and conditional on xvar>2
 xvar = (/ 1.0, 4.0, 4.0, 9.0 /)
-mean = varmean(xvar, mask = xvar.gt.2.0d0 )  ! mean = 5.66
+mean = varmean(xvar , mask = xvar.gt.2.0d0 )  ! mean = 5.66
 
 ! with weigths
 xvar = (/ 1.0, 4.0, 4.0, 9.0 /)
 wvar = (/ 2.0, 4.0, 5.0, 2.0 /)
-mean = varmean(xvar,w = wvar)  ! mean = 4.3076
+mean = varmean(xvar , w = wvar)  ! mean = 4.3076
 ```
 
-[(back to index)](inicio.md)
+**Dependencies**: none
+
+[(back to index)](index.md)

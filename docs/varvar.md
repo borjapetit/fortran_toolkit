@@ -11,15 +11,16 @@ function varvar(var,w,mask) result(variance)
 
 This function returns the variance of a variable ```var``` given some (optional) weigths ```w```. The user can also supply as ```mask``` to compute the conditional mean. If supplied, the vector ```w``` should have the same size as ```var```. If not supplied, the program assums uniform weigthing.
 
-_Example_: compute the variance of a vector
+_Example_: compute the variance of a vector ```xvar = (/ 1.0, 4.0, 4.0, 9.0 /)```
 
 ```fortran
 ! without weigths
-xvar = (/ 1.0, 4.0, 4.0, 9.0 /)
-mean = varmean(xvar)  ! mean = 4.5
-var  = varvar(xvar)   ! var  = 11.0
+var = varvar(xvar)   ! var  = 11.0
+
+! conditional on "x" being greater than 1
+var = varvar(xvar , mask = xvar.gt.1.0d0 )   ! var = 8.33
 ```
 
 **Dependencies**: [```varmean```](varmean.md)
 
-[(back to index)](inicio.md)
+[(back to index)](index.md)

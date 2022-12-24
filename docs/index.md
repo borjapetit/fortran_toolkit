@@ -7,7 +7,7 @@
 - [```interpolation```](interpolation.md): interpolate a value over a grid, returning position and distance.
 - [```interpolate```](interpolate.md): linearly interpolate a value over an n-dimensional grid, with n $\leq$ 6.
 - [```timing```](timing.md): returns the number of seconds since 00:00h of the 1st day of the month (_robust to parelalization_).
-- [```multiplo```](multiplo,md): returns 1 if an integer is a multiple of another user-provided integer.
+- [```multiplo```](multiplo.md): returns 1 if an integer is a multiple of another user-provided integer.
 - [```iseven```](iseven.md): returns 1 if a user-provided integer is even.
 - [```error```](error.md): print error message and interrupt execution.
 

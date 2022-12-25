@@ -1086,8 +1086,8 @@ module toolkit
     !
     ! the outputs of the subroutine are:
     !
-    !   x:    the value of x that maximizes "func"
-    !   y:    the value of the function at the point x
+    !   x: the value of x that maximizes "func"
+    !   y: the value of the function at the point x
 
     implicit none
     external                         :: func
@@ -1271,7 +1271,7 @@ module toolkit
     !         real(dp) :: x(:),y
     !       end function func
     !
-    !   - x0:     the vector of dimension n with the initial guess
+    !   - x0: the vector of dimension n with the initial guess
     !
     ! there are also few optional inputs:
     !

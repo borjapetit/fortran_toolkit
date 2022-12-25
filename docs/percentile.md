@@ -1,4 +1,4 @@
-# percentile
+### percentile
 
 ```fortran
 function percentile(xvec,pct,w,mask) result(cutoff)
@@ -10,7 +10,7 @@ function percentile(xvec,pct,w,mask) result(cutoff)
   logical      , optional :: mask(:)  ! same length of "xvec"
 ```
 
-This function returns the percentile ```pct``` for a distribution ```xvec```, given some (optional) weigths ```w```. the percentile ```pct``` should be between 0 and 1. If supplied, the vector ```w``` should have the same size as ```var```. If not supplied, the program assums uniform weigthing.
+This function returns the percentile ```pct``` for a distribution ```xvec```, given some (optional) weigths ```w```. The percentile ```pct``` should be between 0 and 1. If supplied, the vector ```w``` should have the same size as ```var```. If not supplied, the program assums uniform weigthing.
 
 The user can also supply a ```mask``` to compute the conditional percentile. The input ```mask``` is a logical array of the same size of ```xvec```. For example:
 
@@ -22,4 +22,4 @@ This computes the 60th percentile of ```xvec``` conditional on ```xvec``` being 
 
 **Dependencies**: none
 
-[(back to index)](index.md)
+[(back to index)](../index.md)

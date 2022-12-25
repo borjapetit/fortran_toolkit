@@ -50,7 +50,7 @@ program main
   call normalize(y0(1),x0(1),10.0d0,0.0d0)
   call normalize(y0(2),x0(2),5.0d0,-50.0d0)
 
-  ! use Nelson-Mead to minimize the function "unconstrained_func" (over "y")  
+  ! use Nelder-Mead to minimize the function "unconstrained_func" (over "y")  
   call simplex(unconstrained_func,y1,f1,numiter,exitcode,y0)
     
   ! transform variable "y" (unconstrained) into "x" (contrained)

@@ -1,4 +1,4 @@
-# correlation
+### correlation
 
 ```fortran
 function correlation(xvar1,xvar2,w,mask) result(corr)
@@ -21,4 +21,4 @@ This computes the correlation between vectors ```xvar1``` and ```xvar2``` only f
 
 **Dependencies**: [```varmean```](varmean.md),  [```varvar```](varvar.md)
 
-[(back to index)](index.md)
+[(back to index)](../index.md)

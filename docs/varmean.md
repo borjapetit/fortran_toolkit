@@ -1,4 +1,4 @@
-# varmean
+### varmean
 
 ```fortran
 function varmean(var,w,mask) result(meanvar)
@@ -21,4 +21,4 @@ This computes the mean of ```var``` conditional on ```var``` being between 0 and
 
 **Dependencies**: none
 
-[(back to index)](index.md)
+[(back to index)](../index.md)

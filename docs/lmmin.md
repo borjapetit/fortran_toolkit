@@ -1,4 +1,4 @@
-# lmmin
+### lmmin
 
 ```fortran
 subroutine lmmin_states_both(func,x,y,iy,ind,x0,itermax,damp,tol,toleach,shock,usebro,iprint)
@@ -18,6 +18,10 @@ subroutine lmmin_states_both(func,x,y,iy,ind,x0,itermax,damp,tol,toleach,shock,u
   integer      , intent(in) , optional :: usebro      ! indicator for the use of Broyden method to update Jacobian
 ```
 
+This subroutine applies the Levenberg–Marquardt algorithm (click [here](https://en.wikipedia.org/wiki/Levenberg–Marquardt_algorithm) for more information) which minimizes the sum of squared errors of a (possibly nonlinear) system of multivariate equations.
+
 **Dependencies**: [```inverse```](inverse.md)
 
-[(back to index)](index.md)
+[(back to index)](../index.md)
+
+---

@@ -1,4 +1,4 @@
-# golden
+### golden
 
 ```fortran
 subroutine golden(func,x,y,xmax,xmin,itermax,tol)
@@ -14,4 +14,4 @@ subroutine golden(func,x,y,xmax,xmin,itermax,tol)
 
 **Dependencies**: none
 
-[(back to index)](index.md)
+[(back to index)](../index.md)

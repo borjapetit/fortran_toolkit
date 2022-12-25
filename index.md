@@ -33,20 +33,20 @@ You can download the code from this [link](https://borjapetit.github.io/fortran_
 - [```varstd```](docs/varstd.md): returns the standard deviation of a variable, allowing for weigths and mask.
 - [```correlation```](docs/correlation.md): returns the correlation of two variables, allowing for weigths and mask.
 - [```percentile```](docs/percentile.md): returns the i-th percentile of a distribution, allowing for weigths and mask.
-- [```olsreg```](docs/olsreg.md): returns the OLS coefficients of a linear regression (with up to 8 explanatory variables), allowing for weigths and mask.
-- [```tauchen```](docs/tauchen.md): returns the transition matrix for a discretized AR(1) process.
-- [```normaldist```](docs/normaldist.md): returns the distribution for a normal random variable given some mean and variance.
-- [```randomnormal```](docs/randomnormal.md): returns a random draw (either a scalar or a vector) for a normal distribution.
-- [```cdfn```](docs/cdfn.md): returns the cdf of a standard normal distribution.
+- **[```olsreg```](docs/olsreg.md): returns the OLS coefficients of a linear regression (with up to 8 explanatory variables), allowing for weigths and mask.
+- **[```tauchen```](docs/tauchen.md): returns the transition matrix for a discretized AR(1) process.
+- **[```normaldist```](docs/normaldist.md): returns the distribution for a normal random variable given some mean and variance.
+- **[```randomnormal```](docs/randomnormal.md): returns a random draw (either a scalar or a vector) for a normal distribution.
+- **[```cdfn```](docs/cdfn.md): returns the cdf of a standard normal distribution.
 
 ---
 
 ### Linear algebra
 
-  - [```vect```](docs/vect.md): transform a matrix of into a vector (similar to ```reshape```).
-  - [```cumsum```](docs/cumsum.md): returns the vector with cummulative sum of a vector (as Matlab's ```cumsum``` function).
-  - [```diag```](docs/diag.md): returns a vector with the elements of the main diagonal of a matrix.
-  - [```inverse```](docs/inverse.md): returns the inverse of a sqaured matrix.
+- **[```vect```](docs/vect.md): transform a matrix of into a vector (similar to ```reshape```).
+- **[```cumsum```](docs/cumsum.md): returns the vector with cummulative sum of a vector (as Matlab's ```cumsum``` function).
+- **[```diag```](docs/diag.md): returns a vector with the elements of the main diagonal of a matrix.
+- **[```inverse```](docs/inverse.md): returns the inverse of a sqaured matrix.
 
 ---
 
@@ -54,7 +54,7 @@ You can download the code from this [link](https://borjapetit.github.io/fortran_
 
 Algorithms for single-valued univariate equations:
 
-  - [```golden```](docs/golden.md): maximize a single-valued univariate equation using the Golden Search algorithm.
+- **[```golden```](docs/golden.md): maximize a single-valued univariate equation using the Golden Search algorithm.
 - [```brent```](docs/brent.md): find the root of a single-valued univariate equation using the Brent's method.
 
 Algorithms for single-valued multivariate equations:
@@ -67,7 +67,7 @@ Algorithms for systems of equations:
 
   The Levenberg–Marquardt algorithm uses the Jacobian of the system to find the minimum. When evaluating the objective function is time-costly, computing the Jacobian may take too long. In those cases, one potential way of speeding up the algorithm is to update the Jacobian matrix using the Broyden's method, that does not require further function evaluations.
 
-    - [```broyden```](docs/broyden.md): updates a Jacobian matrix using the Broyden's method.
+  - **[```broyden```](docs/broyden.md): updates a Jacobian matrix using the Broyden's method.
 
 **Constrained optimization**: none of the algorithms in this toolkit is explicitly written to allow for constraints, but one can transform a contrained optimization problem into an uncontrained one using [```normalize``` and ```denormalize```](docs/normalize.md) subroutines.
 

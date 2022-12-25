@@ -1,4 +1,4 @@
-# timing
+### timing
 
 ```fortran
 function timing(mode) result(time)
@@ -15,4 +15,20 @@ This functions returns a timing measure that is robust to parallelization. In pa
 
 **Dependencies**: none
 
-[(back to index)](index.md)
+[(back to index)](../index.md)
+
+---
+
+**Example**
+
+Measure execution time in minutes:
+
+```fortran
+time0 = timing(2)
+
+! ... some code ...
+
+time1 = timing(2)
+
+print * , time1 - time2 , 'min'
+``` 

@@ -69,10 +69,6 @@ Algorithms for systems of equations:
 
   - [```broyden```](docs/broyden.md): updates a Jacobian matrix using the Broyden's method.
 
-**Constrained optimization**: none of the algorithms in this toolkit is explicitly written to allow for constraints, but one can transform a contrained optimization problem into an uncontrained one using ```normalize``` and ```denormalize```.
-
-- [```normalize```](docs/normalize.md): transform a bounded variable into an unbounded one.
-- [```denormalize```](docs/denormalize.md): transform a undonded variable into an counded one.
+**Constrained optimization**: none of the algorithms in this toolkit is explicitly written to allow for constraints, but one can transform a contrained optimization problem into an uncontrained one using [```normalize``` and ```denormalize```](docs/normalize.md) subroutines.
 
 ---
-

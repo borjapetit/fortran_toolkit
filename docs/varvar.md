@@ -1,4 +1,4 @@
-# varvar
+### varvar
 
 ```fortran
 function varvar(var,w,mask) result(variance)
@@ -21,4 +21,4 @@ This computes the variance of ```var``` conditional on ```var``` being between 0
 
 **Dependencies**: [```varmean```](varmean.md)
 
-[(back to index)](index.md)
+[(back to index)](../index.md)

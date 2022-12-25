@@ -14,7 +14,7 @@ subroutine brent(func,x,numiter,exitcode,x0,x1,itermax,tol,iprint)
   integer      , intent(in) , optional :: iprint    ! detault = 0
 ```
 
-Find the root of a single-valued univariate equation. The user must supply a function ```func```, and a maximum and minimum value of ```x```. The root of ```func``` must be between ```x0``` and ```x1```. The function must be of the form:
+Find the root of a single-valued univariate equation using the Brent's method (more info [here](https://en.wikipedia.org/wiki/Brent%27s_method)). The user must supply a function ```func```, and a maximum and minimum value of ```x```. The root of ```func``` must be between ```x0``` and ```x1```. The function must be of the form:
 
 ```fortran
 function func(x) result(f)

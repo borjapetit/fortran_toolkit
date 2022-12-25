@@ -1,4 +1,4 @@
-# simplex
+### simplex
 
 ```fortran
 subroutine simplex(func,x,y,iy,ind,x0,itermax,tol,iprint)
@@ -13,6 +13,8 @@ subroutine simplex(func,x,y,iy,ind,x0,itermax,tol,iprint)
   integer      , intent(in) , optional :: itermax     ! max number of functione valuations
   integer      , intent(in) , optional :: iprint      ! indicator for printing behaviour
 ```
+
+This subroutine applies the Nelder-Mead algorithm (click [here](https://en.wikipedia.org/wiki/Nelder–Mead_method) for more information).
 
 **Note**: for constrained optimization problems, one can make use of the [```normalize and denormalize```](normalize.md) subroutines.
 

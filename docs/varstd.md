@@ -1,4 +1,4 @@
-# varstd
+### varstd
 
 ```fortran
 function varstd(var,w,mask) result(stdvar)
@@ -21,4 +21,4 @@ This computes the standard deviation of ```var``` conditional on ```var``` being
 
 **Dependencies**: [```varmean```](varmean.md),  [```varvar```](varvar.md)
 
-[(back to index)](index.md)
+[(back to index)](../index.md)

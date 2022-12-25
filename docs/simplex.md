@@ -14,6 +14,12 @@ subroutine simplex(func,x,y,iy,ind,x0,itermax,tol,iprint)
   integer      , intent(in) , optional :: iprint      ! indicator for printing behaviour
 ```
 
+**Note**: for constrained optimization problems, one can make use of the [```normalize and denormalize```](normalize.md) subroutines.
+
 **Dependencies**: none
 
 [(back to index)](index.md)
+
+---
+
+**Example**

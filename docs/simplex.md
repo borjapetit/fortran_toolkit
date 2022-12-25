@@ -18,7 +18,7 @@ subroutine simplex(func,x,y,iy,ind,x0,itermax,tol,iprint)
 
 **Dependencies**: none
 
-[(back to index)](index.md)
+[(back to index)](../index.md)
 
 ---
 

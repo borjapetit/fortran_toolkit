@@ -282,12 +282,14 @@ module toolkit
   ! ----------------------------------------------------------------------------
   ! this subroutine prints an error message.
 
-  subroutine error(mess)
+  subroutine error(mess,i)
     implicit none
-    integer :: i
+    integer , optional , intent(inout) :: i
     character(len=*) , intent(in) :: mess
     write(*,*) trim(adjustl(mess)) 
-    read * , i
+    if (present(i) then
+      read * , i
+    end if  
     return
   end subroutine error
 

@@ -33,7 +33,7 @@ You can download the code from this [link](https://borjapetit.github.io/fortran_
 - [```varstd```](docs/varstd.md): returns the standard deviation of a variable, allowing for weigths and mask.
 - [```correlation```](docs/correlation.md): returns the correlation of two variables, allowing for weigths and mask.
 - [```percentile```](docs/percentile.md): returns the i-th percentile of a distribution, allowing for weigths and mask.
-- **[```olsreg```](docs/olsreg.md): returns the OLS coefficients of a linear regression (with up to 8 explanatory variables), allowing for weigths and mask.
+- [```olsreg```](docs/olsreg.md): returns the OLS coefficients of a linear regression (with up to 8 explanatory variables), allowing for weigths and mask.
 - **[```tauchen```](docs/tauchen.md): returns the transition matrix for a discretized AR(1) process.
 - **[```normaldist```](docs/normaldist.md): returns the distribution for a normal random variable given some mean and variance.
 - **[```randomnormal```](docs/randomnormal.md): returns a random draw (either a scalar or a vector) for a normal distribution.

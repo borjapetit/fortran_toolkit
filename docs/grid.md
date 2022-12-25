@@ -28,7 +28,7 @@ This function creates a grid of ```n``` points between ```maxv``` and ```minv```
 vector = grid( 10.d0 , 0.0d0 , 100 )  
 
 ! create a quadratic grid with 500 points between -1 and 1
-vector = grid( 1.d0 , -1.0d0 , 400 , 2.0d0 )  
+vector = grid( 1.d0 , -1.0d0 , 500 , 2.0d0 )  
 ```
 
 

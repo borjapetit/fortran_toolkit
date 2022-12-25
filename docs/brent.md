@@ -38,7 +38,7 @@ The subroutine returns the value of ```x``` that makes ```func``` smaller than `
 
 **Dependencies**: none
 
-[(back to index)](../inicio.md)
+[(back to index)](../index.md)
 
 ---
 

@@ -59,7 +59,7 @@ Algorithms for single-valued univariate equations:
 
 Algorithms for single-valued multivariate equations:
 
-- [```simplex```](docs/simplex.md): minimize a single-valued multivariate equation using the Nelson-Mead algorithm.
+- [```simplex```](docs/simplex.md): minimize a single-valued multivariate equation using the Nelder-Mead algorithm.
 
 Algorithms for systems of equations:
 

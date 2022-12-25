@@ -32,7 +32,7 @@ x = xmin + (xmax - xmin)·[ exp(y)/( 1 + exp(y) ) ]
 
 **Example**
 
-We want to minimize a function ```func``` over a 2-dimensional vector ```x```. The variables are contrained to be between 10 and 0, and between 5 and -5. To find the minimum using the Nelson-Mead algorithm we can write an auxiliry function that takes a 2-dimensional unbounded vector ```y```, maps ```y``` onto ```x```, and evaluate the funciton ```func```.
+We want to minimize a function ```func``` over a 2-dimensional vector ```x```. The variables are contrained to be between 10 and 0, and between 5 and -5. To find the minimum using the Nelder-Mead algorithm (see the [```simplex```](simplex.md) subroutine) we can write an auxiliry function that takes a 2-dimensional unbounded vector ```y```, maps ```y``` onto ```x```, and evaluate the funciton ```func```.
 
 ```fortran
 program main

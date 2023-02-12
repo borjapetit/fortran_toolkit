@@ -287,7 +287,7 @@ module toolkit
     integer , optional , intent(inout) :: i
     character(len=*) , intent(in) :: mess
     write(*,*) trim(adjustl(mess)) 
-    if (present(i) then
+    if (present(i)) then
       read * , i
     end if  
     return

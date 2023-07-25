@@ -26,8 +26,9 @@ contains
 
 subroutine test_ols
   implicit none
-  integer  , parameter :: nn = 50
+  integer  , parameter :: nn = 100
   real(dp) :: y(nn),x1(nn),x2(nn),x3(nn),x0(nn),b(4)
+  integer :: i
   
   call randomnormal(x0,dble(0.10),dble(0.30))
   call randomnormal(x1,dble(0.00),dble(0.40))
@@ -35,6 +36,12 @@ subroutine test_ols
   call randomnormal(x3,dble(0.00),dble(0.60))
   
   y = x0 + dble(0.7)*x1 - dble(0.5)*x2 + dble(0.2)*x3
+
+  open (unit=1, file="data.txt",action="write")
+    do i=1,nn
+      write(1,*) y(i),x0(i),x1(i),x2(i),x3(i)
+    end do
+  close (1)
   
   write(*,98) ' **********************************************************************'
   write(*,98) ' '

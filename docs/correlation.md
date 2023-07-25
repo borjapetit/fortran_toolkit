@@ -4,9 +4,9 @@
 function correlation(xvar1,xvar2,w,mask) result(corr)
   implicit none
   real(kind=8)            :: corr
-  real(kind=8)            :: xvar1(:),xvar2(:)  ! both vectors should have the same length
-  real(kind=8) , optional :: w(:)               ! same length of "xvar1" and "xvar2"
-  logical      , optional :: mask               ! same length of "xvar1" and "xvar2"
+  real(kind=8)            :: xvar1(:),xvar2(:)
+  real(kind=8) , optional :: w(:)             
+  logical      , optional :: mask             
 ```
 
 This function returns the correlation coefficient between two (same size) vectors ```xvar1``` and ```xvar2``` given some (optional) weigths ```w```. If supplied, the vector ```w``` should have the same size as ```xvar1``` and ```xvar2```. If not supplied, the program assumes uniform weigthing.

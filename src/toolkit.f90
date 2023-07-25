@@ -38,33 +38,41 @@
 ! 
 ! it also includes some other functions/subroutines used for optimization:
 !   - broyden: updates a jacobian matrix using the broyden's method
-!   - normalize: transform a bounded variable into an unbounded one [for optimizaton]
-!   - denormalize: transform a undonded variable into an counded one [for optimizaton]
+!   - normalize: transform a bounded variable into an unbounded uno [for optimizaton]
+!   - denormalize: transform a undonded variable into an counded uno [for optimizaton]
 !
 ! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 module toolkit
 
+  use, intrinsic :: IEEE_ARITHMETIC, only: IEEE_VALUE
+
   implicit none
 
+  ! some general parameters
   integer  , parameter :: dp    = kind(1.0d00)
-  real(dp) , parameter :: zero  = dble(0.00000000000000)
-  real(dp) , parameter :: half  = dble(0.50000000000000)
-  real(dp) , parameter :: one   = dble(1.00000000000000)
-  real(dp) , parameter :: two   = dble(2.00000000000000)
-  real(dp) , parameter :: cien  = dble(100.000000000000)
-  real(dp) , parameter :: mil   = dble(1000.00000000000)
-  real(dp) , parameter :: tolvl = dble(0.00000000010000)
+  real(dp) , parameter :: cero  = dble(0.000000000000000000)
+  real(dp) , parameter :: medio = dble(0.500000000000000000)
+  real(dp) , parameter :: uno   = dble(1.000000000000000000)
+  real(dp) , parameter :: dos   = dble(2.000000000000000000)
+  real(dp) , parameter :: cinco = dble(5.000000000000000000)
+  real(dp) , parameter :: diez  = dble(10.00000000000000000)
+  real(dp) , parameter :: cien  = dble(100.0000000000000000)
+  real(dp) , parameter :: mil   = dble(1000.000000000000000)
+  real(dp) , parameter :: tolvl = dble(0.000000000100000000)
   
+  ! interface for the function "interpolate" in different dimessions.
   interface interpolate
     module procedure interpolate1d,interpolate2d,interpolate3d,interpolate4d,interpolate5d,interpolate6d
   end interface interpolate
 
+  ! interface for the function "vect" (vectorize an array) in different dimessions.
   interface vect
-    module procedure vectorize_int_2d,vectorize_int_3d,vectorize_int_4d,vectorize_int_5d,&
-                     vectorize_dp_2d,vectorize_dp_3d,vectorize_dp_4d,vectorize_dp_5d
+    module procedure vectorize_in_2d,vectorize_in_3d,vectorize_in_4d,vectorize_in_5d,vectorize_in_6d,&
+                     vectorize_dp_2d,vectorize_dp_3d,vectorize_dp_4d,vectorize_dp_5d,vectorize_dp_6d
   end interface vect
 
+  ! interface for the function "randomnormal" to generate eithr an scalar or a vector of normal random numbers
   interface randomnormal
     module procedure randomnormal_scalar,randomnormal_vec
   end interface randomnormal
@@ -94,19 +102,14 @@ module toolkit
     implicit none
     integer             :: i,n
     real(dp) , optional :: s
-    real(dp)            :: maxv,minv
-    real(dp)            :: v(n),xmin,xmax,ss
-    v(:) = zero
-    ss   = one
+    real(dp)            :: maxv,minv,grid0(n),v(n),ss,xmin,xmax
+    v(:) = cero ; ss = uno ; if (present(s)) ss = s
     xmin = min(maxv,minv)
     xmax = max(maxv,minv)
-    if (present(s)) ss = s
-    if (ss.le.zero) then
-      call error(' errror in grid: spacing parameter is nonpositive')
-    else
-      do i=1,n
-        v(i) = ((dble(i-1)/dble(n-1))**ss)*(xmax-xmin) + minv
-      end do
+    if (ss.le.cero) call error(' errror in grid: spacing parameter is nonpositive')
+    if (ss.gt.cero) then
+      forall (i=1:n) grid0(i) = dble(i-1)/dble(n-1)
+      forall (i=1:n) v(i) = (grid0(i)**ss)*(xmax-xmin) + minv
     end if
     return
   end function grid
@@ -117,111 +120,136 @@ module toolkit
 
   subroutine interpolation(pos,wth,xnow,xgrid)
     implicit none
-    integer                :: j,n
+    integer                :: j(1),n
     real(dp) , intent(in)  :: xnow,xgrid(:)
     real(dp) , intent(out) :: wth
     integer  , intent(out) :: pos
-    pos = 0 ; wth = one ; n = size(xgrid)
-    if (isnan(xnow)) call error(' errror in interpolation: xnow is nan')
-    if (n.eq.1) call error(' errror in interpolation: xgrid is an scalar')
-    if (xnow.le.xgrid(1)) then
-      pos = 2
-      wth = zero
+    real(dp)               :: xmin,xmax
+
+    if (isnan(xnow)) then
+      call error(' errror in interpolation: xnow is nan',1)
       return
-    else if (xnow.ge.xgrid(n)) then
-      pos = n
-      wth = one
-      return
-    else if (xnow.gt.xgrid(1) .and. xnow.lt.xgrid(n)) then
-      j = 2
-      do while (xnow.gt.xgrid(j))
-        j = j + 1
-      end do
-      pos = j
-      wth = (xnow-xgrid(j-1))/(xgrid(j)-xgrid(j-1))
     end if
-    if (pos.lt.1   ) call error(' errror in interpolation: pos < 1')
-    if (pos.gt.n   ) call error(' errror in interpolation: pos > size')
-    if (isnan(wth) ) call error(' errror in interpolation: wvar is nan')
+    
+    n = size(xgrid)
+    if (n.eq.1) then
+      call error(' errror in interpolation: xgrid is of dimension 1',1)
+      return
+    end if
+
+    xmin = min(xgrid(1),xgrid(n))
+    xmax = max(xgrid(1),xgrid(n))
+
+    if (xnow.le.xmin) then
+      if (xgrid(1).lt.xgrid(n)) then
+        pos = 2 ; wth = cero
+      else
+        pos = n ; wth = uno
+      end if
+      return
+    end if
+
+    if (xnow.ge.xmax) then
+      if (xgrid(n).gt.xgrid(1)) then
+        pos = n ; wth = uno
+      else
+        pos = 2 ; wth = cero
+      end if
+      return
+    end if 
+    
+    if (xnow.gt.xmin .and. xnow.lt.xmax) then
+      j = minloc( xgrid - xnow , mask = xnow.le.xgrid )
+      pos = j(1) ; wth = ( xnow - xgrid(pos-1) )/( xgrid(pos) - xgrid(pos-1) )
+    end if
+    if (pos.lt.1   ) call error(' errror in interpolation: pos < 1',1)
+    if (pos.gt.n   ) call error(' errror in interpolation: pos > size',1)
+    if (isnan(wth) ) call error(' errror in interpolation: wth is nan. is xgrid monotonic?',1)
+    
     return
   end subroutine interpolation
+
 
   ! ----------------------------------------------------------------------------
   ! this set of functions return the linearly interpolated value of a
   ! n-dimensional vector with 6 >= n >= 1
   ! The user does not need oto call the specific subroutine, as the program will
-  ! automatically call the appropiate one depending on the inputs.
+  ! automatically call the appropiate uno depending on the inputs.
   ! To use these subroutine, the command is:
   !
-  !     result = interpolate(val1,val2,...,valn,vector1,vector2,....vectorn,matrix)
+  !     result = interpolate(val1,val2,...,valn,vector1,vector2,....vectorn,matrix,extra)
   !
   ! where "val1", "val2", ... are the values of the variables to be interpolated over
   ! their coresponding grids "vector1", "vector2, ...., and "matrix" is an
   ! n-dimensional array with the results.
-
+  !
+  ! The "extra" input is optional. If "extra" is set to 1, the subroutine will extrapolate 
+  ! those  points "val" that are outside the grid "vector".
+  ! This parameter is set to 0 by default
+  
   function interpolate1d(x1,y1,m) result(xi)
     implicit none
-    integer      :: pos
+    integer  :: pos
     real(dp) :: y1(:),m(:),x1,xi,wth
     if (size(y1).ne.size(m)) call error(' error in interpolate: 1st dimension incorrect')
     call interpolation(pos,wth,x1,y1)
-    xi = m(pos)*wth + m(pos-1)*(one-wth)
+    xi = m(pos)*wth + m(pos-1)*(uno-wth)
     return
   end function interpolate1d
   function interpolate2d(x1,x2,y1,y2,m) result(xi)
     implicit none
-    integer      :: pos2
+    integer  :: pos2
     real(dp) :: wth2
     real(dp) :: x1,x2,xi
     real(dp) :: y1(:),y2(:),m(:,:)
     if (size(m,2).ne.size(y2)) call error(' error in interpolate: 2nd dimension incorrect')
     call interpolation(pos2,wth2,x2,y2)
     xi = interpolate1d(x1,y1,m(:,pos2)  )*wth2 + &
-         interpolate1d(x1,y1,m(:,pos2-1))*(one-wth2)
+         interpolate1d(x1,y1,m(:,pos2-1))*(uno-wth2)
     return
   end function interpolate2d
   function interpolate3d(x1,x2,x3,y1,y2,y3,m) result(xi)
     implicit none
-    integer      :: pos3
+    integer  :: pos3
     real(dp) :: y1(:),y2(:),y3(:),x1,x2,x3,xi
     real(dp) :: wth3,m(:,:,:)
     if (size(m,3).ne.size(y3)) call error(' error in interpolate: 3rd dimension incorrect')
     call interpolation(pos3,wth3,x3,y3)
     xi = interpolate2d(x1,x2,y1,y2,m(:,:,pos3)  )*wth3 + &
-         interpolate2d(x1,x2,y1,y2,m(:,:,pos3-1))*(one-wth3)
+         interpolate2d(x1,x2,y1,y2,m(:,:,pos3-1))*(uno-wth3)
     return
   end function interpolate3d
   function interpolate4d(x1,x2,x3,x4,y1,y2,y3,y4,m) result(xi)
     implicit none
-    integer      :: pos4
+    integer  :: pos4
     real(dp) :: y1(:),y2(:),y3(:),y4(:),x1,x2,x3,x4,xi
     real(dp) :: wth4,m(:,:,:,:)
     if (size(m,4).ne.size(y4)) call error(' error in interpolate: 4th dimension incorrect')
     call interpolation(pos4,wth4,x4,y4)
     xi = interpolate3d(x1,x2,x3,y1,y2,y3,m(:,:,:,pos4)  )*wth4 + &
-         interpolate3d(x1,x2,x3,y1,y2,y3,m(:,:,:,pos4-1))*(one-wth4)
+         interpolate3d(x1,x2,x3,y1,y2,y3,m(:,:,:,pos4-1))*(uno-wth4)
     return
   end function interpolate4d
   function interpolate5d(x1,x2,x3,x4,x5,y1,y2,y3,y4,y5,m) result(xi)
     implicit none
-    integer      :: pos5
+    integer  :: pos5
     real(dp) :: y1(:),y2(:),y3(:),y4(:),y5(:),x1,x2,x3,x4,x5,xi
     real(dp) :: wth5,m(:,:,:,:,:)
     if (size(m,5).ne.size(y5)) call error(' error in interpolate: 5th dimension incorrect')
     call interpolation(pos5,wth5,x5,y5)
     xi = interpolate4d(x1,x2,x3,x4,y1,y2,y3,y4,m(:,:,:,:,pos5))*wth5 + &
-         interpolate4d(x1,x2,x3,x4,y1,y2,y3,y4,m(:,:,:,:,pos5-1))*(one-wth5)
+         interpolate4d(x1,x2,x3,x4,y1,y2,y3,y4,m(:,:,:,:,pos5-1))*(uno-wth5)
     return
   end function interpolate5d
   function interpolate6d(x1,x2,x3,x4,x5,x6,y1,y2,y3,y4,y5,y6,m) result(xi)
     implicit none
-    integer      :: pos6
+    integer  :: pos6
     real(dp) :: y1(:),y2(:),y3(:),y4(:),y5(:),y6(:),x1,x2,x3,x4,x5,x6,xi
     real(dp) :: wth6,m(:,:,:,:,:,:)
     if (size(m,5).ne.size(y5)) call error(' error in interpolate: 6th dimension incorrect')
     call interpolation(pos6,wth6,x6,y6)
     xi = interpolate5d(x1,x2,x3,x4,x5,y1,y2,y3,y4,y5,m(:,:,:,:,:,pos6))*wth6 + &
-         interpolate5d(x1,x2,x3,x4,x5,y1,y2,y3,y4,y5,m(:,:,:,:,:,pos6-1))*(one-wth6)
+         interpolate5d(x1,x2,x3,x4,x5,y1,y2,y3,y4,y5,m(:,:,:,:,:,pos6-1))*(uno-wth6)
     return
   end function interpolate6d
 
@@ -229,27 +257,24 @@ module toolkit
   ! this functions returns a timing number that is robust to parallel computing
   ! it returns the number of seconds since 00:00h of the 1st day of the month.
   ! the variable "mode" controls how time is measured:
-  !   - if mode=1, time is measured in seconds (default).
-  !   - if mode=2, time is measures in minutes.
-  !   - if mode=3, time is measured in hours
+  !   - if mode = 1, time is measured in seconds (default).
+  !   - if mode = 2, time is measures in minutes.
+  !   - if mode = 3, time is measured in hours
 
   function timing(mode) result(time)
     implicit none
     integer , optional :: mode
     integer            :: v1(8),mod
-    real(dp)           :: time0,time ; time0 = zero ; time = zero
+    real(dp)           :: time0,time ; time0 = cero ; time = cero
     mod = 1 ; if (present(mode)) mod = mode
     call date_and_time(values=v1)  
     time0 = dble(v1(7)+60*(v1(6)+60*(v1(5)+24*(v1(3)+30*v1(2)))))
     if (mod.eq.3) then
-      ! measured in hours
-      time = time0/dble(60*60)
+      time = time0/dble(60*60)  ! measured in hours
     elseif (mod.eq.2) then
-      ! measured in minutes
-      time = time0/dble(60)
+      time = time0/dble(60)     ! measured in minutes
     elseif (mod.eq.1) then
-      ! measured in seconds
-      time = time0
+      time = time0              ! measured in seconds
     else
       call error("error in timing: invalid mode valua 8it should be between 1 and 3)")
     end if
@@ -280,20 +305,21 @@ module toolkit
   end function iseven
 
   ! ----------------------------------------------------------------------------
-  ! this subroutine prints an error message.
+  ! this subroutine prints an error message with the text "mess". If the optional 
+  ! input "i" is present, the subroutine interrupts the execution until the user 
+  ! types an integer number.
 
   subroutine error(mess,i)
     implicit none
-    integer , optional , intent(inout) :: i
-    character(len=*) , intent(in) :: mess
+    integer , optional , intent(in) :: i
+    character(len=*)   , intent(in) :: mess
+    character(len=10) :: typeany
     write(*,*) trim(adjustl(mess)) 
     if (present(i)) then
-      read * , i
+      read (*,'(a)') typeany
     end if  
     return
   end subroutine error
-
-
 
 
 
@@ -314,21 +340,15 @@ module toolkit
   function varmean(var,w,mask) result(meanvar)
 
     implicit none
-    real(dp)               :: var(:),meanvar
+    real(dp)               :: meanvar
+    real(dp)               :: var(:)
     real(dp) , optional    :: w(:)
     logical  , optional    :: mask(:)
     logical  , allocatable :: mask1(:)
     real(dp) , allocatable :: weig(:)
 
-    allocate(weig(size(var)))
-    allocate(mask1(size(var)))
-
-    ! initialize
-    weig(:) = one
-    mask1   = .true.
-    meanvar = zero
-    
     ! check mask
+    allocate(mask1(size(var))) ; mask1 = .true.
     if (present(mask)) then
       if (size(var).eq.size(mask)) then
         mask1 = mask
@@ -338,16 +358,17 @@ module toolkit
     end if
 
     ! check weigths
+    allocate(weig(size(var))) ; weig(:) = uno
     if (present(w)) then
       if (size(var).ne.size(w)) call error('error in varmean!! var and w have different size')
-      if (sum(w).lt.tolvl     ) call error('error in varmean!! w are zero')
+      if (sum(w).lt.tolvl     ) call error('error in varmean!! w are cero')
       weig(:) = w(:)
     end if
 
+    ! compute mean
     meanvar = sum(var(:)*weig(:),mask=mask1)/sum(weig,mask=mask1)
 
-    deallocate(weig)
-    deallocate(mask1)
+    deallocate(weig,mask1)
 
     return
   end function varmean
@@ -358,22 +379,15 @@ module toolkit
   function varvar(var,w,mask) result(varian)
 
     implicit none
-    real(dp)               :: var(:),varian,mvar
+    real(dp)               :: varian
+    real(dp)               :: var(:),mvar
     real(dp) , optional    :: w(:)
     logical  , optional    :: mask(:)
     logical  , allocatable :: mask1(:)
     real(dp) , allocatable :: weig(:)
 
-    allocate(weig(size(var)))
-    allocate(mask1(size(var)))
-
-    ! initialize
-    weig(:) = one
-    mask1   = .true.
-    varian  = zero
-    mvar    = zero
-
     ! check mask
+    allocate(mask1(size(var))) ; mask1 = .true.
     if (present(mask)) then
       if (size(var).eq.size(mask)) then
         mask1 = mask
@@ -383,17 +397,17 @@ module toolkit
     end if
 
     ! check weigths
+    allocate(weig(size(var))) ; weig(:) = uno
     if (present(w)) then
       if (size(var).ne.size(w)) call error('error in varvar!! var and w have different size')
-      if (sum(w).lt.tolvl     ) call error('error in varvar!! w are zero')
+      if (sum(w).lt.tolvl     ) call error('error in varvar!! w are cero')
       weig(:) = w(:)
     end if
 
     mvar   = varmean(var,weig,mask=mask1)
     varian = sum(weig*((var-mvar)**2.0d0),mask=mask1)/sum(weig,mask=mask1)
 
-    deallocate(weig)
-    deallocate(mask1)
+    deallocate(weig,mask1)
 
     return
   end function varvar
@@ -404,21 +418,15 @@ module toolkit
   function varstd(var,w,mask) result(stdvar)
 
     implicit none
-    real(dp)               :: var(:),stdvar
+    real(dp)               :: stdvar
+    real(dp)               :: var(:)
     real(dp) , optional    :: w(:)
     logical  , optional    :: mask(:)
     logical  , allocatable :: mask1(:)
     real(dp) , allocatable :: weig(:)
 
-    allocate(weig(size(var)))
-    allocate(mask1(size(var)))
-
-    ! initialize
-    weig(:) = one
-    mask1   = .true.
-    stdvar  = zero
-
     ! check mask
+    allocate(mask1(size(var))) ; mask1  = .true.
     if (present(mask)) then
       if (size(var).eq.size(mask)) then
         mask1 = mask
@@ -428,16 +436,17 @@ module toolkit
     end if
 
     ! check weigths
+    allocate(weig(size(var))) ; weig(:) = uno
     if (present(w)) then
       if (size(var).ne.size(w)) call error('error in varstd!! var and w have different size')
-      if (sum(w).lt.tolvl     ) call error('error in varstd!! w are zero')
+      if (sum(w).lt.tolvl     ) call error('error in varstd!! w are cero')
       weig(:) = w(:)
     end if
 
+    ! compute standard deviation
     stdvar = sqrt(varvar(var,weig,mask=mask1))
 
-    deallocate(weig)
-    deallocate(mask1)
+    deallocate(weig,mask1)
 
     return
   end function varstd
@@ -456,7 +465,7 @@ module toolkit
     real(dp) , allocatable :: vect1(:),vect2(:)
 
     ! initialize
-    corr = zero
+    corr = cero
   
     ! check vector dimensions
     if (size(xvar1).ne.size(xvar2)) then
@@ -464,26 +473,23 @@ module toolkit
     end if
 
     ! check weigths
-    allocate(weig(size(xvar1)))
+    allocate(weig(size(xvar1))) ; weig(:) = uno
     if (present(w)) then
       if (size(xvar1).ne.size(w)) then
         call error('error in correlation!! var and w have different size')
       end if
       if (sum(w).lt.tolvl) then
-        call error('error in correlation!! w are zero')
+        call error('error in correlation!! w are cero')
       end if
       weig(:) = w(:)
-    else
-      weig(:) = one
     end if
 
     ! check mask
     if (present(mask)) then
       if (size(xvar1).eq.size(mask)) then
-        allocate(vect1(count(mask)),vect2(count(mask)),weig1(count(mask)))
-        vect1 = pack(xvar1,mask)
-        vect2 = pack(xvar2,mask)
-        weig1 = pack(weig,mask)
+        allocate(vect1(count(mask))) ; vect1 = pack(xvar1,mask)
+        allocate(vect2(count(mask))) ; vect2 = pack(xvar2,mask)
+        allocate(weig1(count(mask))) ; vect1 = pack(weig ,mask)
       else
         call error('error in varmean: mask of incorrect size')
       end if
@@ -508,12 +514,10 @@ module toolkit
       call error('error in correlation!! xvar2 is a constant')
     end if
 
+    ! compute correlation
     corr = (sum( weig1(:)*(vect1(:) - aux1)*(vect1(:) - aux3) )/sum(weig1))/(aux2*aux4)
 
-    deallocate(weig)
-    deallocate(weig1)
-    deallocate(vect1)
-    deallocate(vect2)
+    deallocate(weig,weig1,vect1,vect2)
 
     return
   end function correlation
@@ -531,16 +535,9 @@ module toolkit
     logical  , optional    :: mask(:)
     logical  , allocatable :: mask1(:)
     real(dp) , allocatable :: weig(:)
-
-    allocate(weig(size(xvec)))
-    allocate(mask1(size(xvec)))
-
-    ! initialize
-    weig(:) = one
-    cutoff  = zero
-    mask1   = .true.
-  
+      
     ! check mask
+    allocate(mask1(size(xvec))) ; mask1 = .true.
     if (present(mask)) then
       if (size(xvec).eq.size(mask)) then
         mask1 = mask
@@ -550,31 +547,29 @@ module toolkit
     end if
 
     ! check weigths
+    allocate(weig(size(xvec))) ; weig(:) = uno
     if (present(w)) then
       if (size(w).ne.size(w)) call error('error in percentile!! var and w have different size')
-      if (sum(w).lt.tolvl   ) call error('error in percentile!! w are zero')
+      if (sum(w).lt.tolvl   ) call error('error in percentile!! w are cero')
       weig(:) = w(:)
     end if
 
     ! check whether percentile is valid
-    if (pct.gt.one ) call error('error in percentile!! invalid percetile: larger than 100')
-    if (pct.lt.zero) call error('error in percentile!! invalid percentile: negative value')
+    if (pct.gt.uno ) call error('error in percentile!! invalid percetile: larger than 100')
+    if (pct.lt.cero) call error('error in percentile!! invalid percentile: negative value')
 
-    ! compute the percentile
-    iter = 0
-    aux1 = maxval(xvec)
-    aux2 = minval(xvec)
+    ! find the percentile by bisection
+    iter = 0 ; aux1 = maxval(xvec) ; aux2 = minval(xvec)
     do while ( abs(aux2-aux1).gt.tolvl .and. iter.lt.5000 ) ; iter = iter + 1
-      aux3 = half*(aux1+aux2)
+      aux3 = medio*(aux1+aux2)
       aux4 = sum(weig,mask = xvec.le.aux3 .and. mask1)/sum(weig,mask=mask1)
       if (aux4.le.pct) aux2 = aux3
       if (aux4.ge.pct) aux1 = aux3
     end do
 
-    cutoff = half*(aux1+aux2)
+    cutoff = medio*(aux1+aux2)
 
-    deallocate(weig)
-    deallocate(mask1)
+    deallocate(weig,mask1)
 
     return
   end function percentile
@@ -588,7 +583,7 @@ module toolkit
   ! coeffs is equal to 1 + the number of explanatory variables, the subroutine
   ! automathically includes a contant term.
   ! the user can specify the printing behaviour of the subroutine. if iprint is
-  ! different from zero, the subroutine prints a regression table with additional
+  ! different from cero, the subroutine prints a regression table with additional
   ! statistics (t-stats, Rsquared, etc).
 
   subroutine olsreg(coeffs,yvec,x1vec,x2vec,x3vec,x4vec,x5vec,x6vec,x7vec,x8vec,w,mask,table)
@@ -611,60 +606,73 @@ module toolkit
     real(dp) , allocatable           :: xvars(:,:)
     real(dp) , allocatable           :: zvar(:)
     real(dp) , allocatable           :: wvar(:)
-    real(dp) , allocatable           :: xTx(:,:),ixTx(:,:),xTy(:),wx(:,:)
-    real(dp) , allocatable           :: evar(:),sdbeta(:,:),sdcoefs(:),tstats(:),inter(:,:)
-    real(dp)                         :: rsq,arsq    
+    real(dp) , allocatable           :: xTx(:,:)
+    real(dp) , allocatable           :: ixTx(:,:)
+    real(dp) , allocatable           :: xTy(:)
+    real(dp) , allocatable           :: wx(:,:)
+    real(dp) , allocatable           :: evar(:)
+    real(dp) , allocatable           :: sdbeta(:,:)
+    real(dp) , allocatable           :: sdcoefs(:)
+    real(dp) , allocatable           :: tstats(:)
+    real(dp) , allocatable           :: inter(:,:)
+    real(dp)                         :: rsq,arsq  
     integer                          :: i,n0,no,nc,wc,nx ; nx = 1
 
-    n0     = size(yvec)
-    coeffs = zero
-
+    ! number of observations
+    n0 = size(yvec)
+  
     ! mask and weights
     allocate(mask1(n0)) ; mask1 = .true.
     if (present(mask)) then
       if (size(mask).eq.n0) mask1 = mask
-      if (size(mask).ne.n0) call error('error in olsreg!! mask of incorrect size')      
+      if (size(mask).ne.n0) call error('error in olsreg!! mask of incorrect size',1)      
     end if
-    allocate(wvar(n0)) ; wvar = one
+    allocate(wvar(n0)) ; wvar = uno
     if (present(w)) then
       if (size(w).eq.n0) wvar = w
-      if (size(w).ne.n0) call error('error in olsreg!! weigths of incorrect size')
+      if (size(w).ne.n0) call error('error in olsreg!! weigths of incorrect size',1)
     end if
 
     ! check vector dimensions
-    if (n0.ne.size(x1vec))   call error('error in olsreg!! yvec and x1vec different observations')
+    if (n0.ne.size(x1vec)) then ; nx = 1
+      call error('error in olsreg!! yvec and x1vec different observations',1)
+    end if
     if (present(x2vec)) then ; nx = 2
-      if (n0.ne.size(x2vec)) call error('error in olsreg!! yvec and x2vec different observations')
+      if (n0.ne.size(x2vec)) call error('error in olsreg!! yvec and x2vec different observations',1)
+    end if 
     if (present(x3vec)) then ; nx = 3
-      if (n0.ne.size(x3vec)) call error('error in olsreg!! yvec and x3vec different observations')
+      if (n0.ne.size(x3vec)) call error('error in olsreg!! yvec and x3vec different observations',1)
+    end if
     if (present(x4vec)) then ; nx = 4
-      if (n0.ne.size(x4vec)) call error('error in olsreg!! yvec and x4vec different observations')
+      if (n0.ne.size(x4vec)) call error('error in olsreg!! yvec and x4vec different observations',1)
+    end if
     if (present(x5vec)) then ; nx = 5
-      if (n0.ne.size(x5vec)) call error('error in olsreg!! yvec and x5vec different observations')
+      if (n0.ne.size(x5vec)) call error('error in olsreg!! yvec and x5vec different observations',1)
+    end if
     if (present(x6vec)) then ; nx = 6
-      if (n0.ne.size(x6vec)) call error('error in olsreg!! yvec and x6vec different observations')
+      if (n0.ne.size(x6vec)) call error('error in olsreg!! yvec and x6vec different observations',1)
+    end if
     if (present(x7vec)) then ; nx = 7
-      if (n0.ne.size(x7vec)) call error('error in olsreg!! yvec and x7vec different observations')
+      if (n0.ne.size(x7vec)) call error('error in olsreg!! yvec and x7vec different observations',1)
+    end if
     if (present(x8vec)) then ; nx = 8
-      if (n0.ne.size(x8vec)) call error('error in olsreg!! yvec and x8vec different observations')
-    end if ; end if ; end if ; end if ; end if ; end if ; end if
+      if (n0.ne.size(x8vec)) call error('error in olsreg!! yvec and x8vec different observations',1)
+    end if 
     
     ! sizes
-    no = count(mask1)  ! number of (valid) observations
+    no = count(mask1)  ! number of observations satisfying "mask"
     nc = size(coeffs)  ! number of coefficients
     wc = nc-nx         ! with constant = 1, 0 if not
 
-    if (wc.ne.1 .and. wc.ne.0) then 
-      call error('error in olsreg!! wc different from 1 and 0')
-    end if
+    if (wc.ne.1 .and. wc.ne.0) call error('error in olsreg!! wc different from 1 and 0',1)
 
     ! allocate y-variable and weigths
-    allocate(xvars(no,nc)) ; xvars = zero
+    allocate(xvars(no,nc)) ; xvars = cero
     allocate(yvar(no))     ; yvar = pack(yvec,mask1) ! keep only valid observations
     allocate(zvar(no))     ; zvar = pack(wvar,mask1) ! keep only valid observations
     
     ! check weigths are positive    
-    if (sum(zvar).lt.tolvl) call error('error in olsreg!! weigths are zero')
+    if (sum(zvar).lt.tolvl) call error('error in olsreg!! weigths are cero',1)
     
     ! fill constant (if exists)
     if (wc.eq.1) xvars(:,1) = zvar/zvar
@@ -696,7 +704,7 @@ module toolkit
     xTy    = matmul(transpose(xvars),yvar(:)*zvar(:))
     coeffs = matmul(ixTx,xTy)
 
-    ! if iprint is different from zero, the subroutine prints a regression table
+    ! if iprint is different from cero, the subroutine prints a regression table
     if (present(table)) then
     if(table.eq.1) then
 
@@ -710,8 +718,12 @@ module toolkit
       inter(:,1) = coeffs - dble(1.9601068)*sdcoefs
       inter(:,2) = coeffs + dble(1.9601068)*sdcoefs
 
-      rsq  = one - varvar(evar,w=zvar)/varvar(yvar,w=zvar)
-      arsq = one - ( (one-rsq)*dble(no-1)/dble(no-nc) )
+      if (wc.eq.1) then 
+        rsq  = uno - varvar(evar,w=zvar)/varvar(yvar,w=zvar)
+      else
+        rsq  = uno - sum(zvar*(evar**2.0d0))/sum(zvar*(yvar**2.0d0))
+      end if
+      arsq = uno - ( (uno-rsq)*dble(no-1)/dble(no-nc) )
 
       write(*,99) '   '
       write(*,99) '   '
@@ -755,8 +767,7 @@ module toolkit
     real(dp) , intent(in)  :: rho,mu,sigma,xvec(n)
     real(dp) , intent(out) :: pmat(n,n)
     integer                :: i
-    do i=1,n
-      pmat(i,:) = zero
+    do i=1,n ; pmat(i,:) = cero
       call normaldist(xvec,mu+rho*xvec(i),sigma,n,pmat(i,:))
     end do
     return
@@ -798,7 +809,7 @@ module toolkit
     do
       call random_number(u)
       call random_number(v)
-      v = 1.7156 * (v - half)
+      v = 1.7156 * (v - medio)
       q = (u-s)**2 + (abs(v)-t)*(a*(abs(v)-t) - b*(u-s))
       if (q < r1) exit
       if (q > r2) cycle
@@ -904,34 +915,48 @@ module toolkit
     vec = reshape(mat,(/size(vec)/))
     return
   end function vectorize_dp_5d
-  function vectorize_int_2d(mat) result(vec)
+  function vectorize_dp_6d(mat) result(vec)
+    implicit none
+    real(dp) :: mat(:,:,:,:,:,:)
+    real(dp) :: vec(size(mat,1)*size(mat,2)*size(mat,3)*size(mat,4)*size(mat,5)*size(mat,6))
+    vec = reshape(mat,(/size(vec)/))
+    return
+  end function vectorize_dp_6d
+  function vectorize_in_2d(mat) result(vec)
     implicit none
     integer :: mat(:,:)
     integer :: vec(size(mat,1)*size(mat,2))
     vec = reshape(mat,(/size(vec)/))
     return
-  end function vectorize_int_2d
-  function vectorize_int_3d(mat) result(vec)
+  end function vectorize_in_2d
+  function vectorize_in_3d(mat) result(vec)
     implicit none
     integer :: mat(:,:,:)
     integer :: vec(size(mat,1)*size(mat,2)*size(mat,3)) 
     vec = reshape(mat,(/size(vec)/))
     return
-  end function vectorize_int_3d
-  function vectorize_int_4d(mat) result(vec)
+  end function vectorize_in_3d
+  function vectorize_in_4d(mat) result(vec)
     implicit none
     integer :: mat(:,:,:,:)
     integer :: vec(size(mat,1)*size(mat,2)*size(mat,3)*size(mat,4))
     vec = reshape(mat,(/size(vec)/))
     return
-  end function vectorize_int_4d
-  function vectorize_int_5d(mat) result(vec)
+  end function vectorize_in_4d
+  function vectorize_in_5d(mat) result(vec)
     implicit none
     integer :: mat(:,:,:,:,:)
     integer :: vec(size(mat,1)*size(mat,2)*size(mat,3)*size(mat,4)*size(mat,5))
     vec = reshape(mat,(/size(vec)/))
     return
-  end function vectorize_int_5d
+  end function vectorize_in_5d
+  function vectorize_in_6d(mat) result(vec)
+    implicit none
+    integer :: mat(:,:,:,:,:,:)
+    integer :: vec(size(mat,1)*size(mat,2)*size(mat,3)*size(mat,4)*size(mat,5)*size(mat,6))
+    vec = reshape(mat,(/size(vec)/))
+    return
+  end function vectorize_in_6d
 
   ! ----------------------------------------------------------------------------
   ! this function returns a vector "vec1" with the cummmulative sum of the elements
@@ -949,6 +974,18 @@ module toolkit
   end function cumsum
 
   ! ----------------------------------------------------------------------------
+  ! this function returns an identity matriz of the same size as mat
+
+  function eye(mat) result(mateye)
+    implicit none
+    real(dp) :: mat(:,:),mateye(size(mat,1),size(mat,2))
+    integer  :: i
+    if (size(mat,1).ne.size(mat,2)) call error(' error in diag: matrix not sqaure')
+    mateye = cero ; forall (i=1:size(mat,1)) mateye(i,i) = uno
+    return
+  end function eye
+
+  ! ----------------------------------------------------------------------------
   ! this function returns the main diagonal of a matric "mat"
 
   function diag(mat) result(vec)
@@ -956,10 +993,7 @@ module toolkit
     real(dp) :: mat(:,:),vec(size(mat,1))
     integer  :: i
     if (size(mat,1).ne.size(mat,2)) call error(' error in diag: matrix not sqaure')
-    vec = zero
-    do i=1,size(mat,1)
-      vec(i) = mat(i,i) 
-    end do
+    vec = cero ; forall (i=1:size(mat,1)) vec(i) = mat(i,i)
     return
   end function diag
 
@@ -973,7 +1007,7 @@ module toolkit
     real(dp) :: im(size(m,1),size(m,1)),b(size(m,1)),d(size(m,1)),x(size(m,1))
     real(dp) :: l(size(m,1),size(m,1)),u(size(m,1),size(m,1)),mb(size(m,1),size(m,1))
     if (size(m,1).ne.size(m,2)) call error(' error in inverse: matrix is not square')
-    n = size(m,1) ; l = zero ; u = zero ; b = zero ; mb = m
+    n = size(m,1) ; l = cero ; u = cero ; b = cero ; mb = m
     do k=1,n-1
       do i=k+1,n
         coeff  = m(i,k)/m(k,k)
@@ -1038,8 +1072,8 @@ module toolkit
   !
   ! this code contains 4 optimization algorithms:
   !
-  !  - golden search: single-value function with one unknown
-  !  - brent method: single-value function with one unknown
+  !  - golden search: single-value function with uno unknown
+  !  - brent method: single-value function with uno unknown
   !  - simplex method: single-value function with "n" unknowns
   !  - levenberg–marquardt algorithm: system of "m" functions with "n" unknowns
   !
@@ -1060,12 +1094,12 @@ module toolkit
 
   ! ----------------------------------------------------------------------------
   ! golden search algorithm
-  ! finds the maximum of a single-valued function with one unknown
+  ! finds the maximum of a single-valued function with uno unknown
   ! the user should make sure the maximum of "func" is between "xmin" and "xmax"
 
   subroutine golden(func,x,y,xmax,xmin,itermax,tol)
 
-    ! this subroutine finds the maximum of a single-valued function with one unknown
+    ! this subroutine finds the maximum of a single-valued function with uno unknown
     ! using the golden search algorithm
     !
     ! the inputs are:
@@ -1108,37 +1142,33 @@ module toolkit
     tolgold = 1.0d-8 ; if (present(tol)    ) tolgold = tol
     maxiter = 500    ; if (present(itermax)) maxiter = itermax
 
-    x0 = xmin
-    x3 = xmax
-    x1 = alpha*x0 + (one-alpha)*x3
-    x2 = alpha*x3 + (one-alpha)*x1 
-    f1 = func(x1)
-    f2 = func(x2)
+    if (abs(xmax-xmin).lt.tol) call error('error in golden: xmax and xmin too close')
+
+    x0 = min(xmax,xmin)
+    x3 = max(xmax,xmin)
+    x1 = alpha*x0 + (uno-alpha)*x3 ; f1 = func(x1)
+    x2 = alpha*x3 + (uno-alpha)*x1 ; f2 = func(x2)
 
     it = 0
-    do while (abs(x0-x3).gt.tolgold*(abs(x2)+abs(x1)) .and. it.lt.maxiter)
+    do while (abs(x0-x3).gt.tolgold*(abs(x2)+abs(x1)) .and. abs(x0-x3).gt.tol .and. it.lt.maxiter)
       it = it + 1
       if (f2.gt.f1) then
         x0 = x1
         x1 = x2
         f1 = f2
-        x2 = alpha*x1 + (one-alpha)*x3
-        f2 = func(x2)
+        x2 = alpha*x1 + (uno-alpha)*x3 ; f2 = func(x2)
       else
         x3 = x2
         x2 = x1
         f2 = f1
-        x1 = alpha*x2 + (one-alpha)*x0
-        f1 = func(x1)
+        x1 = alpha*x2 + (uno-alpha)*x0 ; f1 = func(x1)
       end if
     end do
 
     if (f1.gt.f2) then
-      y = f1
-      x = x1
+      y = f1 ; x = x1
     else
-      y = f2
-      x = x2
+      y = f2 ; x = x2
     end if
 
     return
@@ -1199,17 +1229,16 @@ module toolkit
     maxiter = 500    ; if (present(itermax)) maxiter = itermax
     ipri    = 0      ; if (present(iprint) ) ipri    = iprint
 
-    if (ipri.ge.1) then
-      write(*,*) '  '
-      write(*,*) ' starting brent algorithm'
-      write(*,*) '  '
-    end if
+    if (abs(x1-x0).lt.tol) call error('error in golden: x1 and x0 too close')
 
-    xa = x0 ; ya = func(xa)
-    xb = x1 ; yb = func(xb)
+    if (ipri.ge.1) write(*,'(/,a,/)') ' starting brent algorithm'
+
+    xa = min(x0,x1) ; ya = func(xa)
+    xb = max(x0,x1) ; yb = func(xb)
 
     ! if function is of equal sign at both initial points, return
-    if (ya*yb.gt.zero) then
+    if (ya*yb.gt.cero) then
+      if (ipri.ge.1) write(*,99) ' Not solved: invalid initial values'
       ind = 1 ; x = xa ; return
     end if
 
@@ -1220,6 +1249,7 @@ module toolkit
     
     ! if initial point is already a root, return
     if (abs(yb).lt.toler) then
+      if (ipri.ge.1) write(*,99) ' Not solved: initial point is already a root'
       ind = 0 ; x = xb ; return
     end if
 
@@ -1239,7 +1269,7 @@ module toolkit
       if (iy.eq.maxiter) then
         ind = 2 ; x = xs ; return
       end if
-      if (ya*ys.lt.zero) then
+      if (ya*ys.lt.cero) then
         xc = xb ; xb = xs ; yb = ys
       else
         xa = xs ; ya = ys
@@ -1249,9 +1279,13 @@ module toolkit
       end if
     end do
 
-    x = xb
+    x = xb    
+    if (ipri.ge.1) then
+      write(*,99) ' Solved: a root is found. Root = ',x,' Func = ',func(x)
+    end if
 
     return
+    99 format (a,f10.4,a,f10.4)
   end subroutine brent
 
   ! ----------------------------------------------------------------------------
@@ -1324,17 +1358,20 @@ module toolkit
     y0 = 0.0d-10 ; yp = 0.0d-10 ; ye = 0.0d-10 ; yc = 0.0d-10 ; yr = 0.0d-10
     xm = 0.0d-10 ; xp = 0.0d-10 ; xe = 0.0d-10 ; xc = 0.0d-10 ; xr = 0.0d-10
 
-    toler   = 1.0d-8 ; if (present(tol)    ) toler   = tol
-    maxiter = 500    ; if (present(itermax)) maxiter = itermax
-    ipri    = 0      ; if (present(iprint) ) ipri    = iprint
+    toler   = 1.0d-8 ; if (present(tol)    ) toler   = tol      ! tolerance level; default: 1.0d-8
+    maxiter = 500    ; if (present(itermax)) maxiter = itermax  ! max number of iterations; default: 500
+    ipri    = 0      ; if (present(iprint) ) ipri    = iprint   ! printing behaviour; defualt: don't print
 
-    if (ipri.ge.1) then
-      write(*,*) '  '
-      write(*,*) ' starting simplex algorithm'
-      write(*,*) '  '
-    end if
+    if (ipri.ge.1) write(*,'(/,a,/)') ' starting simplex algorithm'
 
-    ind = -9 ; ilow = 1 ; n = size(x,1) ; y0 = func(x0) ; iy = 1 ; yp(1) = y0 ; xp(:,1) = x0
+    ind  = -9
+    ilow = 1  
+    
+    n       = size(x,1)  ! number of variables
+    y0      = func(x0)   ! value at initial point
+    iy      = 1          ! interation counter
+    yp(1)   = y0         ! initial value
+    xp(:,1) = x0         ! initial simplex
 
     if (ipri.ge.1) print 93 , y0
 
@@ -1342,20 +1379,16 @@ module toolkit
       yp(ilow) = y0 ; xp(:,ilow) = x0 ; goto 10
     end if
 
-    if (ipri.ge.1) then
-      write(*,*) '  '
-      write(*,*) ' evaluating initial simplex'
-      write(*,*) '  '
-    end if
+    if (ipri.ge.1) write(*,'(/,a,/)') ' evaluating initial simplex'
     
-    xp = zero
+    xp = cero
     do j=1,n+1
       xp(:,j) = x0(:)
     end do
 
     do i=2,n+1
-      if (x0(i-1).lt.zero) xp(i-1,i) = x0(i-1) - dble(0.20)
-      if (x0(i-1).ge.zero) xp(i-1,i) = x0(i-1) + dble(0.20)
+      if (x0(i-1).lt.cero) xp(i-1,i) = x0(i-1) - dble(0.20)
+      if (x0(i-1).ge.cero) xp(i-1,i) = x0(i-1) + dble(0.20)
     end do
 
     do i=2,n+1
@@ -1367,11 +1400,7 @@ module toolkit
       end if
     end do
 
-    if (ipri.gt.1) then
-      write(*,*) '  '
-      write(*,*) ' beginning iterations'
-      write(*,*) '  '
-    end if
+    if (ipri.gt.1) write(*,'(/,a,/)') ' beginning iterations'
 
     1 continue
 
@@ -1408,7 +1437,7 @@ module toolkit
 
     ! new point
     do j=1,n
-      xr(j) = (one+alpha)*xm(j) - alpha*xp(j,ihigh)
+      xr(j) = (uno+alpha)*xm(j) - alpha*xp(j,ihigh)
     end do
     yr = func(xr) ; iy = iy + 1
 
@@ -1424,7 +1453,7 @@ module toolkit
 
       ! new point
       do j=1,n
-        xe(j) = (one-gamma)*xm(j) - gamma*xp(j,ihigh)
+        xe(j) = (uno-gamma)*xm(j) - gamma*xp(j,ihigh)
       end do
       ye = func(xe) ; iy = iy + 1
 
@@ -1451,7 +1480,7 @@ module toolkit
 
       ! new point
       do j=1,n
-        xc(j) = (one-beta)*xm(j) - beta*xp(j,ihigh)
+        xc(j) = (uno-beta)*xm(j) - beta*xp(j,ihigh)
       end do
       yc = func(xc) ; iy = iy + 1
 
@@ -1474,7 +1503,7 @@ module toolkit
 
             ! new point
             do j=1,n
-              xp(j,i) = half*( xp(j,i) + xp(j,ilow) )
+              xp(j,i) = medio*( xp(j,i) + xp(j,ilow) )
             end do
             yp(i) = func(xp(:,i)) ; iy = iy + 1
 
@@ -1511,11 +1540,9 @@ module toolkit
     end do
     
     if (ipri.ge.1) then
-      write(*,*) '  '
-      if (ind.eq.0) write(*,*) ' simplex finished: system has converged, func=0 '
-      if (ind.eq.1) write(*,*) ' simplex finished: system converged, simplex is very small'
-      if (ind.eq.9) write(*,*) ' simplex finished: max number of iterations'
-      write (*, *) '  '
+      if (ind.eq.0) write(*,'(/,a,/)') ' simplex finished: system has converged, func=0 '
+      if (ind.eq.1) write(*,'(/,a,/)') ' simplex finished: system converged, simplex is very small'
+      if (ind.eq.9) write(*,'(/,a,/)') ' simplex finished: max number of iterations'
       write (*,94) iy
       write (*,93) yp(ilow)
       write (*,92) yp(ilow)/y0 - 1.0
@@ -1642,21 +1669,17 @@ module toolkit
     m = size(y,1)
 
     if (ip.ge.1) then
-      write(*,'(a)'   ) '                              '
-      write(*,'(a)'   ) '  starting lmmin algorithm    '
-      write(*,'(a)'   ) '                              '
-      write(*,'(a,i2)') '  # equations   = ' , m
-      write(*,'(a,i2)') '  # unknows     = ' , n
+      write(*,'(/,a,/)') '  starting lmmin algorithm    '
+      write(*,'(a,i2)' ) '  # equations   = ' , m
+      write(*,'(a,i2)' ) '  # unknows     = ' , n
     end if
 
     ! initial point
     y0 = func(x0)
     e0 = sum(y0(:)*y0(:))
     iy = 1
-    if (ip.ge.1) then
-      write(*,'(a,f10.4)') '  initial error = ' , e0
-      write(*,'(a)'   ) '                              '
-    end if
+    
+    if (ip.ge.1) write(*,'(a,f10.4,/)') '  initial error = ' , e0
 
     ! best point so far = initial point
     yb = y0
@@ -1710,9 +1733,9 @@ module toolkit
 
         ! shock the i-th parameter
         xj(:,i) = xb(:)
-        if (x(i).le.zero) then
+        if (x(i).le.cero) then
           xj(i,i) = xb(i) - shck(i)*abs(xb(i))
-        elseif (x(i).ge.zero) then
+        elseif (x(i).ge.cero) then
           xj(i,i) = xb(i) + shck(i)*abs(xb(i))
         end if
 
@@ -1802,12 +1825,12 @@ module toolkit
     jj = matmul(transpose(j),j) 
     jt = matmul(transpose(j),yb)
     do i=1,n
-      jj(i,i) = (one+da)*jj(i,i)
+      jj(i,i) = (uno+da)*jj(i,i)
     end do
     ij = inverse(jj)
     x1 = xb - matmul(ij,jt)
 
-    ! if jacobian is too close to zero, return
+    ! if jacobian is too close to cero, return
     if (maxval(abs(jt)).lt.toler) goto 11
 
     ! if the step in "x" is too small, return
@@ -1857,13 +1880,11 @@ module toolkit
     19 ind = 9 ; goto 7
 
     7 if (ip.ge.1) then
-      write(*,*) '  '
-      if (ind.eq.0) write(*,*) ' lmmin finished: system has converged, func=0 '
-      if (ind.eq.1) write(*,*) ' lmmin finished: system has converged, jac close to 0'
-      if (ind.eq.2) write(*,*) ' lmmin finished: system has converged, step in x close to 0'
-      if (ind.eq.3) write(*,*) ' lmmin finished: some equations is 0'
-      if (ind.eq.9) write(*,*) ' lmmin finished: max number of iterations'
-      write(*,*          ) '   '
+      if (ind.eq.0) write(*,'(/,a,/)') ' lmmin finished: system has converged, func=0 '
+      if (ind.eq.1) write(*,'(/,a,/)') ' lmmin finished: system has converged, jac close to 0'
+      if (ind.eq.2) write(*,'(/,a,/)') ' lmmin finished: system has converged, step in x close to 0'
+      if (ind.eq.3) write(*,'(/,a,/)') ' lmmin finished: some equations is 0'
+      if (ind.eq.9) write(*,'(/,a,/)') ' lmmin finished: max number of iterations'
       write(*,*          ) ' iterations = ', iy
       write(*,'(a,f10.4)') ' error      = ', eb
       write(*,'(a,f10.4)') ' reduction  = ', eb/e0 - 1.0
@@ -1891,7 +1912,7 @@ module toolkit
     if (xmax.lt.xmin) call error(' errror in normalize: xmax > xmin')
     if (x.gt.xmax   ) call error(' errror in normalize: x > xmax')
     if (x.lt.xmin   ) call error(' errror in normalize: x < xmin')
-    y = log((x-xmin)/(xmax-xmin)/max(0.0001,one-(x-xmin)/(xmax-xmin)))
+    y = log((x-xmin)/(xmax-xmin)/max(0.0001,uno-(x-xmin)/(xmax-xmin)))
     return
   end subroutine normalize
 
@@ -1905,7 +1926,7 @@ module toolkit
     real(dp) , intent(in)  :: xmax,xmin,y
     real(dp) , intent(out) :: x
     if (xmax.lt.xmin) call error(' errror in denormalize: xmax > xmin')
-    x = (exp(y)/(one+exp(y)))*(xmax-xmin) + xmin
+    x = (exp(y)/(uno+exp(y)))*(xmax-xmin) + xmin
     if (isnan(x) .and. y.gt.cien) x = xmax
     return
   end subroutine denormalize

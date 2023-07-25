@@ -8,46 +8,53 @@ program test
 use toolkit
 implicit none
 integer , parameter :: numsol = 10000
-real(dp)  :: x0(2,numsol),xx
-real(dp)  :: xs(2),x1(2)
-real(dp)  :: ys(2),y1(2)
-real(dp)  :: aveer,aveiter,aveconv
-integer   :: iter1,j1,i
+real(dp) :: x0(2,numsol),xx
+real(dp) :: xs(2),x1(2)
+real(dp) :: ys(2),y1(2)
+real(dp) :: aveer,aveiter,aveconv
+integer  :: iter1,j1,i
 
 do i = 1,numsol
   call random_number(xx) ; x0(1,i) = dble(10.00)*(xx-dble(0.5))
   call random_number(xx) ; x0(2,i) = dble(10.00)*(xx-dble(0.5))
 end do
 
-write(*,99) '   '
-write(*,99) '   '
+
+call normalize(aveconv,dble(3.0),huge(uno),-huge(uno))
+
+print * , aveconv
+
+read * , aveconv
+
+write(*,99) '                                                                      '
+write(*,99) '                                                                      '
 write(*,99) ' %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
-write(*,99) '   '
-write(*,99) ' testing minimization algorithm '
-write(*,99) '   '
-write(*,99) ' I take the functions from Wikipedia. For more details, check:'
-write(*,99) '   '
-write(*,99) '    https://en.wikipedia.org/wiki/test_functions_for_optimization '
-write(*,99) '   '
-write(*,99) ' Reported values are averages over the 1000 minimizations.'
-write(*,99) '   '
+write(*,99) '                                                                      '
+write(*,99) ' testing minimization algorithm                                       '
+write(*,99) '                                                                      '
+write(*,99) ' I take the functions from Wikipedia. For more details, check:        '
+write(*,99) '                                                                      '
+write(*,99) '    https://en.wikipedia.org/wiki/test_functions_for_optimization     '
+write(*,99) '                                                                      '
+write(*,99) ' Reported values are averages over the 1000 minimizations.            '
+write(*,99) '                                                                      '
 write(*,99) ' %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
-write(*,99) '   '
+write(*,99) '                                                                      '
 
 ! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-write(*,99) '   '
+write(*,99) '                                                                      '
 write(*,99) ' ---------------------------------------------------------------------'
-write(*,99) '   '
-write(*,99) ' matyas (solution: x1 = 0.0, x2 = 0.0) '
-write(*,99) '   '
+write(*,99) '                                                                      '
+write(*,99) ' matyas (solution: x1 = 0.0, x2 = 0.0)                                '
+write(*,99) '                                                                      '
 write(*,99) '  solution : x1 =  0.0, x2 =  0.0 ; func =' , matyas_1d( (/  0.0d0 , 0.0d0 /))
 write(*,99) '   '
 
-aveer   = zero
-aveiter = zero
-aveconv = zero
+aveer   = cero
+aveiter = cero
+aveconv = cero
 do i = 1,numsol
   call lmmin(matyas,x1,y1,iter1,j1,x0(:,i)*dble(2.0))
   aveer   = max(aveer,sum(y1(:)*y1(:)))
@@ -59,9 +66,9 @@ aveconv = - aveconv/dble(numsol) + dble(1.00)
 
 write(*,98) ' matyas (jacobian):', aveer,aveiter
 
-aveer   = zero
-aveiter = zero
-aveconv = zero
+aveer   = cero
+aveiter = cero
+aveconv = cero
 do i = 1,numsol
   call lmmin(matyas,x1,y1,iter1,j1,x0(:,i)*dble(2.0),usebro=1)
   aveer   = max(aveer,sum(y1(:)*y1(:)))
@@ -73,9 +80,9 @@ aveconv = - aveconv/dble(numsol) + dble(1.00)
 
 write(*,98) ' matyas (broyden): ', aveer,aveiter
 
-aveer   = zero
-aveiter = zero
-aveconv = zero
+aveer   = cero
+aveiter = cero
+aveconv = cero
 do i = 1,numsol
   call simplex(matyas_1d,x1,y1(1),iter1,j1,x0(:,i)*dble(2.0))
   aveer   = max(aveer,y1(1))
@@ -98,9 +105,9 @@ write(*,99) '   '
 write(*,99) '  solution : x1 =  1.0, x2 =  3.0 ; func =' , booth_1d( (/  1.0d0 , 3.0d0 /))
 write(*,99) '   '
 
-aveer   = zero
-aveiter = zero
-aveconv = zero
+aveer   = cero
+aveiter = cero
+aveconv = cero
 do i = 1,numsol
   call lmmin(booth,x1,y1,iter1,j1,x0(:,i)*dble(2.0))
   aveer   = max(aveer,sum(y1(:)*y1(:)))
@@ -112,9 +119,9 @@ aveconv = - aveconv/dble(numsol) + dble(1.00)
 
 write(*,98) ' booth (jacobian):', aveer,aveiter
 
-aveer   = zero
-aveiter = zero
-aveconv = zero
+aveer   = cero
+aveiter = cero
+aveconv = cero
 do i = 1,numsol
   call lmmin(booth,x1,y1,iter1,j1,x0(:,i)*dble(2.0),usebro=1)
   aveer   = max(aveer,sum(y1(:)*y1(:)))
@@ -126,9 +133,9 @@ aveconv = - aveconv/dble(numsol) + dble(1.00)
 
 write(*,98) ' booth (broyden): ', aveer,aveiter
 
-aveer   = zero
-aveiter = zero
-aveconv = zero
+aveer   = cero
+aveiter = cero
+aveconv = cero
 do i = 1,numsol
   call simplex(booth_1d,x1,y1(1),iter1,j1,x0(:,i)*dble(2.0))
   aveer   = max(aveer,y1(1))
@@ -154,9 +161,9 @@ write(*,99) '  solution 3: x1 = -3.779310, x2 = -3.283186 ; func =' , hummelblau
 write(*,99) '  solution 3: x1 =  3.584428, x2 = -1.848126 ; func =' , hummelblau_1d( (/  3.584428d0 , -1.848126d0 /))
 write(*,99) '   '
 
-aveer   = zero
-aveiter = zero
-aveconv = zero
+aveer   = cero
+aveiter = cero
+aveconv = cero
 do i = 1,numsol
   call lmmin(hummelblau,x1,y1,iter1,j1,x0(:,i))
   aveer   = max(aveer,sum(y1(:)*y1(:)))
@@ -168,9 +175,9 @@ aveconv = - aveconv/dble(numsol) + dble(1.00)
 
 write(*,98) ' lmmin (jacobian):', aveer,aveiter
 
-aveer   = zero
-aveiter = zero
-aveconv = zero
+aveer   = cero
+aveiter = cero
+aveconv = cero
 do i = 1,numsol
   call lmmin(hummelblau,x1,y1,iter1,j1,x0(:,i),usebro=1)
   aveer   = max(aveer,sum(y1(:)*y1(:)))
@@ -182,9 +189,9 @@ aveconv = - aveconv/dble(numsol) + dble(1.00)
 
 write(*,98) ' lmmin (broyden): ', aveer,aveiter
 
-aveer   = zero
-aveiter = zero
-aveconv = zero
+aveer   = cero
+aveiter = cero
+aveconv = cero
 do i = 1,numsol
   call simplex(hummelblau_1d,x1,y1(1),iter1,j1,x0(:,i))
   aveer   = max(aveer,y1(1))

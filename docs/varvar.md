@@ -5,8 +5,8 @@ function varvar(var,w,mask) result(variance)
   implicit none
   real(kind=8)            :: variance
   real(kind=8)            :: var(:)
-  real(kind=8) , optional :: w(:)     ! same length of "var"
-  logical      , optional :: mask(:)  ! same length of "var"
+  real(kind=8) , optional :: w(:)   
+  logical      , optional :: mask(:)
 ```
 
 This function returns the variance of a variable ```var``` given some (optional) weigths ```w```. If supplied, the vector ```w``` should have the same size as ```var```. If not supplied, the program assums uniform weigthing.

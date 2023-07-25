@@ -10,9 +10,9 @@ subroutine tauchen(xvec,rho,mu,sigma,n,pmat)
 
 This function returns the transition matrix for a discretized AR(1) process of the form:
 
-_x_' = mu + rho _x_ + sigma _u_ , _u_ ~ N(0,1)
+$$x' = \texttt{mu} + \texttt{rho} \cdot  x + \texttt{sigma} \cdot u ,  \ \ \ \ \ \text{with} u \sim N(0,1)$$
 
-The vector with the values of _x_, ```xvec```, is of dimension ```n``` and does not need to be equally spaced.
+The vector with the values of $x$, ```xvec```, is of dimension ```n``` and does not need to be equally spaced.
 
 **Dependencies**: [```normaldist```](normaldist.md)
 
@@ -22,7 +22,7 @@ The vector with the values of _x_, ```xvec```, is of dimension ```n``` and does 
 
 **Example**
 
-Imagine a variable _x_ that follows an AR(1) procress with an autocorrelation of 0.8 and subject to normal shocks with stadard deviation 0.2.
+Imagine a variable $x$ that follows an AR(1) procress with an autocorrelation of 0.8 and subject to normal shocks with stadard deviation 0.2.
 
 ```fortran
 ! create a 100-point equallly soaced grid for the variable "x"

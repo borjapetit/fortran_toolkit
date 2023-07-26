@@ -4,7 +4,7 @@ author:
 
 # Build settings
 
-theme: minima
+theme: chirpy
 
 # plugins:
 #   - jekyll-feed
@@ -12,7 +12,7 @@ theme: minima
 
 # Theme-specific settings
 
-minima:
+#minima:
   # Minima date format.
   # Refer to https://shopify.github.io/liquid/filters/date/ if you want to customize this.
   #

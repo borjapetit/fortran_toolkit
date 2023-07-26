@@ -17,12 +17,30 @@ This subroutine prints an error message $\texttt{mess}$. If the user supplies an
 
 **Example**
 
+Error message with execution pause:
 ```fortran
-! error message with execution pause
-call error(' error message',1)
-
-! error message without execution pause
-call error(' error message')
+call error('error message',1)
 ```
+The output would be:
+```
+error message
+```
+
+Error message without execution pause:
+```fortran
+call error('error message')
+```
+The output would be:
+```
+error message
+Type any key to continue...
+```
+
+
+
+
+
+
+
 
 

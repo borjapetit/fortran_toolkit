@@ -4,7 +4,9 @@ author:
 
 # Build settings
 
-theme: chirpy
+theme: minima
+
+exclude: ["README.md"] [docs/*.md]
 
 # plugins:
 #   - jekyll-feed

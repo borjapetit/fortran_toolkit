@@ -1,9 +1,10 @@
 title: Fortran Toolkit
-email: 
+
+email: bpetit@cunef.edu
+
 github_username:  borjapetit
 
-<style>
-  .footer {
-    display: none;
-  }
-</style>
+navbar-links:
+  Author's home: "https://deanattali.com"
+
+navbar-col: "#EAEAEA"

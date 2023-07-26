@@ -8,7 +8,13 @@ function diag(mat) result(vec)
 
 This function returns the main diagonal of a matric ```mat```.
 
-_Example_:
+**Dependencies**: [```error```](error.md)
+
+[(back to index)](../index.md)
+
+---
+
+**Example**
 
 ```fortran
 mat(:,1) = (/ 1.0, 2.0, 1.0 /)
@@ -19,7 +25,3 @@ vec = diag(mat)
 
 print * , 'vec = ', vec   ! vec =  1.00  3.00  3.00
 ```
-
-**Dependencies**: none
-
-[(back to index)](index.md)

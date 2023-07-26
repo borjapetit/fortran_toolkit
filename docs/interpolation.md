@@ -21,7 +21,7 @@ $$\texttt{xgrid}(i) > \texttt{xgrid(i-1)} \ \ \ \text{or} \ \ \  \texttt{xgrid}(
 
 This subroutine is mainly used by the function [```interpolate```](interpolate.md).
 
-**Dependencies**: none
+**Dependencies**: [```error```](error.md)
 
 [(back to index)](../index.md)
 

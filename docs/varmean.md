@@ -13,7 +13,7 @@ This function returns the mean of a variable ```var``` given some (optional) wei
 
 The user can also supply a ```mask``` to compute the conditional mean. The input ```mask``` is a logical array of the same size of ```var```.
 
-**Dependencies**: none
+**Dependencies**: [```error```](error.md)
 
 [(back to index)](../index.md)
 

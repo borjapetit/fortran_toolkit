@@ -13,7 +13,7 @@ This function returns the stadard deviation of a variable ```var``` given some (
 
 The user can also supply a ```mask``` to compute the conditional standard deviation. The input ```mask``` is a logical array of the same size of ```var```.
 
-**Dependencies**: [```varmean```](varmean.md),  [```varvar```](varvar.md)
+**Dependencies**: [```error```](error.md), [```varmean```](varmean.md),  [```varvar```](varvar.md)
 
 [(back to index)](../index.md)
 

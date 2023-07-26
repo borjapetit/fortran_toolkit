@@ -13,6 +13,8 @@ This subroutine prints an error message ```mess```. If the user supplies any int
 
 [(back to index)](../index.md)
 
+---
+
 **Example**
 
 ```fortran

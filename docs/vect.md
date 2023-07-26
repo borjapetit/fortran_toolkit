@@ -15,7 +15,6 @@ This function returns a 1-dimensional array ```vec``` with all the elements of a
 
 ---
 
-
 **Example**:
 
 ```fortran

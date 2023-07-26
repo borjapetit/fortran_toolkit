@@ -16,7 +16,7 @@ The subroutine finds the percentile ```pct``` using a Bisection method.
 
 The user can also supply a ```mask``` to compute the conditional percentile. The input ```mask``` is a logical array of the same size of ```var```.
 
-**Dependencies**: none
+**Dependencies**: [```error```](error.md)
 
 [(back to index)](../index.md)
 

@@ -9,6 +9,8 @@ function inverse(mat) result(imat)
 
 This function returns the inverse of a squared matrix ```mat``` implementing a LU decomposition.
 
-**Dependencies**: none
+**Dependencies**: [```error```](error.md)
 
-[(back to index)](index.md)
+[(back to index)](../index.md)
+
+---

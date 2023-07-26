@@ -45,8 +45,8 @@ You can download the code from this [link](https://borjapetit.github.io/fortran_
 
 - [```vect```](docs/vect.md): transform a matrix of into a vector (similar to ```reshape```).
 - [```cumsum```](docs/cumsum.md): returns the vector with cummulative sum of a vector (as Matlab's ```cumsum``` function).
-- **[```diag```](docs/diag.md): returns a vector with the elements of the main diagonal of a matrix.
-- **[```inverse```](docs/inverse.md): returns the inverse of a sqaured matrix.
+- [```diag```](docs/diag.md): returns a vector with the main diagonal of a matrix.
+- [```inverse```](docs/inverse.md): returns the inverse of a sqaured matrix.
 
 ---
 

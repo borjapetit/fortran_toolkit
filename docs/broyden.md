@@ -1,4 +1,6 @@
-## broyden
+---
+exclude: true
+---
 
 ```fortran
 subroutine broyden(j1,j0,x1,x0,f1,f0)

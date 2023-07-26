@@ -1,6 +1,5 @@
----
-exclude: true
----
+
+### error
 
 ```fortran
 subroutine error(mess,i)

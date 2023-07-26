@@ -1,6 +1,5 @@
----
-exclude: true
----
+
+### interpolate
 
 ```fortran
 function interpolate(x1,x2,...,xn,y1,y2,...,yn,mat) result(xi)

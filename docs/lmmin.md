@@ -1,7 +1,8 @@
+
 ### lmmin
 
 ```fortran
-subroutine lmmin_states_both(func,x,y,iy,ind,x0,itermax,damp,tol,toleach,shock,usebro,iprint)
+subroutine lmmin(func,x,y,iy,ind,x0,itermax,damp,tol,toleach,shock,usebro,iprint)
   implicit none
   external                             :: func        ! user-supplied function to be minimize
   real(kind=8) , intent(out)           :: x(:)        ! values of "x" at minimum

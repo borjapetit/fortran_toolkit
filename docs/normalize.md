@@ -1,4 +1,5 @@
-## normalize & denormalize
+
+### normalize & denormalize
 
 The optimization subroutines included in this toolkit are design to handle unconstrained problems. However, the $\texttt{normalize}$ and $\texttt{denormalize}$ subroutines can transform a contrained optimization problem into an unconstrained one.
 
@@ -12,7 +13,9 @@ $$\max_{x\in(x0,x_1)} \ f(x) \ \equiv \ \max_{z} \ f(g(z)) \ \ \ \text{with} \ \
 
 The problem $\max_{z} \ f(g(z))$ is an unconstrained optimization problem that can be solve with the subrotuines included in this toolkit.
 
-### normalize
+---
+
+#### normalize
 
 ```fortran
 subroutine normalize(y,x,xmax,xmin)
@@ -27,7 +30,13 @@ This subroutine, that corresponds to the inverse function $g^{-1}(z)$ explained 
 
 $$y = \log\left(\frac{\texttt{x} - \texttt{xmin}}{\texttt{xmax} - \texttt{x}}\right)$$
 
-### denormalize
+**Dependencies**: none
+
+[(back to index)](../index.md)
+
+--- 
+
+#### denormalize
 
 ```fortran
 subroutine denormalize(y,x,xmax,xmin)

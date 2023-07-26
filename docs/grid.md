@@ -1,6 +1,5 @@
----
-exclude: true
----
+
+### grid
 
 ```fortran
 function grid(maxv,minv,n,s) result(v)
@@ -22,7 +21,7 @@ This function creates a grid of $\texttt{n}$ points between $\texttt{maxv}$ and 
 
 [(back to index)](../index.md)
 
----
+--
 
 **Example**
 
@@ -33,5 +32,3 @@ vector = grid( 10.d0 , 0.0d0 , 100 )
 ! create a quadratic grid with 500 points between -1 and 1
 vector = grid( 1.d0 , -1.0d0 , 500 , 2.0d0 )  
 ```
-
-

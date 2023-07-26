@@ -1,4 +1,5 @@
-# randomnormal
+
+### randomnormal
 
 ```fortran
 subroutine randomnormal(shock,mu,std)
@@ -15,4 +16,4 @@ _Note_: ```randomnormal``` is an interface that calls ```randomnormal_scalar``` 
 
 [(back to index)](../index.md)
 
---
+---

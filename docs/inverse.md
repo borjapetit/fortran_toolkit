@@ -1,4 +1,5 @@
-# inverse
+
+### inverse
 
 ```fortran
 function inverse(mat) result(imat)

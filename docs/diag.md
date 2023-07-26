@@ -1,6 +1,5 @@
----
-exclude: true
----
+
+### diag
 
 ```fortran
 function diag(mat) result(vec)

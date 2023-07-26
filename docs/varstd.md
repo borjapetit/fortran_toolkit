@@ -1,6 +1,5 @@
----
-exclude: true
----
+
+### varstd
 
 ```fortran
 function varstd(var,w,mask) result(stdvar)

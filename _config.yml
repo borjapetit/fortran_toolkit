@@ -1,3 +1,9 @@
 title: Fortran Toolkit
 email: 
 github_username:  borjapetit
+
+<style>
+  .footer {
+    display: none;
+  }
+</style>

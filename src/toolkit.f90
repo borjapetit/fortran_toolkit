@@ -1,7 +1,7 @@
 
 ! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ! toolkit.f90, a toolkit for fortran90 programming
-! Borja Petit, © 2021
+! Borja Petit, © 2022
 !
 ! general purpose:
 !   - grid: generate a grid for a continuous varibale
@@ -316,6 +316,7 @@ module toolkit
     character(len=10) :: typeany
     write(*,*) trim(adjustl(mess)) 
     if (present(i)) then
+      write (*,'(a)',advance="no") ' Type any key to continue...'
       read (*,'(a)') typeany
     end if  
     return
@@ -1151,19 +1152,18 @@ module toolkit
 
     if (ipri.ge.1) write(*,'(/,a,/)') ' starting golden search algorithm'
 
+    x0 = min(xmax,xmin)
+    x3 = max(xmax,xmin)
+
     if (abs(x0-x3).lt.toler) then
       if (ipri.ge.1) write(*,99) ' Not solved: xmax and xmin are too close'
       f1 = func(xmax) ; numiter = 1 ; x = xmax ; return
     end if
 
-    x0 = min(xmax,xmin)
-    x3 = max(xmax,xmin)
-
     x1 = alpha*x0 + (uno-alpha)*x3 ; f1 = func(x1) ; numiter = numiter + 1
     x2 = alpha*x3 + (uno-alpha)*x1 ; f2 = func(x2) ; numiter = numiter + 1
 
     do while (abs(x0-x3).gt.toler*(abs(x2)+abs(x1)) .and. abs(x0-x3).gt.toler .and. numiter.lt.maxiter)
-      numiter = numiter + 1
       if (f2.gt.f1) then
         x0 = x1
         x1 = x2
@@ -1176,7 +1176,7 @@ module toolkit
         x1 = alpha*x2 + (uno-alpha)*x0 ; f1 = func(x1) ; numiter = numiter + 1 
       end if
       if (ipri.ge.1) then
-        write(*,99) ' Iteration = ',numiter,' x1 = ',x1,' f(x1) = ',f1,' x2 = ',x2,' f(x2) = ',f2
+        write(*,99) ' Iteration = ',numiter,'  | x1 = ',x1,'  x2 = ',x2,'  | f(x1) = ',f1,'  f(x2) = ',f2
       end if
     end do
 
@@ -1188,12 +1188,12 @@ module toolkit
 
     if (ipri.ge.1) then
       write(*,99) ' '
-      write(*,99) ' Solved: x = ',x,' y = ',y
+      write(*,99) ' Solved: Iterations = ',numiter, '  | x = ',x,'  | f(x) = ',y
       write(*,99) ' '
     end if
 
     return
-    99 format (a,i4,a,f10.4,a,f10.4)
+    99 format (a,i4,8(a,f10.4,a,f10.4))
   end subroutine golden
 
   ! ----------------------------------------------------------------------------

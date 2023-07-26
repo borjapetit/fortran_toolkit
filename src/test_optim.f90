@@ -9,7 +9,7 @@ use toolkit
 implicit none
 integer , parameter :: numsol = 10000
 real(dp) :: x0(2,numsol),xx
-real(dp) :: xs(2),x1(2)
+real(dp) :: xs(2),x1(2),yy
 real(dp) :: ys(2),y1(2)
 real(dp) :: aveer,aveiter,aveconv
 integer  :: iter1,j1,i
@@ -40,6 +40,12 @@ write(*,99) '                                                                   
 
 
 call brent(func_brent,xx,iter1,j1,0.00d0,5.00d0,iprint = 2)
+
+print * , iter1 , j1 
+read * , j1
+
+
+call golden(func_golden,xx,yy,iter1,dble(10.0),dble(0.0),iprint=2)
 
 print * , iter1 , j1 
 read * , j1
@@ -271,6 +277,13 @@ contains
     y = exp(-x) - dble(0.01)*x
     return
   end function func_brent
+
+  function func_golden(x) result(y)
+    implicit none
+    real(dp) :: x,y
+    y = dble(10.0)*(x**(0.30d0))- x
+    return
+  end function func_golden
 
 end program test
     

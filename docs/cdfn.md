@@ -1,4 +1,6 @@
-## cdfn
+---
+exclude: true
+---
 
 ```fortran
 elemental function cdfn(x) result(f)

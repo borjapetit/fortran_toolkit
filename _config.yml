@@ -10,3 +10,5 @@ navbar-links:
 navbar-col: "#EAEAEA"
 
 markdown: kramdown
+
+layout: default

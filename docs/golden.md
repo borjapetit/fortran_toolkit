@@ -1,16 +1,17 @@
 ## golden
 
 ```fortran
-subroutine golden(func,x,y,numiter,xmax,xmin,itermax,tol)
+subroutine golden(func,x,y,numiter,xmax,xmin,itermax,tol,iprint)
   implicit none
-  external                             :: func
+  external                             :: func      ! user-supplied function
   real(kind=8) , intent(out)           :: x         ! output: arg max of func
   real(kind=8) , intent(out)           :: y         ! output: max of func
   integer      , intent(out)           :: numiter   ! output: number of function evaluations
   real(kind=8) , intent(in)            :: xmax      ! input: upper-bound of x
   real(kind=8) , intent(in)            :: xmin      ! input: lower-bound of x
-  real(kind=8) , intent(in) , optional :: tol       ! input: (optional) level of tolerance
-  integer      , intent(in) , optional :: itermax   ! input: (optional) maximum function evaluations
+  real(kind=8) , intent(in) , optional :: tol       ! input: (optional) level of tolerance [detault = 1.0d-8]
+  integer      , intent(in) , optional :: itermax   ! input: (optional) maximum function evaluations [default = 500]
+  integer      , intent(in) , optional :: iprint    ! input: (optional) control what's printed [detault = 0]
 ```
 
 This subroutine finds the maximum of a user-supplied single-valued function, $\texttt{func}$, with one unknown using the Golden Search algorithm. The function $\texttt{func}$ must be f the form:
@@ -23,8 +24,13 @@ function func(x) result(f)
 end function func
 ```
 
-The user must also supply a range for the variable $x$, $\texttt{xmin}$ and $\texttt{xmax}$. Optionally, the user can also supply a maximun number of fucntion evaluations ($\texttt{itermax}$, 500 by default), the level of tolerance ($\texttt{tol}$, 1.0d-8 by default).
+The user must also supply an upper- and lower-bound range ($\texttt{xmin}$ and $\texttt{xmax}$) for the function argument. Optionally, the user can also supply a maximun number of fucntion evaluations ($\texttt{itermax}$, 500 by default), the level of tolerance ($\texttt{tol}$, 1.0d-8 by default). Finally, the user can also control what it is printing during execution by setting the corresponding value of $\texttt{iprint}$:
 
+- $\texttt{iprint}$ = 0: don't print anything (default)
+- $\texttt{iprint}$ = 1: print warnings
+- $\texttt{iprint}$ = 2: print warnings and every iteration
+
+The subroutine returns the value of $\texttt{x}$ that maximizes $\texttt{func}$, the value of $\texttt{func}$ at $\texttt{x}$ ($\texttt{y}$),  and the number of function evaluations ($\texttt{numiter}$)
 
 **Dependencies**: [```error```](error.md)
 

@@ -1,4 +1,6 @@
-## error
+---
+exclude: true
+---
 
 ```fortran
 subroutine error(mess,i)

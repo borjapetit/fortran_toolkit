@@ -1,4 +1,4 @@
-### golden
+## golden
 
 ```fortran
 subroutine golden(func,x,y,numiter,xmax,xmin,itermax,tol)
@@ -13,12 +13,7 @@ subroutine golden(func,x,y,numiter,xmax,xmin,itermax,tol)
   integer      , intent(in) , optional :: itermax   ! input: (optional) maximum function evaluations
 ```
 
-This subroutine finds the maximum of a user-supplied single-valued function, ```func```, with one unknown using the Golden Search algorithm, where
-
-- ```x``` is the $\arg\max$ ```func```.
-- ```y``` is ```func```(```x```)
-
-The function ```func``` must be f the form:
+This subroutine finds the maximum of a user-supplied single-valued function, $\texttt{func}$, with one unknown using the Golden Search algorithm. The function $\texttt{func}$ must be f the form:
 
 ```fortran
 function func(x) result(f)
@@ -28,7 +23,7 @@ function func(x) result(f)
 end function func
 ```
 
-The user must also supply a range for the variable $x$, ```xmin``` and ```xmax```. Optionally, the user can also supply a maximun number of fucntion evaluations (```itermax```, 500 by default), the level of tolerance (```tol```, 1.0d-8 by default).
+The user must also supply a range for the variable $x$, $\texttt{xmin}$ and $\texttt{xmax}$. Optionally, the user can also supply a maximun number of fucntion evaluations ($\texttt{itermax}$, 500 by default), the level of tolerance ($\texttt{tol}$, 1.0d-8 by default).
 
 
 **Dependencies**: [```error```](error.md)

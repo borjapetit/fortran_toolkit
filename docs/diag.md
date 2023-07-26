@@ -1,12 +1,13 @@
-# diag
+## diag
 
 ```fortran
 function diag(mat) result(vec)
   implicit none
-  real(kind=8) :: mat(:,:),vec(size(mat,dim=1))
+  real(kind=8) :: mat(:,:)              ! input
+  real(kind=8) :: vec(size(mat,dim=1))  ! output: vector with main diagonal of mat
 ```
 
-This function returns the main diagonal of a matric ```mat```.
+This function returns the main diagonal of a matric $\texttt{mat}$.
 
 **Dependencies**: [```error```](error.md)
 

@@ -1,4 +1,6 @@
-## golden
+---
+exclude: true
+---
 
 ```fortran
 subroutine golden(func,x,y,numiter,xmax,xmin,itermax,tol,iprint)

@@ -35,16 +35,16 @@ You can download the code from this [link](https://borjapetit.github.io/fortran_
 - [```percentile```](docs/percentile.md): returns the i-th percentile of a distribution, allowing for weigths and mask.
 - [```olsreg```](docs/olsreg.md): returns the OLS coefficients of a linear regression (with up to 8 explanatory variables), allowing for weigths and mask.
 - [```tauchen```](docs/tauchen.md): returns the transition matrix for a discretized AR(1) process.
-- **[```normaldist```](docs/normaldist.md): returns the distribution for a normal random variable given some mean and variance.
-- **[```randomnormal```](docs/randomnormal.md): returns a random draw (either a scalar or a vector) for a normal distribution.
-- **[```cdfn```](docs/cdfn.md): returns the cdf of a standard normal distribution.
+- [```normaldist```](docs/normaldist.md): returns the distribution for a normal random variable given some mean and variance.
+- [```randomnormal```](docs/randomnormal.md): returns a random draw (either a scalar or a vector) for a normal distribution.
+- [```cdfn```](docs/cdfn.md): returns the cdf of a standard normal distribution.
 
 ---
 
 ### Linear algebra
 
-- **[```vect```](docs/vect.md): transform a matrix of into a vector (similar to ```reshape```).
-- **[```cumsum```](docs/cumsum.md): returns the vector with cummulative sum of a vector (as Matlab's ```cumsum``` function).
+- [```vect```](docs/vect.md): transform a matrix of into a vector (similar to ```reshape```).
+- [```cumsum```](docs/cumsum.md): returns the vector with cummulative sum of a vector (as Matlab's ```cumsum``` function).
 - **[```diag```](docs/diag.md): returns a vector with the elements of the main diagonal of a matrix.
 - **[```inverse```](docs/inverse.md): returns the inverse of a sqaured matrix.
 
@@ -69,6 +69,6 @@ Algorithms for systems of equations:
 
   - **[```broyden```](docs/broyden.md): updates a Jacobian matrix using the Broyden's method.
 
-**Constrained optimization**: none of the algorithms in this toolkit is explicitly written to allow for constraints, but one can transform a contrained optimization problem into an uncontrained one using [```normalize``` and ```denormalize```](docs/normalize.md) subroutines.
+**Constrained optimization**: none of the algorithms in this toolkit is explicitly written to allow for constraints, but one can transform a contrained optimization problem into an uncontrained one using the [```normalize``` and ```denormalize```](docs/normalize.md) subroutines.
 
 ---

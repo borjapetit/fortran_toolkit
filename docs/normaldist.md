@@ -10,8 +10,17 @@ subroutine normaldist(xvec,mu,sigma,n,dist)
   real(kind=8), intent(out) :: dist(n)   ! vector with the distribution
 ```
 
-This function returns the distribution of a normal random variable with mean ```mu``` and standadrd deviation ```sigma```, over a grid ```xvec``` of size ```n```.
+This subroutine discretized the distribution of a normal random variable with mean ```mu``` and standadrd deviation ```sigma```, over a grid ```xvec``` of size ```n```. The user should provide a vector with values of the variable $x$ over which to comoute the distribution. For any $i\in[2,\texttt{n}-1]$:
+
+$$\texttt{dist}(i) = \Phi\left( \frac{\texttt{z}(i+1)+\texttt{z}(i)}{2.0d0}\right) - \Phi \left( \frac{\texttt{z}(i)+\texttt{z}(i-1)}{2.0d0}\right)$$
+
+where $\Phi(\cdot)$ is the cdf of a standard normal distribution and $\texttt{z} = (\texttt{xvec}-\texttt{mu})/\texttt{sigma}$ is a vector with the normalized values of ```xvec```. And for $i\in\{1,\texttt{n}\}$:
+
+$$\texttt{dist}(1) = \Phi\left( \frac{\texttt{z}(2)+\texttt{z}(1)}{2.0d0}\right) \ \ \ \ \ \ \text{and} \ \ \ \ \ \ 
+\texttt{dist}(n) = 1.0d0 - \Phi\left( \frac{\texttt{z}(\texttt{n})+\texttt{z}(\texttt{n}-1)}{2.0d0}\right) $$
 
 **Dependencies**: [```cdfn```](cdfn.md)
 
-[(back to index)](index.md)
+[(back to index)](../index.md)
+
+---

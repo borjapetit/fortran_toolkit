@@ -7,16 +7,18 @@ elemental function cdfn(x) result(f)
   real(kind=8)             :: f
 ```
 
-This function returns the cdf of a standard normal distribution, ```f``` $=\Phi(x)$. This subroutine is defined as ```elemental```, which implies that it can be call for both scalars and arrays.
-
-_Example_:
-
-```fortran
-print * , 'Result =', cdf(0.0)                  ! Result = 0.500
-print * , 'Result =', cdf(-1.0)                 ! Result = 0.158
-print * , 'Result =', cdf( (/ 0.0 , -1.0 /) )   ! Result = 0.500 0.158
-```
+This function returns the cdf of a standard normal distribution, ```f``` $=\Phi(x)$. This subroutine is defined as ```elemental```.
 
 **Dependencies**: none
 
-[(back to index)](index.md)
+[(back to index)](../index.md)
+
+---
+
+**Example**
+
+```fortran
+print * , 'Result =', cdf(0.0)                  ! Result =   0.500
+print * , 'Result =', cdf(-1.0)                 ! Result =   0.158
+print * , 'Result =', cdf( (/ 0.0 , -1.0 /) )   ! Result =   0.500   0.158
+```

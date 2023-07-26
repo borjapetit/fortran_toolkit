@@ -758,7 +758,7 @@ module toolkit
   end subroutine olsreg
 
   ! ----------------------------------------------------------------------------
-  ! this function returns the transition matrix for a discretized ar(1) process
+  ! this subroutine returns the transition matrix for a discretized ar(1) process
   ! with gaussian shocks
 
   subroutine tauchen(xvec,rho,mu,sigma,n,pmat)
@@ -774,8 +774,8 @@ module toolkit
   end subroutine tauchen
 
   ! ----------------------------------------------------------------------------
-  ! this function returns the transition matrix for a discretized ar(1) process
-  ! with gaussian shocks
+  ! this subroutine find the distribution of a variable "x" (discretized on a 
+  ! "n"-dimensional grid "xvec") with  mean "mu" and stadard deviation "sigma"
 
   subroutine normaldist(xvec,mu,sigma,n,dist)
     implicit none

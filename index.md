@@ -8,7 +8,7 @@ This Fortran code provides a list of functions and subroutines that I typically 
 - General propuse
 - Statistics
 - Linear algebra
-[Title](docs/iseven.md)- Optimization
+- Optimization
 
 All functions/subroutines assume double precision for real variables.
 

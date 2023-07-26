@@ -1,4 +1,4 @@
-# cumsum
+## cumsum
 
 ```fortran
 function cumsum(vec0) result(vec1)
@@ -7,7 +7,7 @@ function cumsum(vec0) result(vec1)
   real(kind=8) :: vec1(size(vec0))
 ```
 
-Returns the cummulative sum of a vector ```vec0```.
+Returns the cummulative sum of a vector $\texttt{vec0}$, as the Matlab's $\texttt{cumsum}$ function.
 
 **Dependencies**: none
 

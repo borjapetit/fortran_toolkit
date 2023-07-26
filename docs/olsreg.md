@@ -17,7 +17,7 @@ This subroutine returns the OLS coefficients from a linear regression model:
 
 $$\texttt{yvar} = \beta_0 + \beta_1 \cdot \texttt{xvar1} + \beta_2 \cdot\texttt{xvar2} + ... + \beta_8 \cdot\texttt{xvar8} + u$$
 
-The subroutine allows up to 8 explanatory variables. The subroutine automatically includes a constant terms if ```size(coeffs)``` equals ```n```+1, where ```n``` is the number of explanatory variables. The user can supply a vector of weigths, ```w``` of the same size as ```yvar```. If not supplied, the program assums uniform weigthing.
+The subroutine allows up to 8 explanatory variables. The subroutine automatically includes a constant terms if ```size(coeffs)``` equals ```n```+1, where ```n``` is the number of explanatory variables. The user can supply a vector of weights, ```w``` of the same size as ```yvar```. If not supplied, the program assums uniform weigthing.
 
 The user can also supply a ```mask``` to compute the impose a condition. The input ```mask``` is a logical array of the same size of ```yvar```. For example:
 

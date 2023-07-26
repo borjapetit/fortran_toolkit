@@ -7,11 +7,11 @@ function correlation(xvar1,xvar2,w,mask) result(corr)
   real(kind=8)            :: corr      ! output: correlation coefficient between xvar1 and xvar2
   real(kind=8)            :: xvar1(:)  ! input: first variable
   real(kind=8)            :: xvar2(:)  ! input: second variable
-  real(kind=8) , optional :: w(:)      ! input: (optional) weigths
+  real(kind=8) , optional :: w(:)      ! input: (optional) weights
   logical      , optional :: mask      ! input: (optional) retrictions on observations
 ```
 
-This function returns the correlation coefficient between two (same size) vectors $\texttt{xvar1}$ and $\texttt{xvar2}$ given some (optional) weigths $\texttt{w}$. If supplied, the vector $\texttt{w}$ should have the same size as $\texttt{xvar1}$ and $\texttt{xvar2}$. If not supplied, the program assumes uniform weigthing.
+This function returns the correlation coefficient between two (same size) vectors $\texttt{xvar1}$ and $\texttt{xvar2}$ given some (optional) weights $\texttt{w}$. If supplied, the vector $\texttt{w}$ should have the same size as $\texttt{xvar1}$ and $\texttt{xvar2}$. If not supplied, the program assumes uniform weigthing.
 
 The user can also supply a $\texttt{mask}$ to compute the conditional correlation. The variable $\texttt{mask}$ is a logical array of the same size of $\texttt{xvar1}$ and $\texttt{xvar2}$ indicating which observations should be considered.
 

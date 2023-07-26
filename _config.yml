@@ -6,15 +6,13 @@ author:
 
 theme: minima
 
-exclude: ["README.md"] [docs/*.md]
-
 # plugins:
 #   - jekyll-feed
 #   - jekyll-seo-tag
 
 # Theme-specific settings
 
-#minima:
+minima:
   # Minima date format.
   # Refer to https://shopify.github.io/liquid/filters/date/ if you want to customize this.
   #
@@ -24,8 +22,7 @@ exclude: ["README.md"] [docs/*.md]
 # If you want to link only specific pages in your header, uncomment this and add the path to the pages in
 # order as they should show up.
 #
-# header_pages:
-#   - about.md
+ header_pages:
 
 # Set to `true` to show excerpts on the homepage.
 #

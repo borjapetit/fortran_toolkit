@@ -1,5 +1,6 @@
-
-## brent
+---
+exclude: true
+---
 
 ```fortran
 subroutine brent(func,x,numiter,exitcode,x0,x1,itermax,tol,iprint)

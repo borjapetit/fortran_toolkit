@@ -1,16 +1,20 @@
 
-**UNDER CONSTRUCTION**
+# A Fortran toolkit --UNDER CONSTRUCTION--
 
-This Fortran code provides a list of functions and subroutines that I typically use in my research. The toolkit assumes double precision for real variables. It contains functions and subroutines that can be classified in four categories:
+This Fortran code provides a list of functions and subroutines that I typically use in my research, which can be classified in four categories:
 
 - General propuse
 - Statistics
 - Linear algebra
 - Optimization
 
+All functions/subroutines assume double precision for real variables.
+
 Efficiency of the algorithms is not guaranteed, and the code is distributed under the MIT license.
 
 You can download the code from this [link](https://borjapetit.github.io/fortran_toolkit/src/toolkit.f90).
+
+If you find any mistake, or have any suggestion, [contact me](mailto:bpetit@cunef.edu).
 
 ---
 

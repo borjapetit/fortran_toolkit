@@ -13,7 +13,7 @@ This function returns the variance of a variable ```var``` given some (optional)
 
 The user can also supply a ```mask``` to compute the conditional variance. The input ```mask``` is a logical array of the same size of ```var```.
 
-**Dependencies**: [```varmean```](varmean.md)
+**Dependencies**: [```error```](error.md), [```varmean```](varmean.md)
 
 [(back to index)](../index.md)
 

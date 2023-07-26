@@ -1,4 +1,4 @@
-### normalize & denormalize
+## normalize & denormalize
 
 ```fortran
 subroutine normalize(y,x,xmax,xmin)

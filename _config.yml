@@ -8,3 +8,5 @@ navbar-links:
   Author's home: "https://deanattali.com"
 
 navbar-col: "#EAEAEA"
+
+markdown: kramdown

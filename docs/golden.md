@@ -15,7 +15,7 @@ subroutine golden(func,x,y,numiter,xmax,xmin,itermax,tol,iprint)
   integer      , intent(in) , optional :: iprint    ! input: (optional) control what's printed [detault = 0]
 ```
 
-This subroutine finds the maximum of a user-supplied single-valued function, $\texttt{func}$, with one unknown using the Golden Search algorithm. The function $\texttt{func}$ must be of the form:
+This subroutine finds the maximum of a user-supplied single-valued function, `func`, with one unknown using the Golden Search algorithm. The function `func` must be of the form:
 
 ```fortran
 function func(x) result(f)
@@ -25,15 +25,15 @@ function func(x) result(f)
 end function func
 ```
 
-The idea of this algorithm is to keep shrinking an interval $(x_1,x_2)$ inside which the optimal $x$ lays. The user needs to provide the initial interval $(\texttt{xmin},\texttt{xmax})$.
+The idea of this algorithm is to keep shrinking an interval (`x1`,`x2`) inside which the optimal $x$ lays. The user needs to provide the initial interval (`xmin`,`xmax`)$.
 
-Optionally, the user can also supply a maximun number of function evaluations ($\texttt{itermax}$, 500 by default), the level of tolerance ($\texttt{tol}$, 1.0d-8 by default). Finally, the user can also control what it is printed during execution by setting the corresponding value of $\texttt{iprint}$:
+Optionally, the user can also supply a maximun number of function evaluations (`itermax`, 500 by default), the level of tolerance (`tol`, 1.0d-8 by default). Finally, the user can also control what it is printed during execution by setting the corresponding value of `iprint`:
 
-- $\texttt{iprint}$ = 0: don't print anything (default)
-- $\texttt{iprint}$ = 1: print warnings
-- $\texttt{iprint}$ = 2: print warnings and every iteration
+- `iprint` = 0: don't print anything (default)
+- `iprint` = 1: print warnings
+- `iprint` = 2: print warnings and every iteration
 
-The subroutine returns the value of $\texttt{x}$ that maximizes $\texttt{func}$, the value of $\texttt{func}$ at $\texttt{x}$ ($\texttt{y}$),  and the number of function evaluations ($\texttt{numiter}$)
+The subroutine returns the value of `x` that maximizes `func`, the value of `func` at `x` (`y`),  and the number of function evaluations (`numiter`)
 
 **Dependencies**: [```error```](error.md)
 

@@ -8,7 +8,7 @@ subroutine error(mess,i)
   integer , optional , intent(in) :: i
 ```
 
-This subroutine prints an error message $\texttt{mess}$. If the user supplies any integer $\texttt{i}$ the subroutine pauses the execution of the program until the user types any key.
+This subroutine prints an error message `mess`. If the user supplies any integer `i` the subroutine pauses the execution of the program until the user types any key.
 
 **Dependencies**: none
 

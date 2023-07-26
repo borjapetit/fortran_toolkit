@@ -11,14 +11,14 @@ subroutine interpolation(pos,wth,xnow,xgrid)
 
 This subroutine finds the closest point in a given grid and return its position (```pos```) and the relative distance (```wth```) such that:
 
-$$\texttt{xnow} = \texttt{vec}(\texttt{pos})\cdot\texttt{wth} \ + \ \texttt{vec}(\texttt{pos}-1)\cdot(\texttt{1.0d0}-\texttt{wth})$$
+```
+xnow = vec(pos)·wth + vec(pos -1)·(1-wth)
+```
 
 - If ```xnow``` < min(```xgrid```) the subroutine takes min(```xgrid```) as the interpolated value of ```xnow```.
 - If ```xnow``` > max(```xgrid```) the subroutine takes max(```xgrid```) as the interpolated value of ```xnow```.
 
-The vector ```xvec``` should be monotonic, so that 
-
-$$\texttt{xgrid}(i) > \texttt{xgrid(i-1)} \ \ \ \text{or} \ \ \  \texttt{xgrid}(i) < \texttt{xgrid(i-1)}  \ \ \ \ \ \forall i\in[1,n]$$
+The vector ```xvec``` should be monotonic, so that ```xgrid(i) > xgrid(i-1)``` or ```xgrid(i) < xgrid(i-1)``` is satisfied for any `i`.
 
 This subroutine is mainly used by the function [```interpolate```](interpolate.md).
 

@@ -7,21 +7,21 @@ function grid(maxv,minv,n,s) result(v)
   real(kind=8)            :: v(n)  ! output: generated grid
   real(kind=8)            :: maxv  ! input: upper-bound of x
   real(kind=8)            :: minv  ! input: lower-bound of x
-  integer                 :: n     ! input: number of points in teh grid
+  integer                 :: n     ! input: number of points in the grid
   real(kind=8) , optional :: s     ! input: (optional) curvatura parameter 
 ```
 
-This function creates a grid of $\texttt{n}$ points between $\texttt{maxv}$ and $\texttt{minv}$ with a curvature of $\texttt{s}$:
+This function creates a grid of `n` points between `maxv` and `maxv` with a curvature of `s`:
 
-- if $\texttt{s}=1$ or missing: linear grid (default)
-- if $\texttt{s}>1$: more grids points around $\texttt{maxv}$
-- if $\texttt{s}<1$: more grids points around $\texttt{minv}$
+- if `s=1` or missing: linear grid (default)
+- if `s>1`: more grids points around `maxv`
+- if `s<1`: more grids points around `minv`
 
 **Dependencies**: [`error`](error.md)
 
 [(back to index)](../index.md)
 
---
+---
 
 **Example**
 

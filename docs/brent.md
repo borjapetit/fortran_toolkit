@@ -30,7 +30,7 @@ Optionally, the user can also supply a level of tolerance (```tol```) and maximu
 - ```iprint``` = 1: print warnings
 - ```iprint``` = 2: print warnings and every iteration
 
-The subroutine returns the value of ```x``` that makes ```func``` smaller than ```tol``` in absolute value (close enought to zero), the number of function evaluations (```numiter```), and an indicator, ```exitcode```:
+The subroutine returns the value of ```x``` that makes ```func``` close enought to zero, the number of function evaluations (```numiter```), and an indicator, ```exitcode```:
 
 - ```exitcode``` = 0: the algorithm found a root
 - ```exitcode``` = 1: either ```x0``` or ```x1``` is a root of ```func```

@@ -8,7 +8,7 @@ function diag(mat) result(vec)
   real(kind=8) :: vec(size(mat,dim=1))  ! output: vector with main diagonal of mat
 ```
 
-This function returns the main diagonal of a matric $\texttt{mat}$.
+This function returns the main diagonal of a matric `mat`.
 
 **Dependencies**: [```error```](error.md)
 

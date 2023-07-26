@@ -8,7 +8,7 @@ elemental function cdfn(x) result(f)
   real(kind=8)             :: f   ! output: cdf of standard normal at x
 ```
 
-This function returns the cdf of a standard normal distribution, $\texttt{f}=\Phi(\texttt{x})$. This subroutine is defined as $\texttt{elemental}$.
+This function returns the cdf of a standard normal distribution. This subroutine is defined as `elemental`.
 
 **Dependencies**: none
 

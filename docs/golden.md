@@ -14,7 +14,7 @@ subroutine golden(func,x,y,numiter,xmax,xmin,itermax,tol,iprint)
   integer      , intent(in) , optional :: iprint    ! input: (optional) control what's printed [detault = 0]
 ```
 
-This subroutine finds the maximum of a user-supplied single-valued function, $\texttt{func}$, with one unknown using the Golden Search algorithm. The function $\texttt{func}$ must be f the form:
+This subroutine finds the maximum of a user-supplied single-valued function, $\texttt{func}$, with one unknown using the Golden Search algorithm. The function $\texttt{func}$ must be of the form:
 
 ```fortran
 function func(x) result(f)
@@ -24,7 +24,9 @@ function func(x) result(f)
 end function func
 ```
 
-The user must also supply an upper- and lower-bound range ($\texttt{xmin}$ and $\texttt{xmax}$) for the function argument. Optionally, the user can also supply a maximun number of fucntion evaluations ($\texttt{itermax}$, 500 by default), the level of tolerance ($\texttt{tol}$, 1.0d-8 by default). Finally, the user can also control what it is printing during execution by setting the corresponding value of $\texttt{iprint}$:
+The idea of this algorithm is to keep shrinking an interval $(x_1,x_2)$ inside which the optimal $x$ lays. The user needs to provide the initial interval $(\texttt{xmin},\texttt{xmax})$.
+
+Optionally, the user can also supply a maximun number of function evaluations ($\texttt{itermax}$, 500 by default), the level of tolerance ($\texttt{tol}$, 1.0d-8 by default). Finally, the user can also control what it is printed during execution by setting the corresponding value of $\texttt{iprint}$:
 
 - $\texttt{iprint}$ = 0: don't print anything (default)
 - $\texttt{iprint}$ = 1: print warnings
@@ -40,6 +42,14 @@ The subroutine returns the value of $\texttt{x}$ that maximizes $\texttt{func}$,
 
 **Example**
 
+We want to maximize the function
+
+$$f(x) = 10 x^{0.3} - x$$
+
+This function is maximized at $x=4.8040$, with $f(4.8040) = 11.2093$.
+
+The following code maximizes the function $f(x)$ using the Golden Search algorithm:
+
 ```fortran
 program example
 
@@ -51,14 +61,10 @@ program example
   real(dp) :: xmax,xmin
 
   ! max and min values for x
-  xmax = 12.0 ; xmin = 4.0
+  xmax = 10.0 ; xmin = 0.0
 
   ! maximize the function func
-  call golden(func,xvar,f,xmax,xmin)
-
-  ! maximize the function func set a tolerance of 0.5 and 
-  ! a maximum of function evaluations of 1000
-  call golden(func,xvar,f,xmax,xmin,itermax=1000,tol=0.5d0)
+  call golden(func,xvar,f,xmax,xmin,iprint=2)
 
   return
 
@@ -73,3 +79,57 @@ program example
 
 end program example
 ```
+
+The output is:
+
+```
+ starting golden search algorithm
+
+ Iteration =   19  | x1 =     2.3607  x2 =     3.8197  | f(x1) =    10.5786  f(x2) =    11.1292
+ Iteration =   20  | x1 =     3.8197  x2 =     5.2786  | f(x1) =    11.1292  f(x2) =    11.1937
+ Iteration =   21  | x1 =     5.2786  x2 =     6.1803  | f(x1) =    11.1937  f(x2) =    11.0901
+ Iteration =   22  | x1 =     4.7214  x2 =     5.2786  | f(x1) =    11.2088  f(x2) =    11.1937
+ Iteration =   23  | x1 =     4.3769  x2 =     4.7214  | f(x1) =    11.1953  f(x2) =    11.2088
+ Iteration =   24  | x1 =     4.7214  x2 =     4.9342  | f(x1) =    11.2088  f(x2) =    11.2081
+ Iteration =   25  | x1 =     4.5898  x2 =     4.7214  | f(x1) =    11.2059  f(x2) =    11.2088
+ Iteration =   26  | x1 =     4.7214  x2 =     4.8027  | f(x1) =    11.2088  f(x2) =    11.2093
+ Iteration =   27  | x1 =     4.8027  x2 =     4.8529  | f(x1) =    11.2093  f(x2) =    11.2091
+ Iteration =   28  | x1 =     4.7716  x2 =     4.8027  | f(x1) =    11.2092  f(x2) =    11.2093
+ Iteration =   29  | x1 =     4.8027  x2 =     4.8219  | f(x1) =    11.2093  f(x2) =    11.2093
+ Iteration =   30  | x1 =     4.7908  x2 =     4.8027  | f(x1) =    11.2093  f(x2) =    11.2093
+ Iteration =   31  | x1 =     4.8027  x2 =     4.8100  | f(x1) =    11.2093  f(x2) =    11.2093
+ Iteration =   32  | x1 =     4.7981  x2 =     4.8027  | f(x1) =    11.2093  f(x2) =    11.2093
+ Iteration =   33  | x1 =     4.8027  x2 =     4.8055  | f(x1) =    11.2093  f(x2) =    11.2093
+ Iteration =   34  | x1 =     4.8009  x2 =     4.8027  | f(x1) =    11.2093  f(x2) =    11.2093
+ Iteration =   35  | x1 =     4.8027  x2 =     4.8037  | f(x1) =    11.2093  f(x2) =    11.2093
+ Iteration =   36  | x1 =     4.8037  x2 =     4.8044  | f(x1) =    11.2093  f(x2) =    11.2093
+ Iteration =   37  | x1 =     4.8033  x2 =     4.8037  | f(x1) =    11.2093  f(x2) =    11.2093
+ Iteration =   38  | x1 =     4.8037  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
+ Iteration =   39  | x1 =     4.8040  x2 =     4.8041  | f(x1) =    11.2093  f(x2) =    11.2093
+ Iteration =   40  | x1 =     4.8039  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
+ Iteration =   41  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
+ Iteration =   42  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
+ Iteration =   43  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
+ Iteration =   44  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
+ Iteration =   45  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
+ Iteration =   46  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
+ Iteration =   47  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
+ Iteration =   48  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
+ Iteration =   49  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
+ Iteration =   50  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
+ Iteration =   51  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
+ Iteration =   52  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
+ Iteration =   53  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
+ Iteration =   54  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
+ Iteration =   55  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
+ Iteration =   56  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
+ Iteration =   57  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
+ Iteration =   58  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
+ 
+ Solved: Iterations =   58  | x =     4.8040  | f(x) =    11.2093
+```
+
+
+
+
+

@@ -1,22 +1,24 @@
-# broyden
+## broyden
 
 ```fortran
 subroutine broyden(j1,j0,x1,x0,f1,f0)
   implicit none
-  real(kind=8) , intent(in)  :: x1(:),f1(:)
-  real(kind=8) , intent(in)  :: x0(:),f0(:)
-  real(kind=8) , intent(in)  :: j0(:,:)
-  real(kind=8) , intent(out) :: j1(:,:)
+  real(kind=8) , intent(in)  :: x1(:)    ! input: initial value of x
+  real(kind=8) , intent(in)  :: x0(:)    ! input: final value of x
+  real(kind=8) , intent(in)  :: f1(:)    ! input: value of function at x = x0
+  real(kind=8) , intent(in)  :: f0(:)    ! input: value of function at x = x1
+  real(kind=8) , intent(in)  :: j0(:,:)  ! input: jacobian at x = x0
+  real(kind=8) , intent(out) :: j1(:,:)  ! output: updated jacobian
 ```
 
-_Dependencies_: none
+This subroutine applies the Boryden's method to update a Jacobian matrix. You can learn more about this method in this [link](https://en.wikipedia.org/wiki/Broyden%27s_method). In particular, this subroutine returns an opproximation to the jacobian matrix around the point $x=x_1$, without function evaluations.
 
-This subroutine applies the Boryden's method to update a Jacobian matrix.
+The user must supply a pair of points $\texttt{x0}$ and $\texttt{x1}$, the value of the function evaluated at those points $\texttt{f0}$ and $\texttt{f1}$, and the jacobian matrix $\texttt{j0}$ evaluated at $\texttt{x0}$.
 
-Imagine we have an $m$-dimensional function $f$ in $n$ unknows. We evaluate two points $x_0$ and $x_1$, $f_1 = f(x_1)$ and $f_0 = f(x_0)$, and we compute the numerical jacobian of the function $f$ around $x=x_0$. This subroutine returns an opproximation to the jacobian matrix arounf the point $x=x_1$. The user must supply a pair of points ```x0``` and ```x1```, the value of the function evaluated at thos epoints ```f0``` and ```f1```, and the jacobian matrix ```j0``` evaluated at ```x0```.
-
-You can learn more about this method in this [link](https://en.wikipedia.org/wiki/Broyden%27s_method).
+_Note: this function is used in [`lmmin`](lmmin.md)_
 
 **Dependencies**: none
 
-[(back to index)](index.md)
+[(back to index)](../index.md)
+
+--

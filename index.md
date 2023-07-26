@@ -75,4 +75,4 @@ Algorithms for systems of equations:
 
 **Constrained optimization**: none of the algorithms in this toolkit is explicitly written to allow for constraints, but one can transform a contrained optimization problem into an uncontrained one using the [```normalize``` and ```denormalize```](docs/normalize.md) subroutines.
 
----
+

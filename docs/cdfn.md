@@ -3,11 +3,11 @@
 ```fortran
 elemental function cdfn(x) result(f)
   implicit none
-  real(kind=8), intent(in) :: x
-  real(kind=8)             :: f
+  real(kind=8), intent(in) :: x   ! input
+  real(kind=8)             :: f   ! output: cdf of standard normal at x
 ```
 
-This function returns the cdf of a standard normal distribution, ```f``` $=\Phi(x)$. This subroutine is defined as ```elemental```.
+This function returns the cdf of a standard normal distribution, $\texttt{f}=\Phi(\texttt{x})$. This subroutine is defined as $\texttt{elemental}$.
 
 **Dependencies**: none
 

@@ -1,17 +1,17 @@
 
-### brent
+## brent
 
 ```fortran
 subroutine brent(func,x,numiter,exitcode,x0,x1,itermax,tol,iprint)
   external                             :: func      ! user-supplied function
-  real(kind=8) , intent(out)           :: x         ! root
-  integer      , intent(out)           :: numiter   ! number of functions evaluations
-  integer      , intent(out)           :: exitcode  ! exit code
-  real(kind=8) , intent(in)            :: x0        ! min value of x
-  real(kind=8) , intent(in)            :: x1        ! max value of x
-  real(kind=8) , intent(in) , optional :: tol       ! detault = 1.0d-8
-  integer      , intent(in) , optional :: itermax   ! detault = 500
-  integer      , intent(in) , optional :: iprint    ! detault = 0
+  real(kind=8) , intent(out)           :: x         ! output: root
+  integer      , intent(out)           :: numiter   ! output: number of functions evaluations
+  integer      , intent(out)           :: exitcode  ! output: exit code
+  real(kind=8) , intent(in)            :: x0        ! input: lower-bound of x
+  real(kind=8) , intent(in)            :: x1        ! input: upper-bound of x
+  real(kind=8) , intent(in) , optional :: tol       ! input: (optional) level of tolerance [detault = 1.0d-8]
+  integer      , intent(in) , optional :: itermax   ! input: (optional) maximum function evaluations [default = 500]
+  integer      , intent(in) , optional :: iprint    ! input: (optional) control what's printed [detault = 0]
 ```
 
 Find the root of a single-valued univariate equation using the Brent's method (more info [here](https://en.wikipedia.org/wiki/Brent%27s_method)). The user must supply a function ```func```, and an two values of ```x```  such that such that ```func```(```x0```) and ```func```(```x1```) have opposite signs. The function must be of the form:

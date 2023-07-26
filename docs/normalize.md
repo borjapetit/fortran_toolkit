@@ -1,28 +1,48 @@
 ## normalize & denormalize
 
+The optimization subroutines included in this toolkit are design to handle unconstrained problems. However, the $\texttt{normalize}$ and $\texttt{denormalize}$ subroutines can transform a contrained optimization problem into an unconstrained one.
+
+Imagine we want to maxmize a function $f(x):\mathbb{R}^n \to \mathbb{R}^m$, where $1\leq m\leq n$. Imagine we want to maximize the function $f$ contidional on $x\in\mathbb{X}^n$:
+
+$$\max_{x\in\mathbb{X}^n} \ f(x)$$
+
+None of the subroutines in the toolkit can solve this problem directly. However, we can define an intermediate function $g(z)$ such that $g(z):\mathbb{R}^n\to\mathbb{X}^n$. Using this function, we can rewrite out original problem as:
+
+$$\max_{x\in(x0,x_1)} \ f(x) \ \equiv \ \max_{z} \ f(g(z)) \ \ \ \text{with} \ \ x = g(z)$$
+
+The problem $\max_{z} \ f(g(z))$ is an unconstrained optimization problem that can be solve with the subrotuines included in this toolkit.
+
+### normalize
+
 ```fortran
 subroutine normalize(y,x,xmax,xmin)
   implicit none
-  real(kind=8) , intent(in)  :: xmax,xmin,x
-  real(kind=8) , intent(out) :: y
+  real(kind=8) , intent(out) :: y     ! output: unbounded variable
+  real(kind=8) , intent(in)  :: x     ! input: bounded variable
+  real(kind=8) , intent(in)  :: xmax  ! input: upper-bound of x
+  real(kind=8) , intent(in)  :: xmin  ! input: lower-bound of x
 ```
 
-This subroutine takes a bounded varibale  ```x```, contrained to be between ```xmin``` and ```xmax```, and return an unbounded variable ```y``` using the following transformation;
+This subroutine, that corresponds to the inverse function $g^{-1}(z)$ explained above, takes a bounded varibale $\texttt{x}$, contrained to be between $\texttt{xmin}$ and $\texttt{xmax}$, and return an unbounded variable $\texttt{y}$ using the following transformation:
 
 $$y = \log\left(\frac{\texttt{x} - \texttt{xmin}}{\texttt{xmax} - \texttt{x}}\right)$$
+
+### denormalize
 
 ```fortran
 subroutine denormalize(y,x,xmax,xmin)
   implicit none
-  real(kind=8) , intent(in)  :: xmax,xmin,y
-  real(kind=8) , intent(out) :: x
+  real(kind=8) , intent(in)  :: y     ! input: unbounded variable
+  real(kind=8) , intent(in)  :: xmax  ! input: upper-bound of the bounded variable
+  real(kind=8) , intent(in)  :: xmin  ! input: lower-bound of the bounded variable
+  real(kind=8) , intent(out) :: x     ! output: bounded variable corresponding to y
 ```
 
-This subroutine takes an unbounded varibale ```y``` and returns a bounded variable ```x```, contrained to be between ```xmin``` and ```xmax```, applying the following transformation
+This subroutine, that corresponds to the function $g(z)$ explained above, takes an unbounded varibale $\texttt{y}$ and applies the transformation:
 
-$$\texttt{x} = \texttt{xmin} + (\texttt{xmax} - \texttt{xmin})\cdot\left( \frac{\exp(\texttt{y})}{ 1 + \exp(\texttt{y})}\right)$$
+$$ \texttt{x} = \texttt{xmin} + \left(\frac{\exp(y)}{1+\exp(y)} \right)\cdot(\texttt{xmax}-\texttt{xmin}) $$
 
-**Note**: These subroutines are useful to solve contrained problems using standard uncontrained optimization algorithms.
+to return a bounded variable $\texttt{x}$, contrained to be between $\texttt{xmin}$ and $\texttt{xmax}$.
 
 **Dependencies**: none
 
@@ -32,7 +52,7 @@ $$\texttt{x} = \texttt{xmin} + (\texttt{xmax} - \texttt{xmin})\cdot\left( \frac{
 
 **Example**
 
-We want to minimize a function ```func``` over a 2-dimensional vector ```x```. The variables are contrained to be between 10 and 0, and between 5 and -5. To find the minimum using the Nelder-Mead algorithm (see the [```simplex```](simplex.md) subroutine) we can write an auxiliry function that takes a 2-dimensional unbounded vector ```y```, maps ```y``` onto ```x```, and evaluate the funciton ```func```.
+We want to minimize a function $\texttt{func}$ over a 2-dimensional vector $\texttt{x}$. The variables are contrained to be between 10 and 0, and between 5 and -5. To find the minimum we want to use the Nelder-Mead algorithm (see the [```simplex```](simplex.md) subroutine) we can write an auxiliry function that takes a 2-dimensional unbounded vector $\texttt{y}$, maps $\texttt{y}$ onto $\texttt{x}$, and evaluate the funciton $\texttt{func}$.
 
 ```fortran
 program main

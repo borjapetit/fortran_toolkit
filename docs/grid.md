@@ -1,21 +1,23 @@
 
-### grid
+## grid
 
 ```fortran
 function grid(maxv,minv,n,s) result(v)
   implicit none
-  real(kind=8)            :: maxv,minv,v(n)
-  real(kind=8) , optional :: s
-  integer                 :: n
+  real(kind=8)            :: v(n)  ! output: generated grid
+  real(kind=8)            :: maxv  ! input: upper-bound of x
+  real(kind=8)            :: minv  ! input: lower-bound of x
+  integer                 :: n     ! input: number of points in teh grid
+  real(kind=8) , optional :: s     ! input: (optional) curvatura parameter 
 ```
 
-This function creates a grid of ```n``` points between ```maxv``` and ```minv``` with a curvature of ```s```:
+This function creates a grid of $\texttt{n}$ points between $\texttt{maxv}$ and $\texttt{minv}$ with a curvature of $\texttt{s}$:
 
-- if ```s```=1 or missing: linear grid (default)
-- if ```s```>1: more grids points around ```maxv```
-- if ```s```<1: more grids points around ```minv```
+- if $\texttt{s}=1$ or missing: linear grid (default)
+- if $\texttt{s}>1$: more grids points around $\texttt{maxv}$
+- if $\texttt{s}<1$: more grids points around $\texttt{minv}$
 
-**Dependencies**: [```error```](error.md)
+**Dependencies**: [`error`](error.md)
 
 [(back to index)](../index.md)
 

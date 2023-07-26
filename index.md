@@ -23,7 +23,7 @@ If you find any mistake, or have any suggestion, [contact me](mailto:bpetit@cune
 ### General propuse
 
 - [grid](#grid): generate a grid for a continuous variable.
-- [interpolation](docs/interpolation.md): interpolate a value over a grid, returning position and distance.
+- [interpolation](#interpolation.md): interpolate a value over a grid, returning position and distance.
 - [interpolate](docs/interpolate.md): linearly interpolate a value over an n-dimensional grid (up to dimension 6).
 - [timing](docs/timing.md): returns the number of seconds since 00:00h of the 1st day of the month (robust to parelalization).
 - [multiplo](docs/multiplo.md): returns ```.TRUE.``` if an integer is a multiple of another user-provided integer.
@@ -31,7 +31,9 @@ If you find any mistake, or have any suggestion, [contact me](mailto:bpetit@cune
 - [error](docs/error.md): print error message and interrupt execution.
 
 
-#### grid <a name="grid"></a>
+<a name="grid"></a>
+
+#### grid 
 
 ```fortran
 function grid(maxv,minv,n,s) result(v)
@@ -65,7 +67,9 @@ vector = grid( 1.d0 , -1.0d0 , 500 , 2.0d0 )
 
 ---
 
-#### interpolation <a name="grid"></a>
+<a name="interpolation"></a>
+
+#### interpolation 
 
 ```fortran
 subroutine interpolation(pos,wth,xnow,xgrid)

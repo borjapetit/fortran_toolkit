@@ -12,6 +12,10 @@ This function returns a 1-dimensional array ```vec``` with all the elements of a
 
 **Dependencies**: none
 
+**Note**: ```vect``` is an interface that calls specific functions depending on the type of ```mat``` (integer or real) and depending on the dimensions of ```mat```. The specific functions are:
+- ```mat``` is real $ \ \to \ $ ```vectorize_dp_2d```, ```vectorize_dp_3d```, ```...```, ```vectorize_in_6d```
+- ```mat``` is integer $ \ \to \ $ ```vectorize_in_2d```, ```vectorize_in_3d```, ```...```, ```vectorize_in_6d```
+
 [(back to index)](../index.md)
 
 ---
@@ -27,8 +31,6 @@ vec = vect(mat)
 print * , 'vec =', vec   ! vec =  1.00  3.00  2.00  4.00
 ```
 
-_Note_: ```vect``` is an interface that calls specific functions depending on the type of ```mat``` (integer or real) and depending on the dimensions of ```mat```. The specific functions are:
-- ```mat``` is real $ \ \to \ $ ```vectorize_dp_2d```, ```vectorize_dp_3d```, ```...```, ```vectorize_in_6d```
-- ```mat``` is integer $ \ \to \ $ ```vectorize_in_2d```, ```vectorize_in_3d```, ```...```, ```vectorize_in_6d```
+
 
 

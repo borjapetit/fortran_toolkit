@@ -1,4 +1,6 @@
-## cumsum
+---
+exclude: true
+---
 
 ```fortran
 function cumsum(vec0) result(vec1)

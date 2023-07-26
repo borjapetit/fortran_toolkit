@@ -1,18 +1,19 @@
 ### golden
 
 ```fortran
-subroutine golden(func,x,y,xmax,xmin,itermax,tol)
+subroutine golden(func,x,y,numiter,xmax,xmin,itermax,tol)
   implicit none
   external                             :: func
-  real(kind=8) , intent(out)           :: x
-  real(kind=8) , intent(out)           :: y
-  real(kind=8) , intent(in)            :: xmax
-  real(kind=8) , intent(in)            :: xmin
-  real(kind=8) , intent(in) , optional :: tol
-  integer      , intent(in) , optional :: itermax
+  real(kind=8) , intent(out)           :: x         ! output: arg max of func
+  real(kind=8) , intent(out)           :: y         ! output: max of func
+  integer      , intent(out)           :: numiter   ! output: number of function evaluations
+  real(kind=8) , intent(in)            :: xmax      ! input: upper-bound of x
+  real(kind=8) , intent(in)            :: xmin      ! input: lower-bound of x
+  real(kind=8) , intent(in) , optional :: tol       ! input: (optional) level of tolerance
+  integer      , intent(in) , optional :: itermax   ! input: (optional) maximum function evaluations
 ```
 
-This subroutine finds the maximum of a user supplied single-valued function, ```func```, with one unknown using the Golden Search algorithm, where
+This subroutine finds the maximum of a user-supplied single-valued function, ```func```, with one unknown using the Golden Search algorithm, where
 
 - ```x``` is the $\arg\max$ ```func```.
 - ```y``` is ```func```(```x```)

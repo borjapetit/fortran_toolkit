@@ -19,13 +19,6 @@ do i = 1,numsol
   call random_number(xx) ; x0(2,i) = dble(10.00)*(xx-dble(0.5))
 end do
 
-
-call normalize(aveconv,dble(3.0),huge(uno),-huge(uno))
-
-print * , aveconv
-
-read * , aveconv
-
 write(*,99) '                                                                      '
 write(*,99) '                                                                      '
 write(*,99) ' %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
@@ -43,6 +36,13 @@ write(*,99) '                                                                   
 
 ! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+call brent(func_brent,xx,iter1,j1,0.00d0,5.00d0,iprint = 2)
+
+print * , iter1 , j1 
+read * , j1
 
 write(*,99) '                                                                      '
 write(*,99) ' ---------------------------------------------------------------------'
@@ -264,6 +264,13 @@ contains
     y = dble(0.26)*( x(1)*x(1) + x(2)*x(2)) - dble(0.48)*x(1)*x(2)
     return
   end function matyas_1d
+
+  function func_brent(x) result(y)
+    implicit none
+    real(dp) :: x,y
+    y = exp(-x) - dble(0.01)*x
+    return
+  end function func_brent
 
 end program test
     

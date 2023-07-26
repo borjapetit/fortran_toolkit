@@ -14,7 +14,7 @@ subroutine brent(func,x,numiter,exitcode,x0,x1,itermax,tol,iprint)
   integer      , intent(in) , optional :: iprint    ! detault = 0
 ```
 
-Find the root of a single-valued univariate equation using the Brent's method (more info [here](https://en.wikipedia.org/wiki/Brent%27s_method)). The user must supply a function ```func```, and a maximum and minimum value of ```x```. The root of ```func``` must be between ```x0``` and ```x1```. The function must be of the form:
+Find the root of a single-valued univariate equation using the Brent's method (more info [here](https://en.wikipedia.org/wiki/Brent%27s_method)). The user must supply a function ```func```, and an two values of ```x```  such that such that ```func```(```x0```) and ```func```(```x1```) have opposite signs. The function must be of the form:
 
 ```fortran
 function func(x) result(f)
@@ -24,17 +24,19 @@ function func(x) result(f)
 end function func
 ```
 
-Optionally, the user can also supply a maximun number of fucntion evaluations (```itermax```), the level of tolerance (```tol```). Finally, the user can also control what the subroutien prints by setting the corresponding value of ```iprint```:
+Optionally, the user can also supply a level of tolerance (```tol```) and maximun number of function evaluations (```itermax```). Finally, the user can also control what it is printing during execution by setting the corresponding value of ```iprint```:
 
 - ```iprint``` = 0: don't print anything (default)
-- ```iprint``` = 1: print main results
-- ```iprint``` = 2: print main results and each iteration
+- ```iprint``` = 1: print warnings
+- ```iprint``` = 2: print warnings and every iteration
 
 The subroutine returns the value of ```x``` that makes ```func``` smaller than ```tol``` in absolute value (close enought to zero), the number of function evaluations (```numiter```), and an indicator, ```exitcode```:
 
 - ```exitcode``` = 0: the algorithm found a root
-- ```exitcode``` = 1: the root is not within the interval (```x0```, ```x1```)
-- ```exitcode``` = 2: maximum number of function evaluations reached
+- ```exitcode``` = 1: either ```x0``` or ```x1``` is a root of ```func```
+- ```exitcode``` = 2: the root is not within the interval (```x0```, ```x1```)
+- ```exitcode``` = 3: the points ```x0``` and ```x1``` are too close
+- ```exitcode``` = 9: maximum number of function evaluations reached
 
 **Dependencies**: none
 

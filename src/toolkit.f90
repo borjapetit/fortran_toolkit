@@ -1097,7 +1097,7 @@ module toolkit
   ! finds the maximum of a single-valued function with uno unknown
   ! the user should make sure the maximum of "func" is between "xmin" and "xmax"
 
-  subroutine golden(func,x,y,xmax,xmin,itermax,tol)
+  subroutine golden(func,x,y,numiter,xmax,xmin,itermax,tol,iprint)
 
     ! this subroutine finds the maximum of a single-valued function with uno unknown
     ! using the golden search algorithm
@@ -1120,18 +1120,24 @@ module toolkit
     !
     ! the outputs of the subroutine are:
     !
-    !   x: the value of x that maximizes "func"
-    !   y: the value of the function at the point x
+    !   x:        the value of x that maximizes "func"
+    !   y:        the value of the function at the point x
+    !   numiter:  number of function evaluations
 
     implicit none
-    external                         :: func
-    real(dp) , intent(in)            :: xmax,xmin
-    real(dp) , intent(out)           :: x,y
+    external               :: func
+    real(dp) , intent(in)  :: xmax
+    real(dp) , intent(in)  :: xmin
+    real(dp) , intent(out) :: x
+    real(dp) , intent(out) :: y
+    integer  , intent(out) :: numiter
+    
     real(dp) , intent(in) , optional :: tol
     integer  , intent(in) , optional :: itermax
+    integer  , intent(in) , optional :: iprint
     real(dp) , parameter             :: alpha=0.61803399
-    real(dp)                         :: x0,x1,x2,x3,f1,f2,tolgold
-    integer                          :: it,maxiter
+    real(dp)                         :: x0,x1,x2,x3,f1,f2,toler
+    integer                          :: maxiter,ipri
 
     interface
       function func(xx) result(ff)
@@ -1139,29 +1145,38 @@ module toolkit
       end function func
     end interface
 
-    tolgold = 1.0d-8 ; if (present(tol)    ) tolgold = tol
+    toler   = 1.0d-8 ; if (present(tol)    ) toler   = tol
     maxiter = 500    ; if (present(itermax)) maxiter = itermax
+    ipri    = 0      ; if (present(iprint) ) ipri    = iprint
 
-    if (abs(xmax-xmin).lt.tol) call error('error in golden: xmax and xmin too close')
+    if (ipri.ge.1) write(*,'(/,a,/)') ' starting golden search algorithm'
+
+    if (abs(x0-x3).lt.toler) then
+      if (ipri.ge.1) write(*,99) ' Not solved: xmax and xmin are too close'
+      f1 = func(xmax) ; numiter = 1 ; x = xmax ; return
+    end if
 
     x0 = min(xmax,xmin)
     x3 = max(xmax,xmin)
-    x1 = alpha*x0 + (uno-alpha)*x3 ; f1 = func(x1)
-    x2 = alpha*x3 + (uno-alpha)*x1 ; f2 = func(x2)
 
-    it = 0
-    do while (abs(x0-x3).gt.tolgold*(abs(x2)+abs(x1)) .and. abs(x0-x3).gt.tol .and. it.lt.maxiter)
-      it = it + 1
+    x1 = alpha*x0 + (uno-alpha)*x3 ; f1 = func(x1) ; numiter = numiter + 1
+    x2 = alpha*x3 + (uno-alpha)*x1 ; f2 = func(x2) ; numiter = numiter + 1
+
+    do while (abs(x0-x3).gt.toler*(abs(x2)+abs(x1)) .and. abs(x0-x3).gt.toler .and. numiter.lt.maxiter)
+      numiter = numiter + 1
       if (f2.gt.f1) then
         x0 = x1
         x1 = x2
         f1 = f2
-        x2 = alpha*x1 + (uno-alpha)*x3 ; f2 = func(x2)
+        x2 = alpha*x1 + (uno-alpha)*x3 ; f2 = func(x2) ; numiter = numiter + 1
       else
         x3 = x2
         x2 = x1
         f2 = f1
-        x1 = alpha*x2 + (uno-alpha)*x0 ; f1 = func(x1)
+        x1 = alpha*x2 + (uno-alpha)*x0 ; f1 = func(x1) ; numiter = numiter + 1 
+      end if
+      if (ipri.ge.1) then
+        write(*,99) ' Iteration = ',numiter,' x1 = ',x1,' f(x1) = ',f1,' x2 = ',x2,' f(x2) = ',f2
       end if
     end do
 
@@ -1171,14 +1186,21 @@ module toolkit
       y = f2 ; x = x2
     end if
 
+    if (ipri.ge.1) then
+      write(*,99) ' '
+      write(*,99) ' Solved: x = ',x,' y = ',y
+      write(*,99) ' '
+    end if
+
     return
+    99 format (a,i4,a,f10.4,a,f10.4)
   end subroutine golden
 
   ! ----------------------------------------------------------------------------
   ! brent's method
-  ! hybrid root-finding algorithm combining the bisection and the secant methods
+  ! root-finding algorithm combining the bisection and secant methods
 
-  subroutine brent(func,x,iy,ind,x0,x1,itermax,tol,iprint)
+  subroutine brent(func,x,numiter,exitcode,x0,x1,itermax,tol,iprint)
 
     ! this subroutine finds the root of a user-supplied single-valued function
     ! with one unknown using the brent's method
@@ -1198,20 +1220,27 @@ module toolkit
     !
     !   itermax:  max number of iterations (default = 500)
     !   tol:      tolerance level (default = 1.0d-8)
+    !   iprint:   indicator for printing results (default = 0)
+    !               0: print no results
+    !               1: print main results
+    !               2: print all the iterations
     !
     ! the outputs of the subroutine are:
     !
-    !   x:    the value of x that maximizes "func"
-    !   iy:   number of function evaluations required
-    !   ind:  exit indicator, taking value:
-    !           0: solved, func(x) = 0
-    !           1: not solved
+    !   x:         the value of x that maximizes "func"
+    !   numiter:   number of function evaluations required
+    !   exitcode:  exit indicator, taking value:
+    !                0: the algorithm found a root
+    !                1: either x0 or x1 is a root of func
+    !                2: the root is not within the interval (x0,x1)
+    !                3: the points x0 and x1 are too close
+    !                9: maximum number of function evaluations reached
 
     implicit none
     external                         :: func
     real(dp) , intent(out)           :: x
-    integer  , intent(out)           :: iy
-    integer  , intent(out)           :: ind
+    integer  , intent(out)           :: numiter
+    integer  , intent(out)           :: exitcode
     real(dp) , intent(in)            :: x0,x1
     real(dp) , intent(in) , optional :: tol
     integer  , intent(in) , optional :: itermax
@@ -1229,70 +1258,113 @@ module toolkit
     maxiter = 500    ; if (present(itermax)) maxiter = itermax
     ipri    = 0      ; if (present(iprint) ) ipri    = iprint
 
-    if (abs(x1-x0).lt.tol) call error('error in golden: x1 and x0 too close')
-
     if (ipri.ge.1) write(*,'(/,a,/)') ' starting brent algorithm'
 
-    xa = min(x0,x1) ; ya = func(xa)
-    xb = max(x0,x1) ; yb = func(xb)
+    numiter = 0
 
     ! if function is of equal sign at both initial points, return
-    if (ya*yb.gt.cero) then
+    if (abs(x1-x0).lt.toler) then ; exitcode = 3
+      if (ipri.ge.1) write(*,99) ' Not solved: x1 and x0 too close'
+      x = x1
+      return
+    end if
+
+    xa = min(x0,x1) ; ya = func(xa) ; numiter = numiter + 1
+    xb = max(x0,x1) ; yb = func(xb) ; numiter = numiter + 1
+
+    ! if function is of equal sign at both initial points, return
+    if (ya*yb.gt.cero) then ; exitcode = 0 ; numiter = 2
       if (ipri.ge.1) write(*,99) ' Not solved: invalid initial values'
-      ind = 1 ; x = xa ; return
+      if (abs(ya).lt.abs(yb)) x = xa
+      if (abs(ya).ge.abs(yb)) x = xb
+      return
+    end if
+
+    ! if initial point is already a root, return
+    if (abs(ya).lt.toler .or. abs(yb).lt.toler) then ; exitcode = 1 ; numiter = 0
+      if (ipri.ge.1) write(*,99) ' Not solved: initial point is already a root'
+      if (abs(ya).lt.abs(yb)) x = xa
+      if (abs(ya).ge.abs(yb)) x = xb
+      return
     end if
 
     ! reorder initial points so that abs(ya) > abs(yb)
     if (abs(ya).lt.abs(yb)) then
       xc = xb ; xb = xa ; xa = x0 ; yc = ya ; ya = yb
     end if
-    
-    ! if initial point is already a root, return
-    if (abs(yb).lt.toler) then
-      if (ipri.ge.1) write(*,99) ' Not solved: initial point is already a root'
-      ind = 0 ; x = xb ; return
-    end if
+  
+    xc = xa ; numiter = 0 ; exitcode = 0
 
-    xc = xa ; iy = 0 ; ind = 1
+    do while (abs(xb-xa).gt.toler .and. numiter.lt.maxiter)
 
-    do while (abs(xb-xa).gt.toler .and. iy.lt.maxiter)
-      yc = func(xc)
+      yc = func(xc) ; numiter = numiter + 1
+
+      ! new guess
       if (abs(yc-ya).gt.toler .and. abs(yc-yb).gt.toler) then
-        xs = xa*yb*yc/((ya-yb)*(yc-yc)) + xb*ya*yc/((yb-ya)*(yb-yc)) + xc*ya*yb/((yc-ya)*(yc-yb))
+        xs = xa*yb*yc/((ya-yb)*(ya-yc)) + xb*ya*yc/((yb-ya)*(yb-yc)) + xc*ya*yb/((yc-ya)*(yc-yb))
       else
         xs = xb - yb*(xb-xa)/(yb-ya)
       end if
-      ys = func(xs) ; iy = iy + 1
-      if (abs(ys).lt.toler) then
-        ind = 0 ; x = xs ; return
+      ys = func(xs) ; numiter = numiter + 1
+
+      if (ipri.gt.1) then
+        write(*,98) ' Iteration = ',numiter,' | xs = ',xs,' | f(xs) = ',ys
       end if
-      if (iy.eq.maxiter) then
-        ind = 2 ; x = xs ; return
+
+      ! root found
+      if (abs(ys).lt.toler) goto 10
+
+      ! max iterations reached
+      if (numiter.eq.maxiter) then ; exitcode = 9
+        x = xs
+        if (ipri.ge.1) write(*,99) ' '
+        if (ipri.ge.1) write(*,99) ' Max iterations reached'
+        if (ipri.ge.1) write(*,99) ' '
+        return
       end if
+
+      ! update points
       if (ya*ys.lt.cero) then
         xc = xb ; xb = xs ; yb = ys
       else
         xa = xs ; ya = ys
       end if
+
+      ! re-order points
       if (abs(ya).lt.abs(yb)) then
         xc = xb ; xb = xa ; xa = xc ; yc = yb ; yb = ya ; ya = yc
       end if
+
     end do
 
-    x = xb    
+    if (abs(ya).lt.min(abs(ys),abs(yb),abs(yc))) then
+      xs = xa ; goto 10
+    elseif (abs(yb).lt.min(abs(ys),abs(ya),abs(yc))) then
+      xs = xa ; goto 10
+    elseif (abs(yc).lt.min(abs(ys),abs(ya),abs(yc))) then
+      xs = xa ; goto 10
+    elseif (abs(ys).lt.min(abs(ya),abs(yb),abs(yc))) then
+      xs = xs ; goto 10
+    end if
+
+    10 x = xs
+
     if (ipri.ge.1) then
-      write(*,99) ' Solved: a root is found. Root = ',x,' Func = ',func(x)
+      write(*,99) ' '
+      write(*,99) ' Solved: a root is found   | Root = ',x,'   | Func = ',func(x)
+      write(*,99) ' '
     end if
 
     return
     99 format (a,f10.4,a,f10.4)
+    98 format (a,i4,a,f10.4,a,f10.4)
   end subroutine brent
 
   ! ----------------------------------------------------------------------------
   ! simplex algorithm
   ! minimize a user-supplied single-valued function in "n" unknows
 
-  subroutine simplex(func,x,y,iy,ind,x0,itermax,tol,iprint)
+  subroutine simplex(func,x,y,numiter,exitcode,x0,itermax,tol,iprint)
 
     ! this subroutine minimizes a single-valued function with n unknowns using the
     ! simplex algorithm
@@ -1312,26 +1384,28 @@ module toolkit
     !   itermax:  max number of iterations (default = 500)
     !   tol:      tolerance level (default = 1.0d-8)
     !   iprint:   indicator for printing results (default = 0)
-    !             0: print no results
-    !             1: print main results
-    !             2: print all the iterations
+    !               0: print no results
+    !               1: print main results
+    !               2: print all the iterations
     !
     ! the outputs of the subroutine are:
     !
-    !   x:    the vector of x that solves the system
-    !   y:    the value of the function at the point x
-    !   iy:   the number of total function evaluations
-    !   ind:  exit indicator, taking value:
-    !           0: system has converged, func(x) = 0
-    !           1: simplex is too small
-    !           9: max number of iterations reached
+    !   x:         the vector of x that solves the system
+    !   y:         the value of the function at the point x
+    !   numiter:   the number of total function evaluations
+    !   exitcode:  exit indicator, taking value:
+    !                0: system has converged, func(x) = 0
+    !                1: simplex is too small
+    !                9: max number of iterations reached
 
     implicit none
 
-    external                         :: func
-    integer  , intent(out)           :: iy,ind
-    real(dp) , intent(out)           :: x(:),y
-
+    external               :: func
+    real(dp) , intent(out) :: x(:)
+    real(dp) , intent(out) :: y
+    integer  , intent(out) :: numiter
+    integer  , intent(out) :: exitcode
+    
     real(dp) , intent(in)            :: x0(:)
     real(dp) , intent(in) , optional :: tol
     integer  , intent(in) , optional :: itermax
@@ -1364,16 +1438,14 @@ module toolkit
 
     if (ipri.ge.1) write(*,'(/,a,/)') ' starting simplex algorithm'
 
-    ind  = -9
-    ilow = 1  
-    
+    ilow    = 1    
     n       = size(x,1)  ! number of variables
     y0      = func(x0)   ! value at initial point
-    iy      = 1          ! interation counter
+    numiter = 1          ! interation counter
     yp(1)   = y0         ! initial value
     xp(:,1) = x0         ! initial simplex
 
-    if (ipri.ge.1) print 93 , y0
+    if (ipri.ge.1) write(*,93) y0
 
     if (y0.lt.toler) then
       yp(ilow) = y0 ; xp(:,ilow) = x0 ; goto 10
@@ -1419,7 +1491,7 @@ module toolkit
     end do
 
     ! new iteration
-    if (ipri.gt.1) write(*,97) iy, yp(ilow)
+    if (ipri.gt.1) write(*,97) numiter, yp(ilow)
     
     ! check if simplex is sufficiently large
     if (maxval(abs(xp(:,ihigh)-xp(:,ilow))).lt.toler) goto 11
@@ -1439,7 +1511,7 @@ module toolkit
     do j=1,n
       xr(j) = (uno+alpha)*xm(j) - alpha*xp(j,ihigh)
     end do
-    yr = func(xr) ; iy = iy + 1
+    yr = func(xr) ; numiter = numiter + 1
 
     ! check convergence
     if (yr.lt.toler) then
@@ -1447,7 +1519,7 @@ module toolkit
     end if
 
     ! check number of function evaluations
-    if (iy.ge.maxiter) goto 19
+    if (numiter.ge.maxiter) goto 19
 
     if (yr.lt.yp(ilow)) then
 
@@ -1455,7 +1527,7 @@ module toolkit
       do j=1,n
         xe(j) = (uno-gamma)*xm(j) - gamma*xp(j,ihigh)
       end do
-      ye = func(xe) ; iy = iy + 1
+      ye = func(xe) ; numiter = numiter + 1
 
       ! check convergence
       if (ye.lt.toler) then
@@ -1469,7 +1541,7 @@ module toolkit
       end if
 
       ! check number of function evaluations
-      if (iy.ge.maxiter) goto 19
+      if (numiter.ge.maxiter) goto 19
 
     elseif (yr.gt.yp(ihigh2)) then
 
@@ -1482,7 +1554,7 @@ module toolkit
       do j=1,n
         xc(j) = (uno-beta)*xm(j) - beta*xp(j,ihigh)
       end do
-      yc = func(xc) ; iy = iy + 1
+      yc = func(xc) ; numiter = numiter + 1
 
       ! check convergence
       if (yc.lt.toler) then
@@ -1490,7 +1562,7 @@ module toolkit
       end if
 
       ! check number of function evaluations
-      if (iy.ge.maxiter) goto 19
+      if (numiter.ge.maxiter) goto 19
       
       ! if "yc" is worse, update worse point
       if (yc.lt.yp(ihigh)) then
@@ -1498,14 +1570,16 @@ module toolkit
         xp(:,ihigh) = xc(:) ; yp(ihigh) = yc
 
       else
+
         do i=1,n+1
+
           if (i.ne.ilow) then
 
             ! new point
             do j=1,n
               xp(j,i) = medio*( xp(j,i) + xp(j,ilow) )
             end do
-            yp(i) = func(xp(:,i)) ; iy = iy + 1
+            yp(i) = func(xp(:,i)) ; numiter = numiter + 1
 
             ! check convergence
             if (yp(i).lt.toler) then
@@ -1513,10 +1587,12 @@ module toolkit
             end if
 
             ! check number of function evaluations
-            if (iy.ge.maxiter) goto 19
+            if (numiter.ge.maxiter) goto 19
 
           end if
+          
         end do
+
       end if
 
     else
@@ -1528,9 +1604,9 @@ module toolkit
 
     goto 1
 
-    10 ind = 0 ; goto 99
-    11 ind = 1 ; goto 99
-    19 ind = 9 ; goto 99
+    10 exitcode = 0 ; goto 99
+    11 exitcode = 1 ; goto 99
+    19 exitcode = 9 ; goto 99
 
     99 continue
 
@@ -1540,10 +1616,10 @@ module toolkit
     end do
     
     if (ipri.ge.1) then
-      if (ind.eq.0) write(*,'(/,a,/)') ' simplex finished: system has converged, func=0 '
-      if (ind.eq.1) write(*,'(/,a,/)') ' simplex finished: system converged, simplex is very small'
-      if (ind.eq.9) write(*,'(/,a,/)') ' simplex finished: max number of iterations'
-      write (*,94) iy
+      if (exitcode.eq.0) write(*,'(/,a,/)') ' simplex finished: system has converged, func=0 '
+      if (exitcode.eq.1) write(*,'(/,a,/)') ' simplex finished: system converged, simplex is very small'
+      if (exitcode.eq.9) write(*,'(/,a,/)') ' simplex finished: max number of iterations'
+      write (*,94) numiter
       write (*,93) yp(ilow)
       write (*,92) yp(ilow)/y0 - 1.0
       write (*, *) '  '
@@ -1563,7 +1639,7 @@ module toolkit
   ! levenberg–marquardt algorithm
   ! minimize a user-supplied system of "m" equations in "n" unknows
 
-  subroutine lmmin(func,x,y,iy,ind,x0,itermax,damp,tol,toleach,shock,usebro,iprint)
+  subroutine lmmin(func,x,y,numiter,exitcode,x0,itermax,damp,tol,toleach,shock,usebro,iprint)
 
     ! this subroutine minimizes the sum of squred errors of a system of m equations
     ! in n unknowns using the levenberg–marquardt algorithm. more about the algorithm
@@ -1591,29 +1667,31 @@ module toolkit
     !             if broyden's method is used, the program will compute the
     !             numerical jacobian once, and then update it at every iteration
     !   iprint:   indicator for printing results (default = 0)
-    !             0: print no results
-    !             1: print main results
-    !             2: print all the iterations
+    !               0: print no results
+    !               1: print main results
+    !               2: print all the iterations
     !
     ! the outputs of the subroutine are:
     !
-    !   x:    the vector of x that solves the system
-    !   y:    the value of the function at the point x
-    !   iy:   the number of total function evaluations
-    !   ind:  exit indicator, taking value:
-    !           0: system has converged, func(x) = 0
-    !           1: jacobian is closed to 0
-    !           2: step in x is close to 0
-    !           9: max number of iterations reached
+    !   x:         the vector of x that solves the system
+    !   y:         the value of the function at the point x
+    !   numiter:   the number of total function evaluations
+    !   exitcode:  exit indicator, taking value:
+    !                0: system has converged, func(x) = 0
+    !                1: jacobian is closed to 0
+    !                2: step in x is close to 0
+    !                9: max number of iterations reached
 
     implicit none
 
     ! function to minimize
-    external                         :: func
+    external :: func
     
     ! outputs
-    real(dp) , intent(out)           :: x(:),y(:)
-    integer  , intent(out)           :: iy,ind
+    real(dp) , intent(out) :: x(:)
+    real(dp) , intent(out) :: y(:)
+    integer  , intent(out) :: numiter
+    integer  , intent(out) :: exitcode
 
     ! inputs (including optionals)
     real(dp) , intent(in)            :: x0(:)
@@ -1632,12 +1710,11 @@ module toolkit
     integer                          :: bro,br
 
     ! other variables
-    integer      ::  i,k,n,m,qp
+    integer  ::  i,k,n,m,qp
     real(dp) ::  j(size(y,1),size(x,1))
     real(dp) :: j0(size(y,1),size(x,1))
     real(dp) :: ij(size(x,1),size(x,1))
     real(dp) :: jj(size(x,1),size(x,1))
-    real(dp) :: ja(size(x,1),size(x,1))
     real(dp) :: jt(size(x,1))
     real(dp) :: e0,y0(size(y,1))
     real(dp) :: eb,yb(size(y,1)),xb(size(x,1))
@@ -1675,9 +1752,7 @@ module toolkit
     end if
 
     ! initial point
-    y0 = func(x0)
-    e0 = sum(y0(:)*y0(:))
-    iy = 1
+    y0 = func(x0) ; e0 = sum(y0(:)*y0(:)) ; numiter = 1
     
     if (ip.ge.1) write(*,'(a,f10.4,/)') '  initial error = ' , e0
 
@@ -1695,7 +1770,7 @@ module toolkit
     end if
 
     ! if reached max number of iterations, finish
-    if (iy.ge.maxiter) goto 19
+    if (numiter.ge.maxiter) goto 19
 
     ! print results
     if ( ip.ge.1 ) write (*,91) eb
@@ -1715,7 +1790,7 @@ module toolkit
     end if
 
     ! update numerical jacobian using broyden's method
-    if ( bro.eq.1 .and. br.eq.1 .and. iy.gt.1 ) then
+    if ( bro.eq.1 .and. br.eq.1 .and. numiter.gt.1 ) then
 
       j0 = j
       dx(:) = x1(:)-xa(:)
@@ -1745,10 +1820,8 @@ module toolkit
         end if
 
         ! evaluate the function
-        yj(:,i) = func(xj(:,i))
-        ej = sum(yj(:,i)*yj(:,i))
-        iy = iy + 1
-
+        yj(:,i) = func(xj(:,i)) ; ej = sum(yj(:,i)*yj(:,i)) ; numiter = numiter + 1
+        
         ! print result
         if (ip.gt.1) write (*,90) i,ej
 
@@ -1765,7 +1838,7 @@ module toolkit
         end if
 
         ! if reached max number of iterations, return best point so far
-        if (iy.ge.maxiter) then
+        if (numiter.ge.maxiter) then
           if (ej.lt.eb) then
             yb = yj(:,i) ; xb = xj(:,i) ; eb = ej
           end if
@@ -1776,9 +1849,9 @@ module toolkit
         if (ej.gt.dble(50.0)*eb) then
           do while (ej.gt.dble(50.0)*eb .and. abs(xj(i,i)-xb(i)).gt.toler)
             xj(i,i) = (xb(i) + xj(i,i))/dble(2.0)
-            yj(:,i) = func(xj(:,i)) ; ej = sum(yj(:,i)*yj(:,i)) ; iy = iy + 1
+            yj(:,i) = func(xj(:,i)) ; ej = sum(yj(:,i)*yj(:,i)) ; numiter = numiter + 1
             if (ip.gt.1) write (*,90) i,ej
-            if (iy.ge.maxiter) then
+            if (numiter.ge.maxiter) then
               if (ej.lt.eb) then
                 yb = yj(:,i) ; xb = xj(:,i) ; eb = ej
               end if
@@ -1792,9 +1865,9 @@ module toolkit
         if (abs(ej-eb).lt.tolvl) then ; ddx = xj(i,i) - xb(i)
           do while (abs(ej-eb).lt.tolvl)
             xj(i,i) = xj(i,i) + ddx
-            yj(:,i) = func(xj(:,i)) ; ej = sum(yj(:,i)*yj(:,i)) ; iy = iy + 1
+            yj(:,i) = func(xj(:,i)) ; ej = sum(yj(:,i)*yj(:,i)) ; numiter = numiter + 1
             if (ip.gt.1) write (*,90) i,ej
-            if (iy.ge.maxiter) then
+            if (numiter.ge.maxiter) then
               if (ej.lt.eb) then
                 yb = yj(:,i) ; xb = xj(:,i) ; eb = ej
               end if
@@ -1837,15 +1910,13 @@ module toolkit
     if (sum(abs(x1-xb)).le.toler) goto 12
 
     ! evaluate new point
-    y1 = func(x1)
-    e1 = sum(y1(:)*y1(:))
-    iy = iy + 1
-
+    y1 = func(x1) ; e1 = sum(y1(:)*y1(:)) ; numiter = numiter + 1
+  
     ! print iterations
-    if (ip.ge.1) print 97 , iy , e1 , eb , da
+    if (ip.ge.1) print 97 , numiter , e1 , eb , da
 
     ! check number of iterations
-    if (iy.ge.maxiter) then
+    if (numiter.ge.maxiter) then
       if (e1.lt.eb) then
         yb = y1 ; xb = x1 ; eb = e1   
       end if 
@@ -1873,19 +1944,19 @@ module toolkit
       end if
     end if
 
-    10 ind = 0 ; goto 7
-    11 ind = 1 ; goto 7
-    12 ind = 2 ; goto 7
-    13 ind = 3 ; goto 7
-    19 ind = 9 ; goto 7
+    10 exitcode = 0 ; goto 7
+    11 exitcode = 1 ; goto 7
+    12 exitcode = 2 ; goto 7
+    13 exitcode = 3 ; goto 7
+    19 exitcode = 9 ; goto 7
 
     7 if (ip.ge.1) then
-      if (ind.eq.0) write(*,'(/,a,/)') ' lmmin finished: system has converged, func=0 '
-      if (ind.eq.1) write(*,'(/,a,/)') ' lmmin finished: system has converged, jac close to 0'
-      if (ind.eq.2) write(*,'(/,a,/)') ' lmmin finished: system has converged, step in x close to 0'
-      if (ind.eq.3) write(*,'(/,a,/)') ' lmmin finished: some equations is 0'
-      if (ind.eq.9) write(*,'(/,a,/)') ' lmmin finished: max number of iterations'
-      write(*,*          ) ' iterations = ', iy
+      if (exitcode.eq.0) write(*,'(/,a,/)') ' lmmin finished: system has converged, func=0 '
+      if (exitcode.eq.1) write(*,'(/,a,/)') ' lmmin finished: system has converged, jac close to 0'
+      if (exitcode.eq.2) write(*,'(/,a,/)') ' lmmin finished: system has converged, step in x close to 0'
+      if (exitcode.eq.3) write(*,'(/,a,/)') ' lmmin finished: some equations is 0'
+      if (exitcode.eq.9) write(*,'(/,a,/)') ' lmmin finished: max number of iterations'
+      write(*,*          ) ' iterations = ', numiter
       write(*,'(a,f10.4)') ' error      = ', eb
       write(*,'(a,f10.4)') ' reduction  = ', eb/e0 - 1.0
       write(*,*          ) '  '

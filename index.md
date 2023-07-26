@@ -54,7 +54,7 @@ You can download the code from this [link](https://borjapetit.github.io/fortran_
 
 Algorithms for single-valued univariate equations:
 
-- **[```golden```](docs/golden.md): maximize a single-valued univariate equation using the Golden Search algorithm.
+- [```golden```](docs/golden.md): maximize a single-valued univariate equation using the Golden Search algorithm.
 - [```brent```](docs/brent.md): find the root of a single-valued univariate equation using the Brent's method.
 
 Algorithms for single-valued multivariate equations:

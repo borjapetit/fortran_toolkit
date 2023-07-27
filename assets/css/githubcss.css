@@ -83,7 +83,7 @@ code, kbd, pre, samp {
   background-color:#f8f8f8; 
 }
 pre{
-  padding:10px;
+  padding:105px;
   margin-bottom:10px;
   overflow:auto;
 }
@@ -139,9 +139,9 @@ hr {
   margin-top:20px;
   margin-bottom:20px;
 }
-textarea {
+/* textarea {
   overflow: auto
-}
+} */
 
 
 
@@ -153,7 +153,7 @@ LIST
 ***************************************************************************/
 
 ul, ol {
-  /* padding: 7px 0px 0px 30px; */
+  padding:0px 0px 0px 30px;
   margin:0px;
   margin-bottom:px;
   /* padding-left: 0;

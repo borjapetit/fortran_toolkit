@@ -1,0 +1,291 @@
+
+/*******************************************************************************
+ DEFINE COLORS
+*******************************************************************************/
+
+/* define colors */
+:root {
+  --main: #006400;
+  --link: #374A74;
+  --linkhover: blue;
+  --journal: #6A1806;
+  --background: white;
+  --fontmain:rgb(79,76,76);
+  --fontabstract:#616161;
+}
+
+/*******************************************************************************
+ INITIALIZE SETTINGS
+*******************************************************************************/
+
+/* set global parameters */
+*{
+  font-family: sans-serif;
+  /* font-family: 'Helvetica','Source Sans Pro','Loto','Roboto',sans-serif; */
+  margin:0px;
+  padding:0px;
+  color:inherit;
+  font-size: 17px;
+  font-weight: 300;
+  line-height: 1.4em;
+  text-decoration:none;
+  background-color:inherit;
+  -webkit-text-size-adjust:none;
+}
+
+/*******************************************************************************
+ MAIN ELEMENTS
+*******************************************************************************/
+
+html{
+  background-color:var(--background);
+  padding:30px;
+}
+body{
+  min-width:880px;
+  max-width:1100px;
+  color:var(--fontmain);
+  background-color:var(--background);
+  margin:0px auto auto auto;
+  padding:0px auto auto auto;
+}
+div,p,span,a,a:hover,i,ul,ol,li{
+  font-size:inherit;
+  color:inherit;
+  text-decoration:inherit;
+  font-weight:inherit;
+  text-align:inherit;
+}
+p,div{
+  margin-top:3px;
+}
+a{
+  color:var(--link);
+}
+a:hover{
+  color:var(--linkhover);
+  cursor:pointer;
+}
+ul{
+  padding: 7px 0px 0px 30px;
+  margin:0px;
+  list-style:circle;
+}
+li{
+  margin-bottom:10px;
+}
+li:not(:last-child) {
+  margin-bottom:2px;
+}
+u{
+  text-decoration:underline;
+}
+b{
+  font-weight:bold;
+}
+
+/*******************************************************************************
+ STRUCTURE OF THE LAYOUT
+ Header-Header-Header
+ Picture  MainContent
+*******************************************************************************/
+
+body{
+  display:grid;
+  grid-template-columns: 200px auto;
+  grid-column-gap:40px;
+  grid-row-gap:20px;
+}
+header{
+  grid-column: 1/3;
+  padding-bottom:15px;
+  border-bottom:2px solid var(--fontmain);
+  background-color:var(--background);
+}
+footer{
+  margin-top:50px;
+  text-align:right;
+  grid-column: 1/3;
+  font-size:80%;
+  padding-top:5px;
+}
+/* right column: main sections */
+maincontent{ 
+  grid-column: 2;
+  background-color:var(--background);
+}
+/* section the whole screen width */
+wide{ 
+  grid-column: 1/3;
+  background-color:var(--background);
+}
+/* left colun: picture, contact */
+photo{ 
+  grid-column: 1;
+  background-color:var(--background);
+  text-align:center;
+}
+/* format for the picture in right column */
+.mainpic{
+  width:100%;
+  margin:0px auto 8px auto;
+  border:3px grey solid;
+  border-radius:100%;
+  text-align:center;
+}
+
+/*******************************************************************************
+ HEADER
+*******************************************************************************/
+
+.title{
+  color:GREY;
+  color:var(--main);
+  text-align:left;
+  font-size:250%;
+  display:block;
+}
+.subtitle{
+  color:var(--fontmain);
+  text-align:left;
+  font-size:140%;
+  line-height:1;
+  display:block;
+}
+
+/*******************************************************************************
+ MAIN CONTENT
+*******************************************************************************/
+
+.section{
+  margin-bottom:30px;
+  width:100%;
+}
+.subsection{
+  margin-bottom:15px;
+  line-height:1.6;
+  width:100%;
+}
+/* section headings */
+h1{
+  margin-bottom:15px;
+  color:var(--main);
+  font-size:150%;
+  /* font-weight:bold; */
+  border-bottom:1px solid darkgray;
+}
+/* this heading is used for paper titles */
+h2{ 
+  color:var(--main);
+  font-size:inherit;
+}
+
+/*******************************************************************************
+ OTHER COMMANDS
+*******************************************************************************/
+
+.hidden{
+  display:none;
+  font-size:inherit;
+}
+journal{
+  color:var(--journal);
+  font-size:inherit;
+}
+color{
+  color:var(--main);
+  font-size:inherit;
+}
+.abstract{
+  color:var(--fontabstract);
+  margin-top:8px;
+  color:#616161;
+  text-align:justify;
+}
+
+/*******************************************************************************
+ FORMAT OF LINKS
+*******************************************************************************/
+
+a.pdf::before,
+a.slides::before,
+a.code::before,
+a.paper::before,
+a.article::before,
+a.github::before,
+a.more::before,
+a.link::before,
+a.less::before,
+a.twitter::before,
+a.google::before,
+a.cunef::before,
+a.address::before{
+  font-family: "FontAwesome";
+  font-size:80%;
+  color:var(--main);
+  margin:0px;
+  padding:0px;
+  margin-right:6px;
+  margin-left:3px;
+}
+a.moresec,
+a.lesssec{
+  color:inherit;
+}
+/* a.moresec::after,
+a.lesssec::after{
+  font-family: "FontAwesome";
+  font-size:50%;
+  margin:0px;
+  padding:0px;
+  margin-left:6px;
+  margin-right:3px;
+  padding-bottom:20px;
+} */
+
+a.moresec:hover,
+a.lesssec:hover{
+  color:blue;
+} 
+
+a.paper::before{    content: "\f0f6 ";}
+a.article::before{  content: "\f02d ";}
+a.pdf::before{      content: "\f1c1 ";}
+a.slides::before{   content: "\f1c4 ";}
+a.code::before{     content: "\f1c9 ";}
+a.github::before{   content: "\f09b ";}
+a.more::before{     content: "\f196 ";}
+a.less::before{     content: "\f147 ";}
+a.link::before{     content: "\f08e ";}
+a.twitter::before{  content: "\f099 ";}
+a.address::before{  content: "\f003 ";}
+a.google::before{   content: "\f1a0 ";}
+a.cunef::before{    content: "\f19c ";}
+/* a.moresec::after{   content: "\f196 ";}
+a.lesssec::after{   content: "\f147 ";} */
+
+a.plus,a.minus{
+  margin-right:3px;
+  display: inline-block;
+  margin-top:4px;
+}
+a.plus::after,a.minus::after{
+  font-family: "FontAwesome";
+  margin-left:4px;
+  font-size:70%;
+}
+a.plus::after{
+  content:"\f196";
+}
+a.minus::after{
+  content:"\f147";
+}
+a.empty{
+  color:lightgrey;
+}
+a.empty::before{
+  color:lightgrey;
+}
+a.empty:hover{
+  cursor:not-allowed;
+}

@@ -1234,6 +1234,7 @@ module toolkit
     !                1: either x0 or x1 is a root of func
     !                2: the root is not within the interval (x0,x1)
     !                3: the points x0 and x1 are too close
+    !                4: the interval is too narrow
     !                9: maximum number of function evaluations reached
 
     implicit none
@@ -1260,29 +1261,33 @@ module toolkit
 
     if (ipri.ge.1) write(*,'(/,a,/)') ' starting brent algorithm'
 
-    numiter = 0
+    numiter = 0 ; ya = huge(uno) ; yb = ya ; yc = ya ; ys = ya
 
     ! if function is of equal sign at both initial points, return
     if (abs(x1-x0).lt.toler) then ; exitcode = 3
-      if (ipri.ge.1) write(*,99) ' Not solved: x1 and x0 too close'
+      if (ipri.ge.1) write(*,99) '   not solved: x1 and x0 too close'
       x = x1
       return
     end if
 
-    xa = min(x0,x1) ; ya = func(xa) ; numiter = numiter + 1
-    xb = max(x0,x1) ; yb = func(xb) ; numiter = numiter + 1
+    xa = max(x0,x1) ; ya = func(xa) ; numiter = numiter + 1
+    xb = min(x0,x1) ; yb = func(xb) ; numiter = numiter + 1
 
-    ! if function is of equal sign at both initial points, return
-    if (ya*yb.gt.cero) then ; exitcode = 0 ; numiter = 2
-      if (ipri.ge.1) write(*,99) ' Not solved: invalid initial values'
-      if (abs(ya).lt.abs(yb)) x = xa
-      if (abs(ya).ge.abs(yb)) x = xb
-      return
+    ! if function is of equal sign at both initial points, existence is not guaranteed
+    if (ya*yb.gt.cero .and. ipri.ge.1) then
+      write(*,'(a,/)') '   root is not bracketed: existence is not guaranteed'
     end if
+  
+    ! if (ya*yb.gt.cero) then ; exitcode = 0 ; numiter = 2
+    !   if (ipri.ge.1) write(*,99) '   not solved: invalid initial values'
+    !   if (abs(ya).lt.abs(yb)) x = xa
+    !   if (abs(ya).ge.abs(yb)) x = xb
+    !   return
+    ! end if
 
     ! if initial point is already a root, return
     if (abs(ya).lt.toler .or. abs(yb).lt.toler) then ; exitcode = 1 ; numiter = 0
-      if (ipri.ge.1) write(*,99) ' Not solved: initial point is already a root'
+      if (ipri.ge.1) write(*,99) '   not solved: initial point is already a root'
       if (abs(ya).lt.abs(yb)) x = xa
       if (abs(ya).ge.abs(yb)) x = xb
       return
@@ -1290,12 +1295,12 @@ module toolkit
 
     ! reorder initial points so that abs(ya) > abs(yb)
     if (abs(ya).lt.abs(yb)) then
-      xc = xb ; xb = xa ; xa = x0 ; yc = ya ; ya = yb
+      xc = xb ; xb = xa ; xa = min(x0,x1) ; yc = ya ; ya = yb
     end if
   
-    xc = xa ; numiter = 0 ; exitcode = 0
+    xc = xa ; exitcode = 0
 
-    do while (abs(xb-xa).gt.toler .and. numiter.lt.maxiter)
+    do while (abs(xb-xa).gt.tolvl .and. numiter.lt.maxiter) 
 
       yc = func(xc) ; numiter = numiter + 1
 
@@ -1307,21 +1312,8 @@ module toolkit
       end if
       ys = func(xs) ; numiter = numiter + 1
 
-      if (ipri.gt.1) then
-        write(*,98) ' Iteration = ',numiter,' | xs = ',xs,' | f(xs) = ',ys
-      end if
-
-      ! root found
-      if (abs(ys).lt.toler) goto 10
-
-      ! max iterations reached
-      if (numiter.eq.maxiter) then ; exitcode = 9
-        x = xs
-        if (ipri.ge.1) write(*,99) ' '
-        if (ipri.ge.1) write(*,99) ' Max iterations reached'
-        if (ipri.ge.1) write(*,99) ' '
-        return
-      end if
+      ! print iteration
+      if (ipri.gt.1) write(*,98) numiter,xs,ys
 
       ! update points
       if (ya*ys.lt.cero) then
@@ -1335,29 +1327,46 @@ module toolkit
         xc = xb ; xb = xa ; xa = xc ; yc = yb ; yb = ya ; ya = yc
       end if
 
+      ! max iterations reached
+      if (numiter.eq.maxiter) goto 9
+
+      ! root found
+      if (abs(ys).lt.toler) goto 10
+
+      ! max iterations reached
+      if (abs(xb-xa).le.tolvl) goto 11
+
     end do
 
-    if (abs(ya).lt.min(abs(ys),abs(yb),abs(yc))) then
-      xs = xa ; goto 10
-    elseif (abs(yb).lt.min(abs(ys),abs(ya),abs(yc))) then
-      xs = xa ; goto 10
-    elseif (abs(yc).lt.min(abs(ys),abs(ya),abs(yc))) then
-      xs = xa ; goto 10
-    elseif (abs(ys).lt.min(abs(ya),abs(yb),abs(yc))) then
-      xs = xs ; goto 10
-    end if
-
-    10 x = xs
-
-    if (ipri.ge.1) then
-      write(*,99) ' '
-      write(*,99) ' Solved: a root is found   | Root = ',x,'   | Func = ',func(x)
-      write(*,99) ' '
-    end if
-
+    9 x = getbestpoint(xa,ya,xb,yb,xc,yc,xs,ys) ; exitcode = 9
+    if (ipri.ge.1) write(*,97) 'interrupted: max iterations reached',numiter,x,func(x)
     return
+
+    10 x = getbestpoint(xa,ya,xb,yb,xc,yc,xs,ys) ; exitcode = 0
+    if (ipri.ge.1) write(*,97) 'solved: a root is found',numiter,x,func(x)
+    return
+
+    11 x = getbestpoint(xa,ya,xb,yb,xc,yc,xs,ys) ; exitcode = 4
+    if (ipri.ge.1) write(*,97) 'interrupted: interval is too narrow',numiter,x,func(x)
+    return
+
     99 format (a,f10.4,a,f10.4)
-    98 format (a,i4,a,f10.4,a,f10.4)
+    98 format ('   Iteration = ',i4,' | xs = ',f10.4,' | f(xs) = ',f10.4)
+    97 format ( /,'   ',a,/,/,'   iter = ',i4,/'   x    = ',f10.4,/,'   func = ',f10.4,/ )
+    contains
+    function getbestpoint(z1,f1,z2,f2,z3,f3,z4,f4) result (z5)
+      implicit none
+      real(dp) :: z1,f1,z2,f2,z3,f3,z4,f4,z5
+      if (abs(f1).lt.min(abs(f2),abs(f3),abs(f4))) then
+        z5 = z1 ; return
+      elseif (abs(f2).lt.min(abs(f1),abs(f3),abs(f4))) then
+        z5 = z2 ; return
+      elseif (abs(f3).lt.min(abs(f1),abs(f2),abs(f4))) then
+        z5 = z3 ; return
+      elseif (abs(f4).lt.min(abs(f1),abs(f2),abs(f3))) then
+        z5 = z4 ; return
+      end if
+    end function getbestpoint
   end subroutine brent
 
   ! ----------------------------------------------------------------------------

@@ -81,6 +81,7 @@ dfn {
 code, kbd, pre, samp {
   font-family: monospace, monospace;
   background-color:#f8f8f8; 
+  font-size:98%;
 }
 pre{
   padding:105px;

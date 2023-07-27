@@ -1,6 +1,3 @@
----
-title: Fortran Toolkit
----
 
 **THIS SITE IS UNDER CONSTRUCTION**
 
@@ -82,5 +79,14 @@ Algorithms for systems of equations:
 > **Constrained optimization**:<br>
 None of the algorithms in this toolkit is explicitly written to allow for constraints, but one can transform a constrained optimization problem into an unconstrained one using the [```normalize``` and ```denormalize```](docs/normalize.md) subroutines.
 
----
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
 

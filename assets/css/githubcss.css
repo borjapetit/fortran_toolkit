@@ -73,7 +73,8 @@ svg:not(:root) {
 
 code, kbd, pre, samp {
   font-family: monospace, monospace;
-  font-size:1em
+  font-size:1em;
+  background-color:#f5f5f5;
 }
 
 
@@ -1054,6 +1055,8 @@ li:not(:last-child) {
   color:#bbbbbb
 }
 
-/* .highlight {
-  background-color: #f8f8f8
-} */
+.highlight {
+  background-color: #f8f8f8;
+  font-family: monospace, monospace;
+}
+

@@ -10,7 +10,7 @@ This Fortran code provides a list of functions and subroutines that I typically 
 - Linear algebra
 - Optimization
 
-All functions/subroutines assume double precision for real variables.
+All functions and subroutines assume double precision for real variables.
 
 Efficiency of the algorithms is not guaranteed, and the code is distributed under the MIT license.
 

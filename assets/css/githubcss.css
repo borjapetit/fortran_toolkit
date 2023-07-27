@@ -80,7 +80,6 @@ dfn {
 
 code, kbd, pre, samp {
   font-family: monospace, monospace;
-  font-size:1em;
   background-color:#f8f8f8; 
 }
 pre{
@@ -128,9 +127,6 @@ b, strong {
 button {
   cursor: pointer;
   border-radius:0
-}
-blockquote {
-  margin:0
 }
 hr {
   box-sizing: content-box;

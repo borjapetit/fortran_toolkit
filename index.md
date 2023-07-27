@@ -76,7 +76,7 @@ Algorithms for systems of equations:
   - [```broyden```](docs/broyden.md): updates a Jacobian matrix using the Broyden's method.
 
 
-> **<u>Constrained optimization</u>**:<br>
+> **Constrained optimization**:<br>
 None of the algorithms in this toolkit is explicitly written to allow for constraints, but one can transform a constrained optimization problem into an unconstrained one using the [```normalize``` and ```denormalize```](docs/normalize.md) subroutines.
 
 ---

@@ -13,7 +13,6 @@ function grid(maxv,minv,n,s) result(v)
 ```
 
 This function creates a grid of `n` points between `maxv` and `maxv` with a curvature of `s`:
-
 - if `s=1` or missing: linear grid (default)
 - if `s>1`: more grids points around `maxv`
 - if `s<1`: more grids points around `minv`

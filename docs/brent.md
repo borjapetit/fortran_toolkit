@@ -27,13 +27,11 @@ end function func
 ```
 
 Optionally, the user can also supply a level of tolerance (```tol```) and maximum number of function evaluations (```itermax```). Finally, the user can also control what it is printing during execution by setting the corresponding value of ```iprint```:
-
 - ```iprint``` = 0: don't print anything (default)
 - ```iprint``` = 1: print warnings
 - ```iprint``` = 2: print warnings and every iteration
 
 The subroutine returns the value of ```x``` that makes ```func``` close enoughs to zero, the number of function evaluations (```numiter```), and an indicator, ```exitcode```:
-
 - ```exitcode``` = 0: the algorithm found a root
 - ```exitcode``` = 1: either ```x0``` or ```x1``` is a root of ```func```
 - ```exitcode``` = 2: the root is not within the interval (```x0```, ```x1```)
@@ -53,7 +51,6 @@ The following example finds the root of the function
 $$f(x) = x^2 - 3.5 x - 5$$
 
 which has two roots at $x=-1.0895$ and $x=4.5895$.
-
 
 ```fortran
 program example

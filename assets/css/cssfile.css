@@ -96,6 +96,7 @@ header{
   padding-bottom:15px;
   border-bottom:2px solid var(--fontmain);
   background-color:var(--background);
+  color:#006400;
 }
 .content{ 
   background-color:var(--background);

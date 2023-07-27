@@ -25,7 +25,7 @@ If you find any mistake, or have any suggestion, [contact me](mailto:bpetit@cune
 - [grid](docs/grid): generate a grid for a continuous variable.
 - [interpolation](docs/interpolation.md): interpolate a value over a grid, returning position and distance.
 - [interpolate](docs/interpolate.md): linearly interpolate a value over an n-dimensional grid (up to dimension 6).
-- [timing](docs/timing.md): returns the number of seconds since 00:00h of the 1st day of the month (robust to parelalization).
+- [timing](docs/timing.md): returns the number of seconds since 00:00h of the 1st day of the month (robust to parallelization).
 - [multiplo](docs/multiplo.md): returns ```.TRUE.``` if an integer is a multiple of another user-provided integer.
 - [iseven](docs/iseven.md): returns ```.TRUE.``` if a user-provided integer is even.
 - [error](docs/error.md): print error message and interrupt execution.
@@ -50,9 +50,9 @@ If you find any mistake, or have any suggestion, [contact me](mailto:bpetit@cune
 ### Linear algebra
 
 - [```vect```](docs/vect.md): transform a matrix of into a vector (similar to ```reshape```).
-- [```cumsum```](docs/cumsum.md): returns the vector with cummulative sum of a vector (as Matlab's ```cumsum``` function).
+- [```cumsum```](docs/cumsum.md): returns the vector with cumulative sum of a vector (as Matlab's ```cumsum``` function).
 - [```diag```](docs/diag.md): returns a vector with the main diagonal of a matrix.
-- [```inverse```](docs/inverse.md): returns the inverse of a sqaured matrix.
+- [```inverse```](docs/inverse.md): returns the inverse of a squared matrix.
 
 ---
 
@@ -69,13 +69,16 @@ Algorithms for single-valued multivariate equations:
 
 Algorithms for systems of equations:
 
-- **[```lmmin```](docs/lmmin.md): minimize a multivariate system of equations using the Levenberg–Marquardt algorithm.
+- [```lmmin```](docs/lmmin.md): minimize a multivariate system of equations using the Levenberg–Marquardt algorithm.
 
   The Levenberg–Marquardt algorithm uses the Jacobian of the system to find the minimum. When evaluating the objective function is time-costly, computing the Jacobian may take too long. In those cases, one potential way of speeding up the algorithm is to update the Jacobian matrix using the Broyden's method, that does not require further function evaluations.
 
-  - **[```broyden```](docs/broyden.md): updates a Jacobian matrix using the Broyden's method.
+  - [```broyden```](docs/broyden.md): updates a Jacobian matrix using the Broyden's method.
 
-**Constrained optimization**: none of the algorithms in this toolkit is explicitly written to allow for constraints, but one can transform a contrained optimization problem into an uncontrained one using the [```normalize``` and ```denormalize```](docs/normalize.md) subroutines.
+
+
+> **<u>Constrained optimization</u>**:<br>
+>None of the algorithms in this toolkit is explicitly written to allow for constraints, but one can transform a constrained optimization problem into an unconstrained one using the [```normalize``` and ```denormalize```](docs/normalize.md) subroutines.
 
 ---
 

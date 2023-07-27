@@ -1,3 +1,21 @@
+<style TYPE="text/css">
+code.has-jax {font: inherit; font-size: 100%; background: inherit; border: inherit;}
+</style>
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'] // removed 'code' entry
+    }
+});
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+});
+</script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS_HTML-full"></script>
 
 ### normalize & denormalize
 
@@ -5,7 +23,7 @@ The optimization subroutines included in this toolkit are design to handle uncon
 
 Imagine we want to maxmize a function $f(x):\mathbb{R}^n \to \mathbb{R}^m$, where $1\leq m\leq n$. Imagine we want to maximize the function $f$ contidional on $x\in\mathbb{X}^n$:
 
-$$\max_{x\in\mathbb{X}^n} \ f(x)$$
+`$$\max_{x\in\mathbb{X}^n} \ f(x)$$`
 
 None of the subroutines in the toolkit can solve this problem directly. However, we can define an intermediate function $g(z)$ such that $g(z):\mathbb{R}^n\to\mathbb{X}^n$. Using this function, we can rewrite out original problem as:
 

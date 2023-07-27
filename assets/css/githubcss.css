@@ -1,52 +1,21 @@
 
-/*******************************************************************************
- DEFINE COLORS
-*******************************************************************************/
-
-/* define colors */
 :root {
   --main: #006400;
-  --link: #374A74;
-  --linkhover: blue;
-  --journal: #6A1806;
-  --background: white;
   --fontmain:rgb(79,76,76);
-  --fontabstract:#616161;
 }
 
-/*******************************************************************************
- INITIALIZE SETTINGS
-*******************************************************************************/
 
-/* set global parameters */
 *{
   font-family: 'Source Sans Pro',sans-serif;
   margin:0px;
   padding:0px;
   color:inherit;
   font-size: 17px;
-  font-weight: 300;
+  font-weight: 400;
   line-height: 1.4em;
   text-decoration:none;
-  background-color:inherit;
+  background-color:white;
   -webkit-text-size-adjust:none;
-}
-
-/*******************************************************************************
- MAIN ELEMENTS
-*******************************************************************************/
-
-html{
-  background-color:var(--background);
-  padding:30px;
-}
-body{
-  min-width:880px;
-  max-width:1100px;
-  color:var(--fontmain);
-  background-color:var(--background);
-  margin:0px auto auto auto;
-  padding:0px auto auto auto;
 }
 div,p,span,a,a:hover,i,ul,ol,li{
   font-size:inherit;
@@ -55,42 +24,18 @@ div,p,span,a,a:hover,i,ul,ol,li{
   font-weight:inherit;
   text-align:inherit;
 }
-p,div{
-  margin-top:5px;
-  margin-bottom:5px;
-}
-a{
-  color:var(--link);
-}
-a:hover{
-  color:var(--linkhover);
-  cursor:pointer;
-}
-ul{
-  padding: 7px 0px 0px 30px;
-  margin:0px;
-  list-style:circle;
-}
-li{
-  margin-bottom:10px;
-}
-li:not(:last-child) {
-  margin-bottom:2px;
-}
-u{
-  text-decoration:underline;
-}
-b{
-  font-weight:bold;
-}
 
-/*******************************************************************************
- STRUCTURE OF THE LAYOUT
- Header-Header-Header
- Picture  MainContent
-*******************************************************************************/
 
+html{
+  background-color:white;
+  padding:30px;
+}
 body{
+  min-width:880px;
+  max-width:1100px;
+  color:var(--fontmain);
+  margin:0px auto auto auto;
+  padding:0px auto auto auto;
 }
 header{
   padding-bottom:15px;
@@ -102,27 +47,14 @@ header{
   background-color:var(--background);
 }
 
-/*******************************************************************************
- HEADER
-*******************************************************************************/
-
-.title{
-  color:GREY;
-  color:var(--main);
-  text-align:left;
-  font-size:250%;
-  display:block;
-}
-
-/*******************************************************************************
- MAIN CONTENT
-*******************************************************************************/
 
 h1{
-  margin-bottom:15px;
+  margin-bottom:20px;
   color:var(--main);
-  font-size:150%;
+  font-size:250%;
+  display:block;
   border-bottom:1px solid darkgray;
+  color: #006400
 }
 h2{ 
   color:var(--main);
@@ -133,4 +65,39 @@ h3{
   font-size:120%;
   padding-top:10px;
   padding-bottom:10px;
+}
+
+hr{
+  padding-top:20px;
+  padding-bottom:20px;
+}
+
+a{
+  color:blue;
+}
+a:hover{
+  color:blue;
+  cursor:pointer;
+  text-decoration:underline;
+}
+
+
+ul{
+  padding: 7px 0px 0px 30px;
+  margin:0px;
+  list-style:circle;
+}
+li{
+  margin-bottom:10px;
+}
+li:not(:last-child) {
+  margin-bottom:2px;
+}
+
+
+u{
+  text-decoration:underline;
+}
+b{
+  font-weight:800;
 }

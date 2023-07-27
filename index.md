@@ -34,12 +34,12 @@ If you find any mistake, or have any suggestion, [contact me](mailto:bpetit@cune
 
 ### Statistics
 
-- [```varmean```](docs/varmean.md): returns the average of a variable, allowing for weights and mask.
-- [```varvar```](docs/varvar.md): returns the variance of a variable, allowing for weights and mask.
-- [```varstd```](docs/varstd.md): returns the standard deviation of a variable, allowing for weights and mask.
-- [```correlation```](docs/correlation.md): returns the correlation of two variables, allowing for weights and mask.
-- [```percentile```](docs/percentile.md): returns the i-th percentile of a distribution, allowing for weights and mask.
-- [```olsreg```](docs/olsreg.md): returns the OLS coefficients of a linear regression (with up to 8 explanatory variables), allowing for weights and mask.
+- [```varmean```](docs/varmean.md): returns the average of a variable, and allows for weights and mask.
+- [```varvar```](docs/varvar.md): returns the variance of a variable, and allows for weights and mask.
+- [```varstd```](docs/varstd.md): returns the standard deviation of a variable, and allows for weights and mask.
+- [```correlation```](docs/correlation.md): returns the correlation of two variables, and allows for weights and mask.
+- [```percentile```](docs/percentile.md): returns the i-th percentile of a distribution, and allows for weights and mask.
+- [```olsreg```](docs/olsreg.md): returns the OLS coefficients of a linear regression (with up to 8 explanatory variables), and allows for weights and mask.
 - [```tauchen```](docs/tauchen.md): returns the transition matrix for a discretized AR(1) process.
 - [```normaldist```](docs/normaldist.md): returns the distribution for a normal random variable given some mean and variance.
 - [```randomnormal```](docs/randomnormal.md): returns a random draw (either a scalar or a vector) for a normal distribution.

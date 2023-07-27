@@ -4,11 +4,6 @@ email: bpetit@cunef.edu
 
 github_username: borjapetit
 
-navbar-links:
-  Author's home: "https://deanattali.com"
-
-navbar-col: "#EAEAEA"
-
 markdown: kramdown
 
 defaults:

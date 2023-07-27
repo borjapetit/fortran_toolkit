@@ -56,7 +56,8 @@ div,p,span,a,a:hover,i,ul,ol,li{
   text-align:inherit;
 }
 p,div{
-  margin-top:3px;
+  margin-top:5px;
+  margin-bottom:5px;
 }
 a{
   color:var(--link);

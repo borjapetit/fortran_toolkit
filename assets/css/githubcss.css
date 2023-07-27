@@ -97,6 +97,9 @@ blockquote{
   margin-bottom:10px;
   background-color:#f8f8f8;
 }
+blockquote > p {
+  margin:0px;
+}
 
 
 

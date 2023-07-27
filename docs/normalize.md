@@ -1,30 +1,16 @@
-<style TYPE="text/css">
-code.has-jax {font: inherit; font-size: 100%; background: inherit; border: inherit;}
-</style>
-<script type="text/x-mathjax-config">
-MathJax.Hub.Config({
-    tex2jax: {
-        inlineMath: [['$','$'], ['\\(','\\)']],
-        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'] // removed 'code' entry
-    }
-});
-MathJax.Hub.Queue(function() {
-    var all = MathJax.Hub.getAllJax(), i;
-    for(i = 0; i < all.length; i += 1) {
-        all[i].SourceElement().parentNode.className += ' has-jax';
-    }
-});
-</script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS_HTML-full"></script>
 
 ### normalize & denormalize
 
 The optimization subroutines included in this toolkit are design to handle unconstrained problems. However, the $\texttt{normalize}$ and $\texttt{denormalize}$ subroutines can transform a constrained optimization problem into an unconstrained one.
 
 Imagine we want to maximize a function $f(x):\mathbb{R}^n \to \mathbb{R}^m$, where $1\leq m\leq n$, conditional on $x\in\mathbb{X}^n$:
+
 $$\max_{x\in\mathbb{X}^n} \ f(x)$$
+
 To solve this problem with standard optimization algorithm, we can define an intermediate function $g(z)$ such that $g(z):\mathbb{R}^n\to\mathbb{X}^n$, and rewrite our original problem as:
+
 $$\max_{x\in\mathbb{X}^n} \ f(x) \ \equiv \ \max_{z} \ f(g(z)) \ \ \ \text{with} \ \ x = g(z)$$
+
 The problem $\max_{z} \ f(g(z))$ is an unconstrained optimization problem that can be solve with the subroutines included in this toolkit.
 
 **How to use**: we have a function ```func``` that takes a variable (scalar or vector) ```x``` that should be between $a$ and $b$. To minimize ```func``` we need to:

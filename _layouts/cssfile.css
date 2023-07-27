@@ -105,7 +105,7 @@ footer{
   padding-top:5px;
 }
 /* right column: main sections */
-content{ 
+.content{ 
   background-color:var(--background);
 }
 

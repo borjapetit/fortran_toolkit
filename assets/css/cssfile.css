@@ -20,8 +20,7 @@
 
 /* set global parameters */
 *{
-  font-family: sans-serif;
-  /* font-family: 'Helvetica','Source Sans Pro','Loto','Roboto',sans-serif; */
+  font-family: 'Source Sans Pro',sans-serif;
   margin:0px;
   padding:0px;
   color:inherit;

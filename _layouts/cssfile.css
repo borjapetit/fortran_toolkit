@@ -91,13 +91,8 @@ b{
 *******************************************************************************/
 
 body{
-  display:grid;
-  grid-template-columns: 200px auto;
-  grid-column-gap:40px;
-  grid-row-gap:20px;
 }
 header{
-  grid-column: 1/3;
   padding-bottom:15px;
   border-bottom:2px solid var(--fontmain);
   background-color:var(--background);
@@ -110,28 +105,8 @@ footer{
   padding-top:5px;
 }
 /* right column: main sections */
-maincontent{ 
-  grid-column: 2;
+content{ 
   background-color:var(--background);
-}
-/* section the whole screen width */
-wide{ 
-  grid-column: 1/3;
-  background-color:var(--background);
-}
-/* left colun: picture, contact */
-photo{ 
-  grid-column: 1;
-  background-color:var(--background);
-  text-align:center;
-}
-/* format for the picture in right column */
-.mainpic{
-  width:100%;
-  margin:0px auto 8px auto;
-  border:3px grey solid;
-  border-radius:100%;
-  text-align:center;
 }
 
 /*******************************************************************************
@@ -143,13 +118,6 @@ photo{
   color:var(--main);
   text-align:left;
   font-size:250%;
-  display:block;
-}
-.subtitle{
-  color:var(--fontmain);
-  text-align:left;
-  font-size:140%;
-  line-height:1;
   display:block;
 }
 

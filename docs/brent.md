@@ -68,7 +68,9 @@ The subroutine returns the value of ```x``` that makes ```func``` close enoughs 
 **Example**
 
 The following example finds the root of the function
+
 $$f(x) = x^2 - 3.5 x - 5$$
+
 which has two roots at $x=-1.0895$ and $x=4.5895$.
 
 

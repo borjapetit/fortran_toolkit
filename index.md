@@ -3,7 +3,7 @@
 
 <a name="inicio"></a>
 
-This Fortran code provides a list of functions and subroutines that I typically use in my research, which can be classified in four categories:
+This Fortran code provides a list of functions and subroutines that I typically use in my research, which can be classified in 4 categories:
 
 - General purpose
 - Statistics

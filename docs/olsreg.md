@@ -42,6 +42,7 @@ Imagine we have four vectors (```x0```, ```x1```, ```x2```, ```x3```) each with 
 $$\texttt{y} = 0.10 + \texttt{x0} + 0.7\cdot\texttt{x1} - 0.5\cdot \texttt{x2} + 0.2\cdot\texttt{x3}$$
 
 We want to estimate the following regression model 
+
 $$\texttt{y} = \beta_0 + \beta_1 \cdot \texttt{x1} + \beta_2 \cdot\texttt{x2} +  \beta_3 \cdot\texttt{x3} + u$$
 
 To do so we first define a vector ```coeffs``` of dimension 4 and the run:
@@ -58,8 +59,8 @@ call olsreg(coeffs,y,x1,x2,x3,table=1)
 ! Output:
 !
 !                               Number of variables =       4
-!                             Number of observatios =     100
-!                       Number of valid observatios =     100
+!                            Number of observations =     100
+!                      Number of valid observations =     100
 !                                         R-squared =  0.6240
 !                                Adjusted R-squared =  0.6122
 !   

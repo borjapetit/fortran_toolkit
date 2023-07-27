@@ -1,21 +1,3 @@
-<style TYPE="text/css">
-code.has-jax {font: inherit; font-size: 100%; background: inherit; border: inherit;}
-</style>
-<script type="text/x-mathjax-config">
-MathJax.Hub.Config({
-    tex2jax: {
-        inlineMath: [['$','$'], ['\\(','\\)']],
-        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'] // removed 'code' entry
-    }
-});
-MathJax.Hub.Queue(function() {
-    var all = MathJax.Hub.getAllJax(), i;
-    for(i = 0; i < all.length; i += 1) {
-        all[i].SourceElement().parentNode.className += ' has-jax';
-    }
-});
-</script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS_HTML-full"></script>
 
 ### normaldist
 
@@ -29,7 +11,7 @@ subroutine normaldist(xvec,mu,sigma,n,dist)
   real(kind=8), intent(out) :: dist(n)   ! vector with the distribution
 ```
 
-This subroutine discretized the distribution of a normal random variable with mean ```mu``` and standadrd deviation ```sigma```, over a grid ```xvec``` of size ```n```. The user should provide a vector with values of the variable $x$ over which to comoute the distribution. For any $i\in[2,\texttt{n}-1]$:
+This subroutine discretized the distribution of a normal random variable with mean ```mu``` and standard deviation ```sigma```, over a grid ```xvec``` of size ```n```. The user should provide a vector with values of the variable $x$ over which to compute the distribution. For any $i\in[2,\texttt{n}-1]$:
 
 $$\texttt{dist}(i) = \Phi\left( \frac{\texttt{z}(i+1)+\texttt{z}(i)}{2}\right) - \Phi \left( \frac{\texttt{z}(i)+\texttt{z}(i-1)}{2}\right)$$
 

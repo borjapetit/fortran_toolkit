@@ -21,9 +21,7 @@ subroutine lmmin(func,x,y,iy,ind,x0,itermax,damp,tol,toleach,shock,usebro,iprint
 
 This subroutine applies the Levenberg–Marquardt algorithm (click [here](https://en.wikipedia.org/wiki/Levenberg–Marquardt_algorithm) for more information) which minimizes the sum of squared errors of a (possibly nonlinear) system of multivariate equations.
 
-
 This subroutine applies the Nelder-Mead algorithm (click [here](https://en.wikipedia.org/wiki/Nelder–Mead_method) for more information).
-
 
 The user should input the function ```func``` and the initial guess ```x0```. The function ```func``` must be of the form:
 
@@ -35,14 +33,12 @@ function func(x) result(f)
 end function func
 ```
 
-The subroutine returns the value(s) of ```x``` that makes ```func``` smaller than ```tol``` (close enought to zero), the number of function evaluations (```numiter```), and an indicator, ```exitcode```:
-
+The subroutine returns the value(s) of ```x``` that makes ```func``` smaller than ```tol``` (close enoughs to zero), the number of function evaluations (```numiter```), and an indicator, ```exitcode```:
 - ```exitcode``` = 0: the algorithm found a root
 - ```exitcode``` = 1: the root is not within the interval (```x0```, ```x1```)
 - ```exitcode``` = 9: maximum number of function evaluations reached
 
-Optionally, the user can also supply a maximun number of fucntion evaluations (```itermax```), the level of tolerance (```tol```). Finally, the user can also control what the subroutine prints by setting the corresponding value of ```iprint```:
-
+Optionally, the user can also supply a maximum number of function evaluations (```itermax```), the level of tolerance (```tol```). Finally, the user can also control what the subroutine prints by setting the corresponding value of ```iprint```:
 - ```iprint``` = 0: don't print anything (default)
 - ```iprint``` = 1: print main results
 - ```iprint``` = 2: print main results and each iteration

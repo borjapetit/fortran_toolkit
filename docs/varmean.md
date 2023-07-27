@@ -10,7 +10,7 @@ function varmean(var,w,mask) result(meanvar)
   logical      , optional :: mask(:)  
 ```
 
-This function returns the mean of a variable ```var``` given some (optional) weights ```w```. If supplied, the vector ```w``` should have the same size as ```var```. If not supplied, the program assums uniform weigthing.
+This function returns the mean of a variable ```var``` given some (optional) weights ```w```. If supplied, the vector ```w``` should have the same size as ```var```. If not supplied, the program assumes uniform weighting.
 
 The user can also supply a ```mask``` to compute the conditional mean. The input ```mask``` is a logical array of the same size of ```var```.
 

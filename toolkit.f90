@@ -729,8 +729,8 @@ module toolkit
       write(*,99) '   '
       write(*,99) '   '
       write(*,'(a,i7  )') '                               Number of variables = ',nc
-      write(*,'(a,i7  )') '                             Number of observatios = ',n0
-      write(*,'(a,i7  )') '                       Number of valid observatios = ',no
+      write(*,'(a,i7  )') '                            Number of observations = ',n0
+      write(*,'(a,i7  )') '                      Number of valid observations = ',no
       write(*,'(a,f7.4)') '                                         R-squared = ',rsq
       write(*,'(a,f7.4)') '                                Adjusted R-squared = ',arsq
       write(*,99) '   '

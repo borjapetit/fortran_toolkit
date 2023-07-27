@@ -14,13 +14,14 @@ $$\max_{x\in\mathbb{X}^n} \ f(x) \ \equiv \ \max_{z} \ f(g(z)) \ \ \ \text{with}
 The problem $\max_{z} \ f(g(z))$ is an unconstrained optimization problem that can be solve with the subroutines included in this toolkit.
 
 **How to use**: we have a function ```func``` that takes a variable (scalar or vector) ```x``` that should be between $a$ and $b$. To minimize ```func``` we need to:
-
 - Use the ```normalize``` subroutine to define a new variable ```z```
 - Define an auxiliary function ```func0``` that takes ```z```, applies the ```denormalize``` subroutine (to get ``` x``` back) and calls ```func(x)```.
 - Use any of the optimization subroutines in this toolkit (```simplex```,```lmmin```) to minimize ```func0``` with respect to ```z```
 - Apply the ```denormalize``` subroutine to the optimal ```z``` to get the corresponding value of ```x```.
 
 Download a complete example, explained below, from this [link](https://borjapetit.github.io/fortran_toolkit/src/test_normalize.f90).
+
+[(back to index)](../index.md)
 
 ---
 
@@ -71,7 +72,9 @@ to return a bounded variable $\texttt{x}$, constrained to be between $\texttt{xm
 **Example**
 
 Imagine we want to find the minimum in the Booth function:
+
 $$f(x_1,x_2) = ( x_2 + 2x_1 - 7 )^2 + ( 2x_2 + x_2 - 5 )^2, \ \ \ \text{s.t.} \ \ -10\leq x_1,x_2\leq 10$$
+
 Since this is a single-valued function with 2 unknowns, we use the the Nelder-Mead algorithm (see the [```simplex```](simplex.md) subroutine).
 To use this algorithm we first write an auxiliary function, ```unconstrained_booth```, that takes a 2-dimensional unbounded vector $\texttt{z}$, maps $\texttt{z}$ onto $\texttt{x}$, and evaluate the function ```booth```.
 

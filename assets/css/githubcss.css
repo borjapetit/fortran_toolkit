@@ -68,7 +68,6 @@ header{
   background-color:#fff
 } */
 
-
 abbr[title] {
   border-bottom: none;
   text-decoration: underline;
@@ -87,7 +86,12 @@ code, kbd, pre, samp {
 pre{
   padding:10px;
 }
-
+pre > * {
+  font-family: monospace, monospace;
+}
+code > * {
+  font-family: monospace, monospace;
+}
 
 
 
@@ -1018,8 +1022,8 @@ input, select, textarea, button {
   color:#bbbbbb
 }
 
-.highlight {
+/* .highlight {
   background-color: #f8f8f8;
   font-family: monospace, monospace;
-}
+} */
 

@@ -81,8 +81,7 @@ dfn {
 code, kbd, pre, samp {
   font-family: monospace, monospace;
   font-size:1em;
-  background-color:#f5f5f5;
-  
+  background-color:#f8f8f8; 
 }
 pre{
   padding:10px;
@@ -94,7 +93,11 @@ pre > * {
 code > * {
   font-family: monospace, monospace;
 }
-
+blockquote{
+  padding:10px;
+  margin-bottom:10px;
+  background-color:#f8f8f8;
+}
 
 
 

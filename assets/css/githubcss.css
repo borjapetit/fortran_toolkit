@@ -85,6 +85,7 @@ code, kbd, pre, samp {
 pre{
   padding:10px;
   margin-bottom:10px;
+  overflow:auto;
 }
 pre > * {
   font-family: monospace, monospace;
@@ -138,9 +139,9 @@ hr {
   margin-top:20px;
   margin-bottom:20px;
 }
-/* textarea {
+textarea {
   overflow: auto
-} */
+}
 
 
 
@@ -152,8 +153,9 @@ LIST
 ***************************************************************************/
 
 ul, ol {
-  padding: 7px 0px 0px 30px;
+  /* padding: 7px 0px 0px 30px; */
   margin:0px;
+  margin-bottom:px;
   /* padding-left: 0;
   margin-top: 0;
   margin-bottom:0 */

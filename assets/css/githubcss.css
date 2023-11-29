@@ -28,9 +28,7 @@ div,p,span,a,a:hover,i,ul,ol,li{
   text-align:inherit;
 }
 
-/***************************************************************************
-STRUCTURE
-***************************************************************************/
+/**************************************************************************/
 
 html {
   -ms-text-size-adjust: 100%;
@@ -52,10 +50,10 @@ p,div{
   margin-top:3px;
 }
 a{
-  color:var(--link);
+  color:blue;
 }
 a:hover{
-  color:var(--linkhover);
+  text-decoration: underline;
   cursor:pointer;
 }
 ul{
@@ -81,23 +79,77 @@ header{
   background-color:var(--background);
   color: var(--main);
 }
-.content{ 
-  background-color:var(--background);
+p{
+  margin-top:0px;
+  margin-bottom:10px;
 }
-
-abbr[title] {
-  border-bottom: none;
-  text-decoration: underline;
-  text-decoration:underline dotted
+button {
+  cursor: pointer;
+  border-radius:0
 }
-
-dfn {
-  font-style:italic
+hr {
+  box-sizing: content-box;
+  height: 0;
+  overflow:visible;
+  margin-top:20px;
+  margin-bottom:20px;
+}
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 0;
+  margin-bottom:10px;
+  color:var(--main);
+  border-bottom:0px solid #eaecef;
+  font-weight:400;
+}
+/* page title */
+h1 {
+  font-size: 250%;
+  text-align: center;
+  display: block;
+}
+/* author */
+h6{
+  font-size: 100%;
+  color: var(--fontmain);
+  border-bottom:1px solid #eaecef;
+  text-align: center;
+  display: block;
+}
+h2 {
+  font-size:150%;
+}
+h3 {
+  font-size: 105%;
+}
+h4,h5 {
+  font-size: 100%;
 }
 code, kbd, pre, samp {
   font-family: monospace, monospace;
   background-color:#f8f8f8; 
   font-size:98%;
+}
+blockquote{
+  padding:10px;
+  margin-bottom:10px;
+  background-color:#f8f8f8;
+}
+blockquote > p {
+  margin:0px;
+}
+
+/**************************************************************************
+
+.content{ 
+  background-color:var(--background);
+}
+abbr[title] {
+  border-bottom: none;
+  text-decoration: underline;
+  text-decoration:underline dotted
+}
+dfn {
+  font-style:italic
 }
 pre{
   padding:15px;
@@ -119,52 +171,6 @@ blockquote > p {
   margin:0px;
 }
 
-/***************************************************************************
-MAIN ELEMENTS
-***************************************************************************/
-
-p{
-  margin-top:0px;
-  margin-bottom:10px;
-}
-button {
-  cursor: pointer;
-  border-radius:0
-}
-hr {
-  box-sizing: content-box;
-  height: 0;
-  overflow:visible;
-  margin-top:20px;
-  margin-bottom:20px;
-}
-
-/***************************************************************************
-HEADERS
-***************************************************************************/
-
-h1, h2, h3, h4, h5, h6 {
-  margin-top: 0;
-  margin-bottom:10px;
-  color:var(--main);
-  border-bottom:0px solid #eaecef;
-  font-weight:400;
-}
-h1 {
-  font-size: 140%;
-  font-weight:bold;
-}
-h2 {
-  font-size: 120%;
-}
-h3 {
-  font-size: 105%;
-  color: var(--fontmain);
-}
-h4,h5,h6 {
-  font-size: 100%;
-  border-bottom:1px solid #eaecef;
-}
 
 /***************************************************************************
 OTHERS

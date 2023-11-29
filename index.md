@@ -24,6 +24,8 @@ You can download the code from this [link](https://borjapetit.github.io/fortran_
 
 If you find any mistake, or have any suggestion, [contact me](mailto:bpetit@cunef.edu).
 
+---
+
 ## General purpose
 
 - [```grid```](docs/grid.md): generate a grid for a continuous variable.

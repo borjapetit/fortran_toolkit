@@ -1,5 +1,11 @@
 
-### varmean
+# Fortran toolkit
+
+###### Borja Petit
+
+---
+
+## ```varmean```
 
 ```fortran
 function varmean(var,w,mask) result(meanvar)

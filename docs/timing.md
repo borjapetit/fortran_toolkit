@@ -1,4 +1,11 @@
-### timing
+
+# Fortran toolkit
+
+###### Borja Petit
+
+---
+
+## ```timing```
 
 ```fortran
 function timing(mode) result(time)

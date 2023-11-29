@@ -1,5 +1,11 @@
 
-### simplex
+# Fortran toolkit
+
+###### Borja Petit
+
+---
+
+## ```simplex```
 
 ```fortran
 subroutine simplex(func,x,y,numiter,exitcode,x0,itermax,tol,iprint)

@@ -1,5 +1,10 @@
+# Fortran toolkit
 
-### correlation
+###### Borja Petit
+
+---
+
+## ```correlation```
 
 ```fortran
 function correlation(xvar1,xvar2,w,mask) result(corr)

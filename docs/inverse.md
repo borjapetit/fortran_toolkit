@@ -1,5 +1,11 @@
 
-### inverse
+# Fortran toolkit
+
+###### Borja Petit
+
+---
+
+## ```inverse```
 
 ```fortran
 function inverse(mat) result(imat)

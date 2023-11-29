@@ -1,5 +1,11 @@
 
-### brent
+# Fortran toolkit
+
+###### Borja Petit
+
+---
+
+## ```brent```
 
 ```fortran
 subroutine brent(func,x,numiter,exitcode,x0,x1,itermax,tol,iprint)

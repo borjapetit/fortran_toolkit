@@ -1,5 +1,11 @@
 
-### multiplo
+# Fortran toolkit
+
+###### Borja Petit
+
+---
+
+## ```multiplo```
 
 ```fortran
 elemental function multiplo(num,xx) result(mul)

@@ -1,7 +1,7 @@
 
 # Fortran toolkit
 
-###### Borja Petit, 2023
+###### Borja Petit
 
 ---
 

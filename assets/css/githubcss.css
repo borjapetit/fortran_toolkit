@@ -18,15 +18,15 @@
 :root {
   --main: #006400;
   --fontmain:rgb(79,76,76);
+  --background:rgb(255, 255, 255); 
 }
-
-/* div,p,span,a,a:hover,i,ul,ol,li{
-  font-size: 17px;
+div,p,span,a,a:hover,i,ul,ol,li{
+  font-size: inherit;
   color:inherit;
   text-decoration:inherit;
   font-weight:inherit;
   text-align:inherit;
-} */
+}
 
 /***************************************************************************
 STRUCTURE
@@ -35,22 +35,51 @@ STRUCTURE
 html {
   -ms-text-size-adjust: 100%;
   -webkit-text-size-adjust:100%;
-  background-color:white;
+  background-color:var(--background);
   padding:30px;
 }
 body {
   margin:0;
   min-width:880px;
-  max-width:1100px;
+  max-width:1000px;
+  padding:20px;
+  padding-bottom:100px;
   color:var(--fontmain);
   margin:0px auto auto auto;
   padding:0px auto auto auto;
+}
+p,div{
+  margin-top:3px;
+}
+a{
+  color:var(--link);
+}
+a:hover{
+  color:var(--linkhover);
+  cursor:pointer;
+}
+ul{
+  padding: 7px 0px 0px 30px;
+  margin:0px;
+  list-style:circle;
+}
+li{
+  margin-bottom:10px;
+}
+li:not(:last-child) {
+  margin-bottom:2px;
+}
+u{
+  text-decoration:underline;
+}
+b , strong{
+  font-weight:bold;
 }
 header{
   padding-bottom:15px;
   border-bottom:2px solid var(--fontmain);
   background-color:var(--background);
-  color:#006400;
+  color: var(--main);
 }
 .content{ 
   background-color:var(--background);
@@ -90,10 +119,6 @@ blockquote > p {
   margin:0px;
 }
 
-
-
-
-
 /***************************************************************************
 MAIN ELEMENTS
 ***************************************************************************/
@@ -101,20 +126,6 @@ MAIN ELEMENTS
 p{
   margin-top:0px;
   margin-bottom:10px;
-}
-a {
-  color:blue;
-  background-color:transparent;
-  text-decoration:none;
-}
-a:hover {
-  background-color:transparent;
-  color:blue;
-  cursor:pointer;
-  text-decoration:underline;
-}
-b, strong {
-  font-weight:600
 }
 button {
   cursor: pointer;
@@ -127,46 +138,6 @@ hr {
   margin-top:20px;
   margin-bottom:20px;
 }
-/* textarea {
-  overflow: auto
-} */
-
-
-
-
-
-
-/***************************************************************************
-LIST
-***************************************************************************/
-
-ul, ol {
-  padding:0px 0px 0px 30px;
-  margin:0px;
-  margin-bottom:px;
-  /* padding-left: 0;
-  margin-top: 0;
-  margin-bottom:0 */
-}
-
-ol ol, ul ol {
-  list-style-type:lower-roman
-}
-
-ul ul ol, ul ol ol, ol ul ol, ol ol ol {
-  list-style-type:lower-alpha
-}
-li{
-  margin-bottom:10px;
-}
-li:not(:last-child) {
-  margin-bottom:2px;
-}
-
-
-
-
-
 
 /***************************************************************************
 HEADERS
@@ -196,6 +167,7 @@ h4,h5,h6 {
 OTHERS
 ***************************************************************************/
 
+/*
 .f1 {
   font-size:26px !important
 }

@@ -111,6 +111,7 @@ h6{
   color: var(--fontmain);
 }
 h2 {
+  margin-top:25px;
   font-size:150%;
 }
 h3 {

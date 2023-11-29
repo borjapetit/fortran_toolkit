@@ -1,4 +1,10 @@
 
+# Fortran toolkit
+
+Borja Petit, 2023
+
+--- 
+
 **THIS SITE IS UNDER CONSTRUCTION**
 
 <a name="inicio"></a>
@@ -22,7 +28,7 @@ If you find any mistake, or have any suggestion, [contact me](mailto:bpetit@cune
 
 ### General purpose
 
-- [```grid```](docs/grid): generate a grid for a continuous variable.
+- [```grid```](docs/grid.md): generate a grid for a continuous variable.
 - [```interpolation```](docs/interpolation.md): interpolate a value over a grid, returning position and distance.
 - [```interpolate```](docs/interpolate.md): linearly interpolate a value over an n-dimensional grid (up to dimension 6).
 - [```timing```](docs/timing.md): returns the number of seconds since 00:00h of the 1st day of the month (robust to parallelization).

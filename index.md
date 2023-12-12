@@ -1,4 +1,10 @@
 
+# Fortran toolkit
+
+###### Borja Petit
+
+---
+
 **THIS SITE IS UNDER CONSTRUCTION**
 
 <a name="inicio"></a>
@@ -13,9 +19,9 @@ If you find any mistake, or have any suggestion, [contact me](mailto:bpetit@cune
 
 ---
 
-### General purpose
+## General purpose
 
-- [```grid```](docs/grid): generate a grid for a continuous variable.
+- [```grid```](docs/grid.md): generate a grid for a continuous variable.
 - [```interpolation```](docs/interpolation.md): interpolate a value over a grid, returning position and distance.
 - [```interpolate```](docs/interpolate.md): linearly interpolate a value over an n-dimensional grid (up to dimension 6).
 - [```timing```](docs/timing.md): timing function robust to parallelization.
@@ -23,9 +29,7 @@ If you find any mistake, or have any suggestion, [contact me](mailto:bpetit@cune
 - [```iseven```](docs/iseven.md): check if a user-provided integer is even.
 - [```error```](docs/error.md): print error message and pause execution.
 
----
-
-### Statistics
+## Statistics
 
 - [```varmean```](docs/varmean.md): returns the average of a variable (allows for weights and mask).
 - [```varvar```](docs/varvar.md): returns the variance of a variable (allows for weights and mask).
@@ -38,18 +42,16 @@ If you find any mistake, or have any suggestion, [contact me](mailto:bpetit@cune
 - [```randomnormal```](docs/randomnormal.md): returns a random draw (either a scalar or a vector) for a normal distribution.
 - [```cdfn```](docs/cdfn.md): returns the cdf of a standard normal distribution.
 
----
 
-### Linear algebra
+## Linear algebra
 
 - [```vect```](docs/vect.md): transform a matrix of into a vector (similar to ```reshape```).
 - [```cumsum```](docs/cumsum.md): returns the vector with cumulative sum of a vector (as Matlab's ```cumsum``` function).
 - [```diag```](docs/diag.md): returns a vector with the main diagonal of a matrix.
 - [```inverse```](docs/inverse.md): returns the inverse of a squared matrix.
 
----
 
-### Optimization
+## Optimization
 
 Algorithms for single-valued univariate equations:
 

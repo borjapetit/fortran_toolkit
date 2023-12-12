@@ -1,5 +1,12 @@
 
-### olsreg
+# Fortran toolkit
+
+###### Borja Petit
+
+---
+
+## ```olsreg```
+
 
 ```fortran
 subroutine olsreg(coeffs,yvar,xvar1,xvar2,...,xvar8,w,mask,table)

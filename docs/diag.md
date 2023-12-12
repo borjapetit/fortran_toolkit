@@ -1,5 +1,11 @@
 
-### diag
+# Fortran toolkit
+
+###### Borja Petit
+
+---
+
+## ```diag```
 
 ```fortran
 function diag(mat) result(vec)

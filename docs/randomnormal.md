@@ -1,5 +1,11 @@
 
-### randomnormal
+# Fortran toolkit
+
+###### Borja Petit
+
+---
+
+## ```randomnormal```
 
 ```fortran
 subroutine randomnormal(shock,mu,std)

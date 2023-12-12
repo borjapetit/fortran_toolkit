@@ -1,5 +1,11 @@
 
-### tauchen
+# Fortran toolkit
+
+###### Borja Petit
+
+---
+
+## ```tauchen```
 
 ```fortran
 subroutine tauchen(xvec,rho,mu,sigma,n,pmat)

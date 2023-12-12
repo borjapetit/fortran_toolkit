@@ -1,5 +1,11 @@
 
-### normaldist
+# Fortran toolkit
+
+###### Borja Petit
+
+---
+
+## ```normaldist```
 
 ```fortran
 subroutine normaldist(xvec,mu,sigma,n,dist)

@@ -4,7 +4,7 @@
 ! Borja Petit, © 2022
 !
 ! general purpose:
-!   - grid: generate a grid for a continuous varibale
+!   - grid: generate a grid for a continuous variable
 !   - interpolation: interpolate a value over a grid, returning position and distance
 !   - interpolate: linearly interpolate a value over an n-dimensional grid, with n <= 6
 !   - timing: returns the number of seconds since 00:00h of the 1st day of the month [robust to parelalization]
@@ -17,10 +17,10 @@
 !   - correlation: returns the correlation of two variables, allowing for weigths
 !   - percentile: returns the i-th percentile of a variables, allowing for weigths
 !   - ols: returns the ols coefficients of a 1-var or 2-var regression, allowing for weigths
-!   - fit2poli: fits a 2nd order polynomianl to a variable, allowing for weigths
+!   - fit2poli: fits a 2nd order polynomials to a variable, allowing for weigths
 !   - tachen: returns the transition matrix for a discretized ar(1) process
-!   - randomnormal: returns a random draw for a nomal distribution
-!   - cdfn: retutns the cdf of a nomabl distribution
+!   - randomnormal: returns a random draw for a normal distribution
+!   - cdfn: returns the cdf of a normal distribution
 !   - beta_noncentral_cdf: returns the cdf from a beta distribution
 !
 ! linear algebra:
@@ -28,7 +28,7 @@
 !   - cumsum: returns the vector with cummulative sum of a vector (as matlab's cumsum function)
 !   - diag: returns the main diagonal of a matrix
 !   - transmat: returns the transpose of a square matrix
-!   - inverse: returns the invesrse of a sqaured matrix
+!   - inverse: returns the inverse of a squared matrix
 !
 ! optimization (with and without states/fixed parameters)
 !   - simplex: simplex algorithm
@@ -39,7 +39,7 @@
 ! it also includes some other functions/subroutines used for optimization:
 !   - broyden: updates a jacobian matrix using the broyden's method
 !   - normalize: transform a bounded variable into an unbounded uno [for optimizaton]
-!   - denormalize: transform a undonded variable into an counded uno [for optimizaton]
+!   - denormalize: transform a unbounded variable into an bounded uno [for optimizaton]
 !
 ! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -61,18 +61,18 @@ module toolkit
   real(dp) , parameter :: mil   = dble(1000.000000000000000)
   real(dp) , parameter :: tolvl = dble(0.000000000100000000)
   
-  ! interface for the function "interpolate" in different dimessions.
+  ! interface for the function "interpolate" in different dimesions.
   interface interpolate
     module procedure interpolate1d,interpolate2d,interpolate3d,interpolate4d,interpolate5d,interpolate6d
   end interface interpolate
 
-  ! interface for the function "vect" (vectorize an array) in different dimessions.
+  ! interface for the function "vect" (vectorize an array) in different dimensions.
   interface vect
     module procedure vectorize_in_2d,vectorize_in_3d,vectorize_in_4d,vectorize_in_5d,vectorize_in_6d,&
                      vectorize_dp_2d,vectorize_dp_3d,vectorize_dp_4d,vectorize_dp_5d,vectorize_dp_6d
   end interface vect
 
-  ! interface for the function "randomnormal" to generate eithr an scalar or a vector of normal random numbers
+  ! interface for the function "randomnormal" to generate either an scalar or a vector of normal random numbers
   interface randomnormal
     module procedure randomnormal_scalar,randomnormal_vec
   end interface randomnormal
@@ -354,15 +354,15 @@ module toolkit
       if (size(var).eq.size(mask)) then
         mask1 = mask
       else
-        call error('error in varmean: mask of incorrect size')
+        call error('error in varmean: mask of incorrect size',1)
       end if
     end if
 
     ! check weigths
     allocate(weig(size(var))) ; weig(:) = uno
     if (present(w)) then
-      if (size(var).ne.size(w)) call error('error in varmean!! var and w have different size')
-      if (sum(w).lt.tolvl     ) call error('error in varmean!! w are cero')
+      if (size(var).ne.size(w)) call error('error in varmean!! var and w have different size',1)
+      if (sum(w).lt.tolvl     ) call error('error in varmean!! w are zero',1)
       weig(:) = w(:)
     end if
 
@@ -393,15 +393,15 @@ module toolkit
       if (size(var).eq.size(mask)) then
         mask1 = mask
       else
-        call error('error in varvar: mask of incorrect size')
+        call error('error in varvar: mask of incorrect size',1)
       end if
     end if
 
     ! check weigths
     allocate(weig(size(var))) ; weig(:) = uno
     if (present(w)) then
-      if (size(var).ne.size(w)) call error('error in varvar!! var and w have different size')
-      if (sum(w).lt.tolvl     ) call error('error in varvar!! w are cero')
+      if (size(var).ne.size(w)) call error('error in varvar!! var and w have different size',1)
+      if (sum(w).lt.tolvl     ) call error('error in varvar!! w are zero',1)
       weig(:) = w(:)
     end if
 
@@ -432,15 +432,15 @@ module toolkit
       if (size(var).eq.size(mask)) then
         mask1 = mask
       else
-        call error('error in varstd: mask of incorrect size')
+        call error('error in varstd: mask of incorrect size',1)
       end if
     end if
 
     ! check weigths
     allocate(weig(size(var))) ; weig(:) = uno
     if (present(w)) then
-      if (size(var).ne.size(w)) call error('error in varstd!! var and w have different size')
-      if (sum(w).lt.tolvl     ) call error('error in varstd!! w are cero')
+      if (size(var).ne.size(w)) call error('error in varstd!! var and w have different size',1)
+      if (sum(w).lt.tolvl     ) call error('error in varstd!! w are zero',1)
       weig(:) = w(:)
     end if
 
@@ -470,17 +470,17 @@ module toolkit
   
     ! check vector dimensions
     if (size(xvar1).ne.size(xvar2)) then
-      call error('error in correaltion!! yvar and xvar of different sizes')
+      call error('error in correaltion!! yvar and xvar of different sizes',1)
     end if
 
     ! check weigths
     allocate(weig(size(xvar1))) ; weig(:) = uno
     if (present(w)) then
       if (size(xvar1).ne.size(w)) then
-        call error('error in correlation!! var and w have different size')
+        call error('error in correlation!! var and w have different size',1)
       end if
       if (sum(w).lt.tolvl) then
-        call error('error in correlation!! w are cero')
+        call error('error in correlation!! w are zero',1)
       end if
       weig(:) = w(:)
     end if
@@ -492,7 +492,7 @@ module toolkit
         allocate(vect2(count(mask))) ; vect2 = pack(xvar2,mask)
         allocate(weig1(count(mask))) ; vect1 = pack(weig ,mask)
       else
-        call error('error in varmean: mask of incorrect size')
+        call error('error in varmean: mask of incorrect size',1)
       end if
     else
       allocate(vect1(size(xvar1)),vect2(size(xvar1)),weig1(size(xvar1)))
@@ -510,9 +510,11 @@ module toolkit
     ! check whether any of the variables is a constant
     if (aux2.lt.tolvl) then
       call error('error in correlation!! xvar1 is a constant')
+      return
     end if
     if (aux4.lt.tolvl) then
       call error('error in correlation!! xvar2 is a constant')
+      return
     end if
 
     ! compute correlation
@@ -543,21 +545,21 @@ module toolkit
       if (size(xvec).eq.size(mask)) then
         mask1 = mask
       else
-        call error('error in percentile: mask of incorrect size')
+        call error('error in percentile: mask of incorrect size',1)
       end if
     end if
 
     ! check weigths
     allocate(weig(size(xvec))) ; weig(:) = uno
     if (present(w)) then
-      if (size(w).ne.size(w)) call error('error in percentile!! var and w have different size')
-      if (sum(w).lt.tolvl   ) call error('error in percentile!! w are cero')
+      if (size(w).ne.size(w)) call error('error in percentile!! var and w have different size',1)
+      if (sum(w).lt.tolvl   ) call error('error in percentile!! w are zero',1)
       weig(:) = w(:)
     end if
 
     ! check whether percentile is valid
-    if (pct.gt.uno ) call error('error in percentile!! invalid percetile: larger than 100')
-    if (pct.lt.cero) call error('error in percentile!! invalid percentile: negative value')
+    if (pct.gt.uno ) call error('error in percentile!! invalid percetile: larger than 100',1)
+    if (pct.lt.cero) call error('error in percentile!! invalid percentile: negative value',1)
 
     ! find the percentile by bisection
     iter = 0 ; aux1 = maxval(xvec) ; aux2 = minval(xvec)
@@ -673,7 +675,7 @@ module toolkit
     allocate(zvar(no))     ; zvar = pack(wvar,mask1) ! keep only valid observations
     
     ! check weigths are positive    
-    if (sum(zvar).lt.tolvl) call error('error in olsreg!! weigths are cero',1)
+    if (sum(zvar).lt.tolvl) call error('error in olsreg!! weigths are zero',1)
     
     ! fill constant (if exists)
     if (wc.eq.1) xvars(:,1) = zvar/zvar

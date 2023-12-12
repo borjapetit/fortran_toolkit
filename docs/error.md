@@ -25,6 +25,7 @@ call error('error message',1)
 The output would be:
 ```
 error message
+Type any key to continue...
 ```
 
 Error message without execution pause:
@@ -34,7 +35,6 @@ call error('error message')
 The output would be:
 ```
 error message
-Type any key to continue...
 ```
 
 

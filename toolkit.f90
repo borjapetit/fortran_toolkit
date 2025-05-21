@@ -10,6 +10,8 @@
 !   - timing: returns the number of seconds since 00:00h of the 1st day of the month [robust to parelalization]
 !   - multiplo: returns 1 if an integer is a multiple of another user-provided integer
 !   - iseven: returns 1 if a user-provided integer is even
+!   - error: prints an error message
+!   - num2text: returns a string with an integer or a real number
 !
 ! statistics:
 !   - varmean: returns the average of a variable, allowing for weigths

@@ -41,6 +41,7 @@ If you find any mistake, or have any suggestion, [contact me](mailto:bpetit@cune
 - [```normaldist```](docs/normaldist.md): returns the distribution for a normal random variable given some mean and variance.
 - [```randomnormal```](docs/randomnormal.md): returns a random draw (either a scalar or a vector) for a normal distribution.
 - [```cdfn```](docs/cdfn.md): returns the cdf of a standard normal distribution.
+- [```shuffle_vect```](docs/shuffle_vect.md): this subroutine returns a vector with the shuffled values of a used-provided vector.
 
 
 ## Linear algebra

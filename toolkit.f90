@@ -3,6 +3,10 @@
 ! toolkit.f90, a toolkit for fortran90 programming
 ! Borja Petit, © 2021
 !
+! econ-related:
+!   - crra: CRRA function
+!   - ces: CES function
+!
 ! general purpose:
 !   - grid: generate a grid for a continuous varibale
 !   - interpolation: interpolate a value over a grid, returning position and distance
@@ -59,11 +63,18 @@ module toolkit
   real(dp) , parameter :: tolvl = dble(0.00000000010000)
   
   interface interpolate
-    module procedure interpolate1d,interpolate2d,interpolate3d,interpolate4d,interpolate5d,interpolate6d
+    module procedure interpolate1d,&
+                     interpolate2d,&
+                     interpolate3d,&
+                     interpolate4d,&
+                     interpolate5d,&
+                     interpolate6d
   end interface interpolate
   interface vect
-    module procedure vectorize_int_2d,vectorize_int_3d,vectorize_int_4d,vectorize_int_5d,&
-                     vectorize_dp_2d,vectorize_dp_3d,vectorize_dp_4d,vectorize_dp_5d
+    module procedure vectorize_int_2d,vectorize_dp_2d,&
+                     vectorize_int_3d,vectorize_dp_3d,&
+                     vectorize_int_4d,vectorize_dp_4d,&
+                     vectorize_int_5d,vectorize_dp_5d
   end interface vect
   interface randomnormal
     module procedure randomnormal_scalar,randomnormal_vec
@@ -74,12 +85,48 @@ module toolkit
   interface num2text
     module procedure int2text,real2text
   end interface num2text
+  interface shuffle_vect
+    module procedure shuffle_vect_int,shuffle_vect_dp
+  end interface shuffle_vect
   
   contains
 
 
 
+  ! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  ! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  ! econ functions and subroutines
+  ! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  ! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+   ! crra function with "x" being the argument and "b" being the rra parameter
+  function crra(x,b) result(u)
+    implicit none
+    real(dp) :: x,b,u ; u = zero
+    if (abs(b).gt.tolvl) then
+      if (abs(x).gt.tolvl) u = (x**b)/b
+      if (abs(x).le.tolvl) then
+        if (b.gt.zero) u = zero
+        if (b.lt.zero) u = -huge(x)
+      end if
+    else if (abs(b).le.tolvl) then
+      if (x.gt.tolvl) u = log(x)
+      if (x.le.tolvl) u = -huge(x)
+    end if
+    return
+  end function crra
+
+   ! CES function with "x1" and "x2" being the inputs, "b" being (inverse) elasticity of substitution and "a" being the share of input 1
+  function ces(x1,x2,a,b) result(u)
+    implicit none
+    real(dp) :: x1,x2,a,b,u ; u = zero
+    if (abs(b).gt.tolvl) then
+      u = (a*(x1**b) + (one-a)*(x2**b))**(one/b)
+    else if (abs(b).le.tolvl) then
+      u = (x1**a)*(x2**(one-a))
+    end if
+    return
+  end function ces 
 
 
   ! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -298,7 +345,7 @@ module toolkit
 
   subroutine error_0(mess)
     implicit none
-    character(len=*)   , intent(in)    :: mess
+    character(len=*) , intent(in)    :: mess
     write(*,*) trim(adjustl(mess)) 
     return
   end subroutine error_0
@@ -330,15 +377,15 @@ module toolkit
   function real2text(realnum,decs) result(txt)
     implicit none
     real(dp)                       :: realnum
-    integer                        :: inter,decs0
+    integer                        :: decs0
     integer , optional             :: decs
-    character(len=100)             :: txt0
+    character(len=100)             :: fmt, txt0
     character(len=:) , allocatable :: txt
     decs0 = 2 ; if (present(decs)) decs0 = decs
-    inter = floor(realnum)
-    txt0  = int2text(inter)//"."//int2text(floor( (realnum-dble(inter))*dble(10.0**decs0) ))
+    write(fmt, '(A,A,I0,A)') '(','F20.', decs0, ')'
+    write(txt0, fmt=fmt) realnum
     allocate(character(len=len(trim(adjustl(txt0)))) :: txt)
-    txt   = trim(adjustl(txt0))
+    txt = trim(adjustl(txt0))
     return
   end function real2text
 
@@ -383,9 +430,12 @@ module toolkit
     end if
 
     if (present(w)) then
-      if (size(var).ne.size(w)) call error('error in varmean!! var and w have different size')
-      !if (sum(w).lt.tolvl     ) call error('error in varmean!! w are zero')
-      weig(:) = w(:)
+      if (size(var).ne.size(w)) then
+        call error('error in varmean!! var and w have different size')
+      else
+        weig(:) = w(:)
+      end if
+      if (sum(weig).lt.tolvl) call error('error in varmean!! w are zero')
     end if
 
     meanvar = sum(var(:)*weig(:),mask=mask1)/sum(weig,mask=mask1)
@@ -425,9 +475,12 @@ module toolkit
     end if
 
     if (present(w)) then
-      if (size(var).ne.size(w)) call error('error in varvar!! var and w have different size')
-      !if (sum(w).lt.tolvl     ) call error('error in varvar!! w are zero')
-      weig(:) = w(:)
+      if (size(var).ne.size(w)) then
+        call error('error in varvar!! var and w have different size')
+      else
+        weig(:) = w(:)
+      end if
+      if (sum(weig).lt.tolvl) call error('error in varvar!! w are zero')
     end if
 
     mvar   = varmean(var,weig,mask=mask1.and..not.isnan(var))
@@ -467,9 +520,12 @@ module toolkit
     end if
 
     if (present(w)) then
-      if (size(var).ne.size(w)) call error('error in varstd!! var and w have different size')
-      !if (sum(w).lt.tolvl     ) call error('error in varstd!! w are zero')
-      weig(:) = w(:)
+      if (size(var).ne.size(w)) then
+        call error('error in varstd!! var and w have different size')
+      else
+        weig(:) = w(:)
+      end if
+      if (sum(weig).lt.tolvl) call error('error in varstd!! w are zero')
     end if
 
     stdvar = sqrt(varvar(var,weig,mask=mask1))
@@ -867,6 +923,80 @@ module toolkit
     return
   end function cdfn
 
+  ! ----------------------------------------------------------------------------
+  ! this subroutine takes an array "nums" of dimension "n" and fills it with
+  ! integer numbers from 1 to n and them shuffled using the the Fisher–Yates
+  ! shuffle algorithm
+
+  subroutine fisheryates(nums,seed)
+    implicit none
+    integer , intent(inout) :: nums(:)
+    integer , intent(in) , optional :: seed(:)
+    real(dp) :: r
+    integer :: i, j, temp , n ; n = size(nums)
+
+    ! Initialize the array with values 1 to 100
+    do i = 1,n ; nums(i) = i ; end do
+
+    ! Seed the random number generator
+    if (present(seed)) then
+      call random_seed(put=seed)
+    else
+      call random_seed()
+    end if
+
+    ! Fisher–Yates shuffle
+    do i = n, 2, -1
+      call random_number(r)
+      j = int(r * real(i)) + 1
+      temp    = nums(i)
+      nums(i) = nums(j)
+      nums(j) = temp
+    end do
+
+    return
+  end subroutine fisheryates
+
+  ! ----------------------------------------------------------------------------
+  ! this subroutine takes an input vector "input_vec" of size "n" and returns a
+  ! vector "output_vec" with "m" shuffled values from "input_vec". The input vector
+  ! is shuffled using the Fisher–Yates algorithm.
+  ! if n > m: "output_vec" filled with "m" shuffled values of "input_vec"
+  ! if n < m: "output_vec" filled with "n" shuffled values of "input_vec" until m. 
+
+  subroutine shuffle_vect_int(input_vec, output_vec)
+    implicit none
+    integer , intent(in)  :: input_vec(:)
+    integer , intent(out) :: output_vec(:)
+    integer , allocatable :: indices(:)
+    integer               :: i,n,m
+    n = size(input_vec)
+    m = size(output_vec)
+    allocate(indices(n))
+    call fisheryates(indices)
+    do i = 1,m
+      output_vec(i) = input_vec(indices(mod(i-1,n)+1))
+    end do
+    deallocate(indices)
+    return
+  end subroutine shuffle_vect_int
+  subroutine shuffle_vect_dp(input_vec, output_vec)
+    implicit none
+    real(dp) , intent(in)  :: input_vec(:)
+    real(dp) , intent(out) :: output_vec(:)
+    integer  , allocatable :: indices(:)
+    integer                :: i,n,m
+    n = size(input_vec)
+    m = size(output_vec)
+    allocate(indices(n))
+    call fisheryates(indices)
+    do i = 1,size(output_vec)
+      output_vec(i) = input_vec(indices(mod(i-1,n)+1))
+    end do
+    deallocate(indices)
+    return
+  end subroutine shuffle_vect_dp
+
   ! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -946,6 +1076,34 @@ module toolkit
     vec = reshape(mat,(/size(vec)/))
     return
   end function vectorize_int_5d
+  function vectorize_lo_2d(mat) result(vec)
+    implicit none
+    logical :: mat(:,:)
+    logical :: vec(size(mat,1)*size(mat,2))
+    vec = reshape(mat,(/size(vec)/))
+    return
+  end function vectorize_lo_2d
+  function vectorize_lo_3d(mat) result(vec)
+    implicit none
+    logical :: mat(:,:,:)
+    logical :: vec(size(mat,1)*size(mat,2)*size(mat,3)) 
+    vec = reshape(mat,(/size(vec)/))
+    return
+  end function vectorize_lo_3d
+  function vectorize_lo_4d(mat) result(vec)
+    implicit none
+    logical :: mat(:,:,:,:)
+    logical :: vec(size(mat,1)*size(mat,2)*size(mat,3)*size(mat,4))
+    vec = reshape(mat,(/size(vec)/))
+    return
+  end function vectorize_lo_4d
+  function vectorize_lo_5d(mat) result(vec)
+    implicit none
+    logical :: mat(:,:,:,:,:)
+    logical :: vec(size(mat,1)*size(mat,2)*size(mat,3)*size(mat,4)*size(mat,5))
+    vec = reshape(mat,(/size(vec)/))
+    return
+  end function vectorize_lo_5d
 
   ! ----------------------------------------------------------------------------
   ! this function returns a vector "vec1" with the cummmulative sum of the elements
@@ -1538,7 +1696,7 @@ module toolkit
   ! levenberg–marquardt algorithm
   ! minimize a user-supplied system of "m" equations in "n" unknows
 
-  subroutine lmmin(func,x,y,iy,ind,x0,itermax,damp,tol,toleach,shock,usebro,just,iprint)
+  subroutine lmmin(func,x,y,iy,ind,x0,itermax,damp,tol,toleach,shock,usebro,iprint)
 
     ! this subroutine minimizes the sum of squred errors of a system of m equations
     ! in n unknowns using the levenberg–marquardt algorithm. more about the algorithm
@@ -1601,8 +1759,6 @@ module toolkit
     integer                          :: maxiter
     integer  , intent(in) , optional :: iprint
     integer                          :: ip
-    integer  , intent(in) , optional :: just
-    integer                          :: just0
     integer  , intent(in) , optional :: usebro
     integer                          :: bro,br
 
@@ -1636,7 +1792,6 @@ module toolkit
     shck(:)   = 5.0d-2 ; if (present(shock)  ) shck(:)   = shock    ! shock to parameters
     maxiter   = 500    ; if (present(itermax)) maxiter   = itermax  ! max number of iterations
     ip        = 0      ; if (present(iprint) ) ip        = iprint   ! indicator of printing behaviour
-    just0     = 0      ; if (present(just)   ) just0     = just     ! indicator of printing behaviour 
     bro = 0 ; br = 0   ; if (present(usebro) ) bro       = usebro   ! indicator for the use of Broyden Updating
     
 
@@ -1651,11 +1806,6 @@ module toolkit
 
     ! number of variables ad number of equations
     n = size(x,1) ; m = size(y,1)
-
-    ! if not saured, not just identified
-    if (n.ne.m) then
-      just0 = 0
-    end if
 
     ! initial point
     y0 = func(x0) ; e0 = sum(y0(:)*y0(:)) ; iy = 1
@@ -1752,13 +1902,6 @@ module toolkit
       qp = 0
 
       if (ip.gt.1) write (*,*) '  '
-    end if
-
-    if (just0.eq.1) then
-      j0 = j ; j = zero
-      do k = 1,m
-        j(k,k) = j0(k,k)
-      end do
     end if
 
     ! for each iteration, starting point = best point

@@ -13,7 +13,8 @@ $$ u =
 \begin{cases}
   \left( a\,x_1^b + (1-a)\,x_2^b\right)^{1/b} & \text{ if } b>0 \\ \\ 
   x_1^a \,x_2^{1-a} & \text{ if } b\approx 0
-\end{cases}$$
+\end{cases}
+$$
 
 **Dependencies**: none
 

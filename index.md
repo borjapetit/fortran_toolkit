@@ -19,6 +19,11 @@ If you find any mistake, or have any suggestion, [contact me](mailto:bpetit@cune
 
 ---
 
+## Econ-related functions and subroutines
+
+- [```crra```](docs/crra.md): a constant relative risk aversion utilit function.
+- [```ces```](docs/ces.md): a constant elasticity of substitution aggregator.
+
 ## General purpose
 
 - [```grid```](docs/grid.md): generate a grid for a continuous variable.
@@ -28,6 +33,7 @@ If you find any mistake, or have any suggestion, [contact me](mailto:bpetit@cune
 - [```multiplo```](docs/multiplo.md): check if an integer is a multiple of another user-provided integer.
 - [```iseven```](docs/iseven.md): check if a user-provided integer is even.
 - [```error```](docs/error.md): print error message and pause execution.
+- [```num2text```](docs/num2text.md): converts a real number or an integer into a string.
 
 ## Statistics
 
@@ -41,7 +47,8 @@ If you find any mistake, or have any suggestion, [contact me](mailto:bpetit@cune
 - [```normaldist```](docs/normaldist.md): returns the distribution for a normal random variable given some mean and variance.
 - [```randomnormal```](docs/randomnormal.md): returns a random draw (either a scalar or a vector) for a normal distribution.
 - [```cdfn```](docs/cdfn.md): returns the cdf of a standard normal distribution.
-- [```shuffle_vect```](docs/shuffle_vect.md): this subroutine returns a vector with the shuffled values of a used-provided vector.
+- [```fisheryates```](docs/fisheryates.md): this subroutine returns a vector of dimmension $n$ filled with integers from 1 to $n$ and then shuffled using the Fisher-Yates shuffle algorithm.
+- [```shuffle_vect```](docs/shuffle_vect.md): this subroutine returns a vector with the shuffled values of a used-provided vector using the Fisher-Yates algorithm.
 
 
 ## Linear algebra
@@ -50,26 +57,26 @@ If you find any mistake, or have any suggestion, [contact me](mailto:bpetit@cune
 - [```cumsum```](docs/cumsum.md): returns the vector with cumulative sum of a vector (as Matlab's ```cumsum``` function).
 - [```diag```](docs/diag.md): returns a vector with the main diagonal of a matrix.
 - [```inverse```](docs/inverse.md): returns the inverse of a squared matrix.
-
+- [```transmat```](docs/transmat.md): returns the transpose of a matrix.
 
 ## Optimization
 
-Algorithms for single-valued univariate equations:
+*Algorithms for single-valued univariate equations:*
 
 - [```golden```](docs/golden.md): maximize a single-valued univariate equation using the Golden Search algorithm.
 - [```brent```](docs/brent.md): find the root of a single-valued univariate equation using the Brent's method.
 
-Algorithm for single-valued multivariate equations:
+*Algorithm for single-valued multivariate equations:*
 
 - [```simplex```](docs/simplex.md): minimize a single-valued multivariate equation using the Nelder-Mead algorithm.
 
-Algorithm for systems of equations:
+*Algorithm for systems of equations:*
 
 - [```lmmin```](docs/lmmin.md): minimize a multivariate system of equations using the Levenberg–Marquardt algorithm.
 
   The Levenberg–Marquardt algorithm uses the Jacobian of the system to find the minimum. When evaluating the objective function is time-costly, computing the Jacobian may take too long. In those cases, one potential way of speeding up the algorithm is to update the Jacobian matrix using the Broyden's method, that does not require further function evaluations.
 
-Other functions:
+*Other functions:*
 
 - [```broyden```](docs/broyden.md): updates a Jacobian matrix using the Broyden's method.
 

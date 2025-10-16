@@ -1,10 +1,4 @@
 
-
-# Fortran toolkit
-
-### Borja Petit
----
-
 ## ```tauchen```
 
 ```fortran

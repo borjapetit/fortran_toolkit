@@ -1,11 +1,4 @@
 
-
-# Fortran toolkit
-
-### Borja Petit
-
----
-
 ## ```normaldist```
 
 ```fortran

@@ -1,11 +1,4 @@
 
-
-# Fortran toolkit
-
-### Borja Petit
-
----
-
 ## ```num2text```
 
 ```fortran

@@ -1,4 +1,8 @@
 
+<span style="text-align:right;display:block;">
+<a style="border: 1px solid var(--main); padding: 5px 10px 5px 10px" href="https://borjapetit.github.io/fortran_toolkit/">Back to index</a>
+</span>
+
 ## ```broyden```
 
 ```fortran
@@ -19,7 +23,3 @@ The user must supply a pair of points `x0` and `x1`, the value of the function e
 *Note*: this function is used in [`lmmin`](lmmin.md)
 
 **Dependencies**: none
-
-[(back to index)](../index.md)
-
---

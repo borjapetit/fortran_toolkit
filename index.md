@@ -3,11 +3,14 @@
 
 <a name="inicio"></a>
 
-This Fortran code provides a list of functions and subroutines that I typically use in my research. All functions and subroutines assume double precision for real variables.
+This Fortran code provides a list of functions and subroutines that I typically use in my research.  If you find any mistake, either in the codes or in this website, [contact me](mailto:bpetit@cunef.edu).
 
-Efficiency of the algorithms is not guaranteed, and the code is distributed under the MIT license.
+**License**: The code is distributed under the MIT license. You are free to use and modify it as you wish, but please acknowledge the source.
+If you distributte a modified version ofthis code, please indicate in the preambule the changes made along with your name and date.
 
-If you find any mistake, either in the codes or in this website, [contact me](mailto:bpetit@cunef.edu).
+**Notes**
+- Efficiency of the algorithms is not guaranteed.
+- All functions and subroutines assume double precision for real variables.
 
 ---
 

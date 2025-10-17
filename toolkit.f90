@@ -404,7 +404,7 @@ module toolkit
     character(len=*) , intent(in) :: mess
     integer          , intent(in) :: i
     integer                       :: j
-    write(*,*) trim(adjustl(mess)) ; read * , j
+    write(*,*) trim(adjustl(mess//' --> type any key to continue...')) ; read * , j
     return
   end subroutine error_1
 
@@ -758,7 +758,7 @@ module toolkit
   ! the subroutine. The program will automatically call the corresponding subroutine
   ! depending on the number of variables and on the format of output variables
 
-  subroutine olsreg(coeffs,yvec,x1vec,x2vec,x3vec,x4vec,x5vec,x6vec,x7vec,x8vec,w,mask,iprint,stds)
+  subroutine olsreg(coeffs,yvec,x1vec,x2vec,x3vec,x4vec,x5vec,x6vec,x7vec,x8vec,w,mask,table,stds)
     implicit none
     real(dp) , intent(out)            :: coeffs(:)
     real(dp) , intent(out) , optional :: stds(:)
@@ -766,7 +766,7 @@ module toolkit
     real(dp) , intent(in) , optional  :: x1vec(:),x2vec(:),x3vec(:),x4vec(:),x5vec(:),x6vec(:),x7vec(:),x8vec(:)
     real(dp) , intent(in) , optional  :: w(:)
     logical  , intent(in) , optional  :: mask(:)
-    integer  , intent(in) , optional  :: iprint
+    logical  , intent(in) , optional  :: table
     logical  , allocatable            :: mask1(:)
     real(dp) , allocatable            :: yvar(:),xvars(:,:),zvar(:),wvar(:)
     real(dp) , allocatable            :: xTx(:,:),ixTx(:,:),xTy(:),wx(:,:)
@@ -920,8 +920,8 @@ module toolkit
       stds = sdcoefs
     end if
 
-    if (present(iprint)) then 
-      if (iprint.ne.0) then
+    if (present(table)) then 
+      if (table .eqv. .true.) then
 
         inter(:,1) = coeffs - dble(1.9601068)*sdcoefs
         inter(:,2) = coeffs + dble(1.9601068)*sdcoefs
@@ -1535,30 +1535,52 @@ module toolkit
       end function func
     end interface
 
+
+    ! - ```exitcode``` = 0: the algorithm found a root
+    ! - ```exitcode``` = 1: either ```x0``` or ```x1``` is a root of ```func```
+    ! - ```exitcode``` = 2: the root is not within the interval (```x0```, ```x1```)
+    ! - ```exitcode``` = 3: the points ```x0``` and ```x1``` are too close
+    ! - ```exitcode``` = 9: maximum number of function evaluations reached
+
     toler   = 1.0d-8 ; if (present(tol)    ) toler   = tol
     maxiter = 500    ; if (present(itermax)) maxiter = itermax
     ipri    = 0      ; if (present(iprint) ) ipri    = iprint
 
-    if (ipri.ge.1) then
+    if (ipri.ge.0) then
       write(*,*) '  '
       write(*,*) ' starting brent algorithm'
       write(*,*) '  '
     end if
 
-    xa = x0 ; ya = func(xa)
-    xb = x1 ; yb = func(xb)
+    if (abs(x1-x0).lt.tol) then
+      if (ipri.ge.0) write(*,*) ' x0 and x1 are too close'
+      ind = 3 ; return
+    end if
 
-    if (ya*yb.gt.cero) then
+    xa = x0 ; ya = func(xa)
+
+    if (abs(ya).lt.toler) then
+      if (ipri.ge.0) write(*,*) ' x0 is a root'
       ind = 1 ; x = xa ; return
     end if
+
+    xb = x1 ; yb = func(xb)
+
+    if (abs(yb).lt.toler) then
+      if (ipri.ge.0) write(*,*) ' x1 is a root'
+      ind = 1 ; x = xb ; return
+    end if
+
+    if (ya*yb.gt.cero) then
+      if (ipri.ge.0) write(*,*) ' f(x0) and f(x1) have the same sign'
+      ind = 2 ; x = xa ; return
+    end if
+
     if (abs(ya).lt.abs(yb)) then
       xc = xb ; xb = xa ; xa = x0 ; yc = ya ; ya = yb
     end if
-    if (abs(yb).lt.toler) then
-      ind = 0 ; x = xb ; return
-    end if
 
-    xc = xa ; iy = 0 ; ind = 1
+    xc = xa ; iy = 0 ; ind = 0
 
     do while (abs(xb-xa).gt.toler .and. iy.lt.maxiter)
       yc = func(xc)
@@ -1572,7 +1594,7 @@ module toolkit
         ind = 0 ; x = xs ; return
       end if
       if (iy.eq.maxiter) then
-        ind = 2 ; x = xs ; return
+        ind = 9 ; x = xs ; return
       end if
       if (ya*ys.lt.cero) then
         xc = xb ; xb = xs ; yb = ys
@@ -1582,11 +1604,20 @@ module toolkit
       if (abs(ya).lt.abs(yb)) then
         xc = xb ; xb = xa ; xa = xc ; yc = yb ; yb = ya ; ya = yc
       end if
+      if (ipri.ge.1) then
+        write(*,87) iy , xa , xb , xc , ya , yb , yc
+      end if
     end do
+    if (ipri.gt.0) then
+      write(*,86) iy,xb,yb
+    end if
 
     x = xb
 
     return
+    87 format( ' iteration = ',i4,' | xa = ',f10.4,' | xb = ',f10.4,' | xc = ',f10.4,&
+    ' | f(xa) = ',f10.4,' | f(xb) = ',f10.4,' | f(xc) = ',f10.4)
+    86 format( ' solved: iterations = ',i4,' | x = ',f10.4,' | f(x) = ',f10.4)
   end subroutine brent
 
   ! ----------------------------------------------------------------------------
@@ -1669,7 +1700,7 @@ module toolkit
       yp(ilow) = y0 ; xp(:,ilow) = x0 ; goto 10
     end if
 
-    if (ipri.ge.1) then
+    if (ipri.gt.1) then
       write(*,*) '  '
       write(*,*) ' evaluating initial simplex'
       write(*,*) '  '

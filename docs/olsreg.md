@@ -7,15 +7,16 @@
 
 
 ```fortran
-subroutine olsreg(coeffs,yvar,xvar1,xvar2,...,xvar8,w,mask,table)
+subroutine olsreg(coeffs,yvar,xvar1,xvar2,...,xvar8,w,mask,table,stds)
   implicit none
-  real(kind=8) , intent(out)           :: coeffs(:)
-  real(kind=8) , intent(in)            :: yvar(:)
-  real(kind=8) , intent(in)            :: xvar1(:)
-  real(kind=8) , intent(in) , optional :: xvar2(:),xvar3(:),...,xvar8(:)
-  real(kind=8) , intent(in) , optional :: w(:)     
-  logical      , intent(in) , optional :: mask(:)
-  integer      , intent(in) , optional :: table
+  real(kind=8) , intent(out)            :: coeffs(:)
+  logical      , intent(out) , optional :: stds(:)
+  real(kind=8) , intent(in)             :: yvar(:)
+  real(kind=8) , intent(in)             :: xvar1(:)
+  real(kind=8) , intent(in) , optional  :: xvar2(:),xvar3(:),...,xvar8(:)
+  real(kind=8) , intent(in) , optional  :: w(:)     
+  logical      , intent(in) , optional  :: mask(:)
+  logical      , intent(in) , optional  :: table
 ```
 
 This subroutine returns the OLS coefficients from a linear regression model:
@@ -32,15 +33,15 @@ call olsreg(coeffs,yvar,xvar1,xvar2,mask = xvar1.gt.0.0d0 .and. xvar2.lt.5.0d0)
 
 This code computes the OLS coefficients from a linear regression of ```yvar``` on ```xvar1``` and ```xvar2``` conditional on ```xvar1``` being positive and ```xvar2``` being smaller than 5. If ```coeffs``` is of size 3, the model includes a contant term so that $\texttt{coeffs} = (\beta_0,\beta_1,\beta_2)$. If the size of ```coefs``` is 2, then the returned vector is $\texttt{coeffs} = (\beta_1,\beta_2)$.
 
-Finally, the variable ```table``` controls the output of the subroutine. If ```table``` is 0 (or missing), the subroutine returns the coefficients in the vector ```coeffs```. If ```table``` is 1, the subroutine prints a regression table with the coefficients and some additional statistics (t-stats, R-squared, etc).
+Finally, the variable ```table``` controls the output of the subroutine. If ```table``` is ```.false.``` (or missing), the subroutine returns the coefficients in the vector ```coeffs```. If ```table``` is ```.true.```, the subroutine prints a regression table with the coefficients and some additional statistics (t-stats, R-squared, etc).
 
-**Internal dependencies**: [```error```](error.md), [```varmean```](varmean.md),  [```varvar```](varvar.md)
+**Internal dependencies**: [```error```](error.md), [```varmean```](varmean.md),  [```varvar```](varvar.md), [```inverse```](inverse.md), [```transmat```](transmat.md), [```diag```](diag.md)
 
 ---
 
 **Example**
 
-Imagine we have four vectors (```x0```, ```x1```, ```x2```, ```x3```) each with 100 normal random numbers (all with mean zero). And we define a vector ```y``` such that
+Imagine we have three vectors (```x0```, ```x1```, ```x2```, ```x3```) each with 100 normal random numbers (all with mean zero). And we define a vector ```y``` such that
 
 $$\texttt{y} = 0.10 + \texttt{x0} + 0.7\cdot\texttt{x1} - 0.5\cdot \texttt{x2} + 0.2\cdot\texttt{x3}$$
 
@@ -51,13 +52,28 @@ $$\texttt{y} = \beta_0 + \beta_1 \cdot \texttt{x1} + \beta_2 \cdot\texttt{x2} + 
 To do so we first define a vector ```coeffs``` of dimension 4 and the run:
 
 ```fortran
+real(kind=8) :: coeffs(4)
+
 call olsreg(coeffs,y,x1,x2,x3)
 
 ! coeffs = (/ 0.1000 , 0.7265 , -0.4519 , 0.2535 /)
 ```
-If we specify ```table = 1```, the command prints the following:
+
+if we add a vector of dimension 4 to ```stds```, the subroutine also returns the standard deviations of the coefficients:
+
 ```fortran
-call olsreg(coeffs,y,x1,x2,x3,table=1)
+real(kind=8) :: coeffs(4)
+real(kind=8) :: stds(4)
+
+call olsreg(coeffs,y,x1,x2,x3,stds=stds)
+
+! coeffs = (/ 0.1000 , 0.7265 , -0.4519 , 0.2535 /)
+! stds   = (/ 0.0311 , 0.0839 , 0.0664 , 0.0526 /)
+```
+
+If we specify ```table = .true.```, the command prints the following:
+```fortran
+call olsreg(coeffs,y,x1,x2,x3,table=.true.)
 
 ! Output:
 !
@@ -80,11 +96,13 @@ call olsreg(coeffs,y,x1,x2,x3,table=1)
 If we want to run the same regression model without a constant, we just define the vector ```coeffs``` to have dimension 3. 
 
 ```fortran
+real(kind=8) :: coeffs(3)
+
 call olsreg(coeffs,y,x1,x2,x3)
 
 ! coeffs = (/ 0.7265 , -0.4519 , 0.2535 /)
 
-call olsreg(coeffs,y,x1,x2,x3,table=1)
+call olsreg(coeffs,y,x1,x2,x3,table=.true.)
 
 ! Output:
 !   

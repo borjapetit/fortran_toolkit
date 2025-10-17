@@ -17,7 +17,7 @@ This functions returns a timing measure that is robust to parallelization. In pa
 - If ```mode``` = 2, ```time``` is measures in minutes.
 - If ```mode``` = 3, ```time``` is measured in hours
 
-**Internal dependencies**: [```error```](error.md)
+**Internal dependencies**: none
 
 ---
 

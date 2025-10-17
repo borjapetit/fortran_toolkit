@@ -6,7 +6,7 @@
 ## ```multiplo```
 
 ```fortran
-elemental function multiplo(num,xx) result(mul)
+function multiplo(num,xx) result(mul)
   implicit none
   integer :: num,xx
   logical :: mul
@@ -14,7 +14,7 @@ elemental function multiplo(num,xx) result(mul)
 
 This function checks whether a number ```num0``` is a multiple of ```num1```. The result ```mul``` is a logical variable taking value ```.TRUE.``` if ```num0``` is a multiple of ```num1```, and ```.FALSE.``` otherwise.
 
-**Internal dependencies**: none
+**Internal dependencies**: [```error```](error.md)
 
 ---
 

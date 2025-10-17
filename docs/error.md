@@ -23,20 +23,17 @@ This subroutine prints an error message `mess`. If the user supplies any integer
 Error message with execution pause:
 ```fortran
 call error('error message',1)
-```
-The output would be:
-```
-error message
-Type any key to continue...
+
+! The output would be:
+!   error message --> type any key to continue...
 ```
 
 Error message without execution pause:
 ```fortran
 call error('error message')
-```
-The output would be:
-```
-error message
+
+! The output would be:
+!   error message
 ```
 
 

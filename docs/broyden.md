@@ -1,6 +1,6 @@
 
 <span style="text-align:right;display:block;">
-<a style="border: 1px solid var(--main); padding: 5px 10px 5px 10px" href="https://borjapetit.github.io/fortran_toolkit/">Back to index</a>
+<a href="https://borjapetit.github.io/fortran_toolkit/">Back to index</a>
 </span>
 
 ## ```broyden```

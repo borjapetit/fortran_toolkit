@@ -146,8 +146,8 @@ module toolkit
     real(dp) , optional :: s
     real(dp)            :: maxv,minv,grid0(n),v(n),ss,xmin,xmax
     v(:) = cero ; ss = uno ; if (present(s)) ss = s
-    if (ss.le.cero) call error(' errror in grid: spacing parameter is nonpositive')
-    if (n.lt.2    ) call error(' errror in grid: required dimension of 1')
+    if (ss.le.cero) call error(' errror in grid: spacing parameter is nonpositive',0)
+    if (n.lt.2    ) call error(' errror in grid: required dimension of 1',0)
     xmin = min(maxv,minv)
     xmax = max(maxv,minv)
     if (ss.gt.cero) forall (i=1:n) grid0(i) = dble(i-1)/dble(n-1)
@@ -171,7 +171,10 @@ module toolkit
 
     if (present(outof)) ofs = outof
     
-    if (isnan(xnow)) call error(' errror in interpolation: xnow is nan')
+    if (isnan(xnow)) then
+      call error(' errror in interpolation: xnow is nan',0)
+      return
+    end if
     
     n = size(xgrid)
     if (n.eq.1) then
@@ -194,9 +197,9 @@ module toolkit
       end if
     end if
 
-    if (pos.lt.1   ) call error(' errror in interpolation: pos < 1')
-    if (pos.gt.n   ) call error(' errror in interpolation: pos > size')
-    if (isnan(wth) ) call error(' errror in interpolation: wvar is nan')
+    if (pos.lt.1   ) call error(' errror in interpolation: pos < 1',0)
+    if (pos.gt.n   ) call error(' errror in interpolation: pos > size',0)
+    if (isnan(wth) ) call error(' errror in interpolation: wvar is nan',0)
     return
   end subroutine interpolation
 
@@ -218,11 +221,11 @@ module toolkit
     integer      :: pos
     real(dp) :: y1(:),m(:),x1,xi,wth
     if (size(y1).ne.size(m)) then
-      call error(' error in interpolate: 1st dimension incorrect')
+      call error(' error in interpolate: 1st dimension incorrect',0)
       return
     end if
     if (size(y1).eq.1      ) then
-      call error(' error in interpolate: 1st dimension with single element')
+      call error(' error in interpolate: 1st dimension with single element',0)
       return
     end if
     call interpolation(pos,wth,x1,y1)
@@ -236,11 +239,11 @@ module toolkit
     real(dp) :: x1,x2,xi
     real(dp) :: y1(:),y2(:),m(:,:)
     if (size(m,2).ne.size(y2)) then
-      call error(' error in interpolate: 2nd dimension incorrect')
+      call error(' error in interpolate: 2nd dimension incorrect',0)
       return
     end if
     if (size(y2).eq.1        ) then
-      call error(' error in interpolate: 2st dimension with single element')
+      call error(' error in interpolate: 2st dimension with single element',0)
       return
     end if
     call interpolation(pos2,wth2,x2,y2)
@@ -254,11 +257,11 @@ module toolkit
     real(dp) :: y1(:),y2(:),y3(:),x1,x2,x3,xi
     real(dp) :: wth3,m(:,:,:)
     if (size(m,3).ne.size(y3)) then
-      call error(' error in interpolate: 3rd dimension incorrect')
+      call error(' error in interpolate: 3rd dimension incorrect',0)
       return
     end if
     if (size(y3).eq.1        ) then
-      call error(' error in interpolate: 3rd dimension with single element')
+      call error(' error in interpolate: 3rd dimension with single element',0)
       return
     end if
     call interpolation(pos3,wth3,x3,y3)
@@ -272,11 +275,11 @@ module toolkit
     real(dp) :: y1(:),y2(:),y3(:),y4(:),x1,x2,x3,x4,xi
     real(dp) :: wth4,m(:,:,:,:)
     if (size(m,4).ne.size(y4)) then
-      call error(' error in interpolate: 4th dimension incorrect')
+      call error(' error in interpolate: 4th dimension incorrect',0)
       return
     end if
     if (size(y4).eq.1        ) then
-      call error(' error in interpolate: 4th dimension with single element')
+      call error(' error in interpolate: 4th dimension with single element',0)
       return
     end if
     call interpolation(pos4,wth4,x4,y4)
@@ -290,11 +293,11 @@ module toolkit
     real(dp) :: y1(:),y2(:),y3(:),y4(:),y5(:),x1,x2,x3,x4,x5,xi
     real(dp) :: wth5,m(:,:,:,:,:)
     if (size(m,5).ne.size(y5)) then
-      call error(' error in interpolate: 5th dimension incorrect')
+      call error(' error in interpolate: 5th dimension incorrect',0)
       return
     end if
     if (size(y5).eq.1        ) then
-      call error(' error in interpolate: 5th dimension with single element')
+      call error(' error in interpolate: 5th dimension with single element',0)
       return
     end if
     call interpolation(pos5,wth5,x5,y5)
@@ -308,11 +311,11 @@ module toolkit
     real(dp) :: y1(:),y2(:),y3(:),y4(:),y5(:),y6(:),x1,x2,x3,x4,x5,x6,xi
     real(dp) :: wth6,m(:,:,:,:,:,:)
     if (size(m,6).ne.size(y6)) then
-      call error(' error in interpolate: 6th dimension incorrect')
+      call error(' error in interpolate: 6th dimension incorrect',0)
       return
     end if
     if (size(y6).eq.1        ) then
-      call error(' error in interpolate: 6th dimension with single element')
+      call error(' error in interpolate: 6th dimension with single element',0)
       return
     end if
     call interpolation(pos6,wth6,x6,y6)
@@ -366,9 +369,9 @@ module toolkit
   function multiplo(num,xx) result(mul)
     implicit none
     integer :: num,xx
-    logical :: mul
+    logical :: mul ; mul = .false.
     if (abs(xx).lt.tolvl) then
-      call error(' error in multiplo: zero has no multiples')
+      call error(' error in multiplo: zero has no multiples',0)
       return
     end if
     if (xx*floor(dble(num)/dble(xx)).eq.num) mul = .true.
@@ -398,9 +401,10 @@ module toolkit
   end subroutine error_0
   subroutine error_1(mess,i)
     implicit none
-    integer          , intent(out) :: i
-    character(len=*) , intent(in)  :: mess
-    write(*,*) trim(adjustl(mess)) ; read * , i
+    character(len=*) , intent(in) :: mess
+    integer          , intent(in) :: i
+    integer                       :: j
+    write(*,*) trim(adjustl(mess)) ; read * , j
     return
   end subroutine error_1
 
@@ -452,6 +456,9 @@ module toolkit
   ! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+  ! ----------------------------------------------------------------------------
+  ! this function returns the avarage of a variable "var"
+
   function varmean(var,w,mask) result(meanvar)
 
     implicit none
@@ -472,17 +479,22 @@ module toolkit
       if (size(var).eq.size(mask)) then
         mask1 = mask
       else
-        call error('error in varmean: mask of incorrect size')
+        call error('error in varmean: mask of incorrect size',0)
+        return
       end if
     end if
 
     if (present(w)) then
       if (size(var).ne.size(w)) then
-        call error('error in varmean!! var and w have different size')
+        call error('error in varmean!! var and w have different size',0)
+        return
       else
         weig(:) = w(:)
       end if
-      if (sum(weig).lt.tolvl) call error('error in varmean!! w are cero')
+      if (sum(weig).lt.tolvl) then
+        call error('error in varmean!! w are cero',0)
+        return
+      end if
     end if
 
     meanvar = sum(var(:)*weig(:),mask=mask1)/sum(weig,mask=mask1)
@@ -517,17 +529,22 @@ module toolkit
       if (size(var).eq.size(mask)) then
         mask1 = mask
       else
-        call error('error in varvar: mask of incorrect size')
+        call error('error in varvar: mask of incorrect size',0)
+        return
       end if
     end if
 
     if (present(w)) then
       if (size(var).ne.size(w)) then
-        call error('error in varvar!! var and w have different size')
+        call error('error in varvar!! var and w have different size',0)
+        return
       else
         weig(:) = w(:)
       end if
-      if (sum(weig).lt.tolvl) call error('error in varvar!! w are cero')
+      if (sum(weig).lt.tolvl) then 
+        call error('error in varvar!! w are cero',0)
+        return
+      end if
     end if
 
     mvar   = varmean(var,weig,mask=mask1.and..not.isnan(var))
@@ -562,17 +579,22 @@ module toolkit
       if (size(var).eq.size(mask)) then
         mask1 = mask
       else
-        call error('error in varstd: mask of incorrect size')
+        call error('error in varstd: mask of incorrect size',0)
+        return
       end if
     end if
 
     if (present(w)) then
       if (size(var).ne.size(w)) then
-        call error('error in varstd!! var and w have different size')
+        call error('error in varstd!! var and w have different size',0)
+        return
       else
         weig(:) = w(:)
       end if
-      if (sum(weig).lt.tolvl) call error('error in varstd!! w are cero')
+      if (sum(weig).lt.tolvl) then
+        call error('error in varstd!! w are cero',0)
+        return
+      end if
     end if
 
     stdvar = sqrt(varvar(var,weig,mask=mask1))
@@ -607,14 +629,24 @@ module toolkit
       if (size(xvar1).eq.size(mask)) then
         mask1 = mask
       else
-        call error('error in varmean: mask of incorrect size')
+        call error('error in varmean: mask of incorrect size',0)
+        return
       end if
     end if
 
-    if (size(xvar1).ne.size(xvar2)) call error('error in correaltion!! yvar and xvar of different sizes')
+    if (size(xvar1).ne.size(xvar2)) then
+      call error('error in correaltion!! yvar and xvar of different sizes',0)
+      return
+    end if
     if (present(w)) then
-      if (size(xvar1).ne.size(w)) call error('error in correlation!! var and w have different size')
-      if (sum(w).lt.tolvl       ) call error('error in correlation!! w are cero')
+      if (size(xvar1).ne.size(w)) then
+        call error('error in correlation!! var and w have different size',0)
+        return
+      end if
+      if (sum(w).lt.tolvl) then
+        call error('error in correlation!! w are cero',0)
+        return
+      end if
       weig(:) = w(:)
     end if
 
@@ -623,8 +655,14 @@ module toolkit
     aux3 = varmean(xvar2,weig,mask=mask1)
     aux4 = varstd(xvar2,weig,mask=mask1)
 
-    if (aux2.lt.tolvl) call error('error in correlation!! xvar1 is a constant')
-    if (aux4.lt.tolvl) call error('error in correlation!! xvar2 is a constant')
+    if (aux2.lt.tolvl) then
+      call error('error in correlation!! xvar1 is a constant',0)
+      return
+    end if
+    if (aux4.lt.tolvl) then
+      call error('error in correlation!! xvar2 is a constant',0)
+      return
+    end if
 
     aux5 = sum(weig(:)*( (xvar1(:) - aux1)*(xvar2(:) - aux3) ),mask=mask1)/sum(weig,mask=mask1)
     corr = aux5/(aux2*aux4)
@@ -648,30 +686,51 @@ module toolkit
     logical  , optional    :: mask(:)
     logical  , allocatable :: mask1(:)
     real(dp) , allocatable :: weig(:)
+    real(dp)               :: perc
 
     allocate(weig(size(xvec)))
     allocate(mask1(size(xvec)))
 
     weig(:) = uno
-    cutoff  = cero
+    cutoff  = minval(xvec)
     mask1   = .true.
   
     if (present(mask)) then
       if (size(xvec).eq.size(mask)) then
         mask1 = mask
       else
-        call error('error in percentile: mask of incorrect size')
+        call error('error in percentile: mask of incorrect size',0)
+        return
       end if
     end if
 
     if (present(w)) then
-      if (size(w).ne.size(xvec)) call error('error in percentile!! var and w have different size')
-      if (sum(w).lt.tolvl      ) call error('error in percentile!! w are cero')
+      if (size(w).ne.size(xvec)) then
+        call error('error in percentile!! var and w have different size',0)
+        return
+      end if
+      if (sum(w).lt.tolvl) then
+        call error('error in percentile!! w are cero',0)
+        return
+      end if
       weig(:) = w(:)
     end if
 
-    if (pct.gt.uno ) call error('error in percentile!! invalid percetile: larger than 100')
-    if (pct.lt.cero) call error('error in percentile!! invalid percentile: negative value')
+    if (pct.lt.cero) then
+      call error('error in percentile!! invalid percentile: negative value',0)
+      return
+    end if
+    if (pct.gt.uno) then
+      if (pct.lt.cien) then
+        perc = pct/cien
+      else
+        call error('error in percentile!! invalid percetile: larger than 100',0)
+        cutoff = maxval(xvec)
+        return
+      end if
+    else
+      perc = pct
+    end if
 
     iter = 0
     aux1 = maxval(xvec)
@@ -679,8 +738,8 @@ module toolkit
     do while ( abs(aux2-aux1).gt.tolvl .and. iter.lt.5000 ) ; iter = iter + 1
       aux3 = medio*(aux1+aux2)
       aux4 = sum(weig,mask = xvec.le.aux3 .and. mask1)/sum(weig,mask=mask1)
-      if (aux4.le.pct) aux2 = aux3
-      if (aux4.ge.pct) aux1 = aux3
+      if (aux4.le.perc) aux2 = aux3
+      if (aux4.ge.perc) aux1 = aux3
     end do
 
     cutoff = medio*(aux1+aux2)
@@ -721,46 +780,80 @@ module toolkit
     ! mask – valid observations
     allocate(mask1(n0)) ; mask1 = .true.
     if (present(mask)) then
-      if (size(mask).eq.n0) mask1 = mask
-      if (size(mask).ne.n0) call error('error in olsreg!! mask of incorrect size')      
+      if (size(mask).ne.n0) then
+        call error('error in olsreg!! mask of incorrect size',0)   
+        return
+      else
+        mask1 = mask
+      end if
     end if
-    no = count(mask1)  ! number of observations
+
+    ! number of valid observations
+    no = count(mask1)  
     if (no.eq.0) then 
-      !call error('error in olsreg!! no observations')
+      call error('error in olsreg!! no (valid) observations',0)
       return
     end if
 
     ! weigths
     allocate(wvar(n0)) ; wvar = uno
     if (present(w)) then
-      if (size(w).eq.n0) wvar = w
-      if (size(w).ne.n0) call error('error in olsreg!! weigths of incorrect size')
+      if (size(w).ne.n0) then
+        call error('error in olsreg!! weigths of incorrect size',0)
+        return
+      else
+        wvar = w
+      end if
     end if
 
     ! check number of explanatory variabkes
     if (present(x1vec)) then ; nx = 1
-      if (n0.ne.size(x1vec)) call error('error in olsreg!! yvec and x1vec different observations')
+      if (n0.ne.size(x1vec)) then
+        call error('error in olsreg!! yvec and x1vec different observations',0)
+        return
+      end if
     end if
     if (present(x2vec)) then ; nx = 2
-      if (n0.ne.size(x2vec)) call error('error in olsreg!! yvec and x2vec different observations')
+      if (n0.ne.size(x2vec)) then
+        call error('error in olsreg!! yvec and x2vec different observations',0)
+        return
+      end if
     end if
     if (present(x3vec)) then ; nx = 3
-      if (n0.ne.size(x3vec)) call error('error in olsreg!! yvec and x3vec different observations')
+      if (n0.ne.size(x3vec)) then
+        call error('error in olsreg!! yvec and x3vec different observations',0)
+        return
+      end if
     end if
     if (present(x4vec)) then ; nx = 4
-      if (n0.ne.size(x4vec)) call error('error in olsreg!! yvec and x4vec different observations')
+      if (n0.ne.size(x4vec)) then
+        call error('error in olsreg!! yvec and x4vec different observations',0)
+        return
+      end if
     end if
     if (present(x5vec)) then ; nx = 5
-      if (n0.ne.size(x5vec)) call error('error in olsreg!! yvec and x5vec different observations')
+      if (n0.ne.size(x5vec)) then
+        call error('error in olsreg!! yvec and x5vec different observations',0)
+        return
+      end if
     end if
     if (present(x6vec)) then ; nx = 6
-      if (n0.ne.size(x6vec)) call error('error in olsreg!! yvec and x6vec different observations')
+      if (n0.ne.size(x6vec)) then
+        call error('error in olsreg!! yvec and x6vec different observations',0)
+        return
+      end if
     end if
     if (present(x7vec)) then ; nx = 7
-      if (n0.ne.size(x7vec)) call error('error in olsreg!! yvec and x7vec different observations')
+      if (n0.ne.size(x7vec)) then
+        call error('error in olsreg!! yvec and x7vec different observations',0)
+        return
+      end if
     end if
     if (present(x8vec)) then ; nx = 8
-      if (n0.ne.size(x8vec)) call error('error in olsreg!! yvec and x8vec different observations')
+      if (n0.ne.size(x8vec)) then
+        call error('error in olsreg!! yvec and x8vec different observations',0)
+        return
+      end if
     end if
     
     nc = size(coeffs)  ! number of coefficients
@@ -768,11 +861,13 @@ module toolkit
 
     if (wc.ne.1 .and. wc.ne.0) then 
       print * , nc , nx , wc
-      call error('error in olsreg!! incorrect number of coefficients')
+      call error('error in olsreg!! '//num2text(nc)//' coefficients and '//num2text(nx)//' variables',0)
+      return
     end if
 
     if (present(stds)) then
-      if (size(stds).ne.size(coeffs)) call error('error in olsreg!! stds and coeffs of different size')
+      if (size(stds).ne.size(coeffs)) call error('error in olsreg!! stds and coeffs of different size',0)
+      return
     end if
 
     ! allocate y-variable and weigths
@@ -781,7 +876,10 @@ module toolkit
     allocate(zvar(no))     ; zvar = pack(wvar,mask1)
     
     ! check weigths are positive    
-    if (sum(zvar).lt.tolvl) call error('error in olsreg!! weigths are cero')
+    if (sum(zvar).lt.tolvl) then
+      call error('error in olsreg!! weigths are cero',0)
+      return
+    end if
     
     ! fill constant (if exists) and first variable
     if (wc.eq.1) xvars(:,1) = uno
@@ -1171,7 +1269,10 @@ module toolkit
     implicit none
     real(dp) :: mat(:,:),vec(size(mat,1))
     integer  :: i
-    if (size(mat,1).ne.size(mat,2)) call error(' error in diag: matrix not sqaure')
+    if (size(mat,1).ne.size(mat,2)) then
+      call error(' error in diag: matrix not square',0)
+      return
+    end if
     forall (i=1:size(mat,1)) vec(i) = mat(i,i) 
     return
   end function diag
@@ -1194,9 +1295,18 @@ module toolkit
     implicit none
     integer  :: n,i,j,k
     real(dp) :: m(:,:),coeff
-    real(dp) :: im(size(m,1),size(m,1)),b(size(m,1)),d(size(m,1)),x(size(m,1))
-    real(dp) :: l(size(m,1),size(m,1)),u(size(m,1),size(m,1)),mb(size(m,1),size(m,1))
-    if (size(m,1).ne.size(m,2)) call error(' error in inverse: matrix is not square')
+    real(dp) :: b(size(m,1))
+    real(dp) :: d(size(m,1))
+    real(dp) :: x(size(m,1))
+    real(dp) :: im(size(m,1),size(m,1))
+    real(dp) :: l(size(m,1),size(m,1))
+    real(dp) :: u(size(m,1),size(m,1))
+    real(dp) :: mb(size(m,1),size(m,1))
+
+    if (size(m,1).ne.size(m,2)) then
+      call error(' error in inverse: matrix is not square',0)
+      return
+    end if
     n = size(m,1) ; l = cero ; u = cero ; b = cero ; mb = m
     do k=1,n-1 ; do i=k+1,n
       coeff  = m(i,k)/m(k,k)
@@ -1281,7 +1391,7 @@ module toolkit
   ! ----------------------------------------------------------------------------
   ! golden search algorithm
   
-  subroutine golden(func,x,y,xmax,xmin,itermax,tol)
+  subroutine golden(func,x,y,xmax,xmin,itermax,tol,iprint)
 
     ! this subroutine finds the maximum of a single-valued function with one unknown
     ! using the golden search algorithm
@@ -1301,20 +1411,25 @@ module toolkit
     !
     !   itermax:  max number of iterations (default = 500)
     !   tol:      tolerance level (default = 1.0d-8)
+    !   iprint:   control the printing behaviour
+    !       - iprint = 0: don't print anything (default)
+    !       - iprint = 1: print warnings
+    !       - iprint = 2: print warnings and every iteration
     !
     ! the outputs of the subroutine are:
     !
-    !   x:    the value of x that maximizes "func"
-    !   y:    the value of the function at the point x
+    !   x: the value of x that maximizes "func"
+    !   y: the value of the function at the point x
 
     implicit none
     real(dp) , intent(in)            :: xmax,xmin
     real(dp) , intent(out)           :: x,y
     real(dp) , intent(in) , optional :: tol
     integer  , intent(in) , optional :: itermax
+    integer  , intent(in) , optional :: iprint
     real(dp) , parameter             :: alpha=0.61803399
     real(dp)                         :: x0,x1,x2,x3,f1,f2,tolgold
-    integer                          :: it,maxiter
+    integer                          :: it,maxiter,ip
 
     interface
       function func(xx) result(ff)
@@ -1324,6 +1439,10 @@ module toolkit
 
     tolgold = 1.0d-8 ; if (present(tol)    ) tolgold = tol
     maxiter = 500    ; if (present(itermax)) maxiter = itermax
+    ip      = 0      ; if (present(iprint) ) ip      = iprint
+
+    if (ip.gt.0) write(*,*) ' starting golden search algorithm '
+    if (ip.gt.0) write(*,*) '                                  '
 
     x0 = xmin
     x3 = xmax
@@ -1348,6 +1467,7 @@ module toolkit
         x1 = alpha*x2 + (uno-alpha)*x0
         f1 = func(x1)
       end if
+      if (ip.gt.1) write(*,15) it , x1 , x2 , f1 , f2
     end do
 
     if (f1.gt.f2) then
@@ -1358,7 +1478,12 @@ module toolkit
       x = x2
     end if
 
+    if (ip.gt.0) write(*,*  ) '   '
+    if (ip.gt.0) write(*,16) it , x , y
+
     return
+    15 format( ' iteration = ',i4,' | x1 = ',f10.4,' | x2 = ',f10.4,' | f(x1) = ',f10.4,' | f(x2) = ',f10.4)
+    16 format( ' solved: iterations = ',i4,' | x = ',f10.4,' | f(x) = ',f10.4)
   end subroutine golden
 
   ! ----------------------------------------------------------------------------
@@ -2054,9 +2179,18 @@ module toolkit
     implicit none
     real(dp) , intent(in)  :: xmax,xmin,x
     real(dp) , intent(out) :: y
-    if (xmax.lt.xmin) call error(' errror in normalize: xmax > xmin')
-    if (x.gt.xmax   ) call error(' errror in normalize: x > xmax')
-    if (x.lt.xmin   ) call error(' errror in normalize: x < xmin')
+    if (xmax.lt.xmin) then
+      call error(' errror in normalize: xmax > xmin',0)
+      return
+    end if
+    if (x.gt.xmax) then
+      call error(' errror in normalize: x > xmax',0)
+      return
+    end if
+    if (x.lt.xmin) then 
+      call error(' errror in normalize: x < xmin',0)
+      return
+    end if
     y = log((x-xmin)/(xmax-xmin)/max(0.0001,uno-(x-xmin)/(xmax-xmin)))
     return
   end subroutine normalize
@@ -2070,7 +2204,10 @@ module toolkit
     implicit none
     real(dp) , intent(in)  :: xmax,xmin,y
     real(dp) , intent(out) :: x
-    if (xmax.lt.xmin) call error(' errror in denormalize: xmax > xmin')
+    if (xmax.lt.xmin) then
+      call error(' errror in denormalize: xmax > xmin',0)
+      return
+    end if
     x = (exp(y)/(uno+exp(y)))*(xmax-xmin) + xmin
     if (isnan(x) .and. y.gt.cien) x = xmax
     return
@@ -2088,20 +2225,18 @@ module toolkit
     real(dp)               :: dx(size(x1,1))
     real(dp)               :: den
     integer                :: i
+    j1 = j0
     if (size(f1).ne.size(j0,1)) then
-      call error(' error in broyden: size(y) /= size(j,1)')
-      j1 = j0
+      call error(' error in broyden: size(y) /= size(j,1)',0)
       return
     end if
     if (size(x1).ne.size(j0,2)) then
-      call error(' error in broyden: size(x) /= size(j,2)')
-      j1 = j0
+      call error(' error in broyden: size(x) /= size(j,2)',0)
       return
     end if
     den = sum(dx(:)*dx(:))
     if (abs(den).lt.tolvl) then
-      call error(' error in broyden: denominator close to 0')
-      j1 = j0
+      call error(' error in broyden: denominator close to 0',0)
       return
     end if
     dx(:) = x1(:)-x0(:)

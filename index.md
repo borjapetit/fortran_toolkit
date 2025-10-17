@@ -7,7 +7,7 @@ This Fortran code provides a list of functions and subroutines that I typically 
 
 Efficiency of the algorithms is not guaranteed, and the code is distributed under the MIT license.
 
-If you find any mistake, or have any suggestion, [contact me](mailto:bpetit@cunef.edu).
+If you find any mistake, either in the codes or in this website, [contact me](mailto:bpetit@cunef.edu).
 
 ---
 

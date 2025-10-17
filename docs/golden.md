@@ -6,12 +6,11 @@
 ## ```golden```
 
 ```fortran
-subroutine golden(func,x,y,numiter,xmax,xmin,itermax,tol,iprint)
+subroutine golden(func,x,y,xmax,xmin,itermax,tol,iprint)
   implicit none
   external                             :: func      ! user-supplied function
   real(kind=8) , intent(out)           :: x         ! output: arg max of func
   real(kind=8) , intent(out)           :: y         ! output: max of func
-  integer      , intent(out)           :: numiter   ! output: number of function evaluations
   real(kind=8) , intent(in)            :: xmax      ! input: upper-bound of x
   real(kind=8) , intent(in)            :: xmin      ! input: lower-bound of x
   real(kind=8) , intent(in) , optional :: tol       ! input: (optional) level of tolerance [detault = 1.0d-8]
@@ -37,7 +36,7 @@ Optionally, the user can also supply a maximun number of function evaluations (`
 - `iprint` = 1: print warnings
 - `iprint` = 2: print warnings and every iteration
 
-The subroutine returns the value of `x` that maximizes `func`, the value of `func` at `x` (`y`),  and the number of function evaluations (`numiter`)
+The subroutine returns the value of `x` that maximizes `func` and the value of `func` at `x` (`y`).
 
 **Internal dependencies**: [```error```](error.md)
 
@@ -60,14 +59,14 @@ program example
 
   implicit none
 
-  real(dp) :: xvar,f
+  real(dp) :: xvar,fx
   real(dp) :: xmax,xmin
 
   ! max and min values for x
   xmax = 10.0 ; xmin = 0.0
 
   ! maximize the function func
-  call golden(func,xvar,f,xmax,xmin,iprint=2)
+  call golden(func,xvar,fx,xmax,xmin,iprint=2)
 
   return
 
@@ -88,48 +87,48 @@ The output is:
 ```
  starting golden search algorithm
 
- Iteration =   19  | x1 =     2.3607  x2 =     3.8197  | f(x1) =    10.5786  f(x2) =    11.1292
- Iteration =   20  | x1 =     3.8197  x2 =     5.2786  | f(x1) =    11.1292  f(x2) =    11.1937
- Iteration =   21  | x1 =     5.2786  x2 =     6.1803  | f(x1) =    11.1937  f(x2) =    11.0901
- Iteration =   22  | x1 =     4.7214  x2 =     5.2786  | f(x1) =    11.2088  f(x2) =    11.1937
- Iteration =   23  | x1 =     4.3769  x2 =     4.7214  | f(x1) =    11.1953  f(x2) =    11.2088
- Iteration =   24  | x1 =     4.7214  x2 =     4.9342  | f(x1) =    11.2088  f(x2) =    11.2081
- Iteration =   25  | x1 =     4.5898  x2 =     4.7214  | f(x1) =    11.2059  f(x2) =    11.2088
- Iteration =   26  | x1 =     4.7214  x2 =     4.8027  | f(x1) =    11.2088  f(x2) =    11.2093
- Iteration =   27  | x1 =     4.8027  x2 =     4.8529  | f(x1) =    11.2093  f(x2) =    11.2091
- Iteration =   28  | x1 =     4.7716  x2 =     4.8027  | f(x1) =    11.2092  f(x2) =    11.2093
- Iteration =   29  | x1 =     4.8027  x2 =     4.8219  | f(x1) =    11.2093  f(x2) =    11.2093
- Iteration =   30  | x1 =     4.7908  x2 =     4.8027  | f(x1) =    11.2093  f(x2) =    11.2093
- Iteration =   31  | x1 =     4.8027  x2 =     4.8100  | f(x1) =    11.2093  f(x2) =    11.2093
- Iteration =   32  | x1 =     4.7981  x2 =     4.8027  | f(x1) =    11.2093  f(x2) =    11.2093
- Iteration =   33  | x1 =     4.8027  x2 =     4.8055  | f(x1) =    11.2093  f(x2) =    11.2093
- Iteration =   34  | x1 =     4.8009  x2 =     4.8027  | f(x1) =    11.2093  f(x2) =    11.2093
- Iteration =   35  | x1 =     4.8027  x2 =     4.8037  | f(x1) =    11.2093  f(x2) =    11.2093
- Iteration =   36  | x1 =     4.8037  x2 =     4.8044  | f(x1) =    11.2093  f(x2) =    11.2093
- Iteration =   37  | x1 =     4.8033  x2 =     4.8037  | f(x1) =    11.2093  f(x2) =    11.2093
- Iteration =   38  | x1 =     4.8037  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
- Iteration =   39  | x1 =     4.8040  x2 =     4.8041  | f(x1) =    11.2093  f(x2) =    11.2093
- Iteration =   40  | x1 =     4.8039  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
- Iteration =   41  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
- Iteration =   42  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
- Iteration =   43  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
- Iteration =   44  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
- Iteration =   45  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
- Iteration =   46  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
- Iteration =   47  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
- Iteration =   48  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
- Iteration =   49  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
- Iteration =   50  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
- Iteration =   51  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
- Iteration =   52  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
- Iteration =   53  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
- Iteration =   54  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
- Iteration =   55  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
- Iteration =   56  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
- Iteration =   57  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
- Iteration =   58  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
+ iteration =   19  | x1 =     2.3607  x2 =     3.8197  | f(x1) =    10.5786  f(x2) =    11.1292
+ iteration =   20  | x1 =     3.8197  x2 =     5.2786  | f(x1) =    11.1292  f(x2) =    11.1937
+ iteration =   21  | x1 =     5.2786  x2 =     6.1803  | f(x1) =    11.1937  f(x2) =    11.0901
+ iteration =   22  | x1 =     4.7214  x2 =     5.2786  | f(x1) =    11.2088  f(x2) =    11.1937
+ iteration =   23  | x1 =     4.3769  x2 =     4.7214  | f(x1) =    11.1953  f(x2) =    11.2088
+ iteration =   24  | x1 =     4.7214  x2 =     4.9342  | f(x1) =    11.2088  f(x2) =    11.2081
+ iteration =   25  | x1 =     4.5898  x2 =     4.7214  | f(x1) =    11.2059  f(x2) =    11.2088
+ iteration =   26  | x1 =     4.7214  x2 =     4.8027  | f(x1) =    11.2088  f(x2) =    11.2093
+ iteration =   27  | x1 =     4.8027  x2 =     4.8529  | f(x1) =    11.2093  f(x2) =    11.2091
+ iteration =   28  | x1 =     4.7716  x2 =     4.8027  | f(x1) =    11.2092  f(x2) =    11.2093
+ iteration =   29  | x1 =     4.8027  x2 =     4.8219  | f(x1) =    11.2093  f(x2) =    11.2093
+ iteration =   30  | x1 =     4.7908  x2 =     4.8027  | f(x1) =    11.2093  f(x2) =    11.2093
+ iteration =   31  | x1 =     4.8027  x2 =     4.8100  | f(x1) =    11.2093  f(x2) =    11.2093
+ iteration =   32  | x1 =     4.7981  x2 =     4.8027  | f(x1) =    11.2093  f(x2) =    11.2093
+ iteration =   33  | x1 =     4.8027  x2 =     4.8055  | f(x1) =    11.2093  f(x2) =    11.2093
+ iteration =   34  | x1 =     4.8009  x2 =     4.8027  | f(x1) =    11.2093  f(x2) =    11.2093
+ iteration =   35  | x1 =     4.8027  x2 =     4.8037  | f(x1) =    11.2093  f(x2) =    11.2093
+ iteration =   36  | x1 =     4.8037  x2 =     4.8044  | f(x1) =    11.2093  f(x2) =    11.2093
+ iteration =   37  | x1 =     4.8033  x2 =     4.8037  | f(x1) =    11.2093  f(x2) =    11.2093
+ iteration =   38  | x1 =     4.8037  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
+ iteration =   39  | x1 =     4.8040  x2 =     4.8041  | f(x1) =    11.2093  f(x2) =    11.2093
+ iteration =   40  | x1 =     4.8039  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
+ iteration =   41  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
+ iteration =   42  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
+ iteration =   43  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
+ iteration =   44  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
+ iteration =   45  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
+ iteration =   46  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
+ iteration =   47  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
+ iteration =   48  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
+ iteration =   49  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
+ iteration =   50  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
+ iteration =   51  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
+ iteration =   52  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
+ iteration =   53  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
+ iteration =   54  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
+ iteration =   55  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
+ iteration =   56  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
+ iteration =   57  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
+ iteration =   58  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
  
- Solved: Iterations =   58  | x =     4.8040  | f(x) =    11.2093
+ solved: iterations =   58  | x =     4.8040  | f(x) =    11.2093
 ```
 
 

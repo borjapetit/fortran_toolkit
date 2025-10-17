@@ -1,4 +1,8 @@
 
+<span style="text-align:right;display:block;">
+<a href="https://borjapetit.github.io/fortran_toolkit/">Back to index</a>
+</span>
+
 ## ```inverse```
 
 ```fortran
@@ -10,8 +14,6 @@ function inverse(mat) result(imat)
 
 This function returns the inverse of a squared matrix ```mat``` implementing a LU decomposition.
 
-**Dependencies**: [```error```](error.md)
-
-[(back to index)](../index.md)
+**Internal dependencies**: [```error```](error.md)
 
 ---

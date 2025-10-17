@@ -1,4 +1,8 @@
 
+<span style="text-align:right;display:block;">
+<a href="https://borjapetit.github.io/fortran_toolkit/">Back to index</a>
+</span>
+
 ## ```percentile```
 
 ```fortran
@@ -17,9 +21,7 @@ The subroutine finds the percentile ```pct``` using a Bisection method.
 
 The user can also supply a ```mask``` to compute the conditional percentile. The input ```mask``` is a logical array of the same size of ```var```.
 
-**Dependencies**: [```error```](error.md)
-
-[(back to index)](../index.md)
+**Internal dependencies**: [```error```](error.md)
 
 ---
 

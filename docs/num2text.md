@@ -1,4 +1,8 @@
 
+<span style="text-align:right;display:block;">
+<a href="https://borjapetit.github.io/fortran_toolkit/">Back to index</a>
+</span>
+
 ## ```num2text```
 
 ```fortran
@@ -17,13 +21,11 @@ function num2text(integer) result(txt)
 
 This function returns a string ```txt``` with the user-provided number. The user can provide either a real number (double precision) or an integer. In the case of a real number, the user can also provide the number of decimals ```dec``` (default is 2).
 
-**Dependencies**: none
+**Internal dependencies**: none
 
 **Note**: ```num2text``` is an interface that calls specific functions depending on the inputs provided . The specific functions are:
 - ```real2text``` if the user provide a real number
 - ```int2text``` if the user provide an integer
-
-[(back to index)](../index.md)
 
 ---
 

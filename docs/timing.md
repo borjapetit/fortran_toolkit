@@ -1,4 +1,8 @@
 
+<span style="text-align:right;display:block;">
+<a href="https://borjapetit.github.io/fortran_toolkit/">Back to index</a>
+</span>
+
 ## ```timing```
 
 ```fortran
@@ -13,9 +17,7 @@ This functions returns a timing measure that is robust to parallelization. In pa
 - If ```mode``` = 2, ```time``` is measures in minutes.
 - If ```mode``` = 3, ```time``` is measured in hours
 
-**Dependencies**: [```error```](error.md)
-
-[(back to index)](../index.md)
+**Internal dependencies**: [```error```](error.md)
 
 ---
 

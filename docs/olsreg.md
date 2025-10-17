@@ -1,4 +1,8 @@
 
+<span style="text-align:right;display:block;">
+<a href="https://borjapetit.github.io/fortran_toolkit/">Back to index</a>
+</span>
+
 ## ```olsreg```
 
 
@@ -30,9 +34,7 @@ This code computes the OLS coefficients from a linear regression of ```yvar``` o
 
 Finally, the variable ```table``` controls the output of the subroutine. If ```table``` is 0 (or missing), the subroutine returns the coefficients in the vector ```coeffs```. If ```table``` is 1, the subroutine prints a regression table with the coefficients and some additional statistics (t-stats, R-squared, etc).
 
-**Dependencies**: [```error```](error.md), [```varmean```](varmean.md),  [```varvar```](varvar.md)
-
-[(back to index)](../index.md)
+**Internal dependencies**: [```error```](error.md), [```varmean```](varmean.md),  [```varvar```](varvar.md)
 
 ---
 

@@ -1,4 +1,8 @@
 
+<span style="text-align:right;display:block;">
+<a href="https://borjapetit.github.io/fortran_toolkit/">Back to index</a>
+</span>
+
 ## ```simplex```
 
 ```fortran
@@ -39,9 +43,7 @@ Optionally, the user can also supply a maximun number of fucntion evaluations (`
 
 **Note**: for constrained optimization problems, one can make use of the [```normalize and denormalize```](normalize.md) subroutines.
 
-**Dependencies**: none
-
-[(back to index)](../index.md)
+**Internal dependencies**: none
 
 ---
 

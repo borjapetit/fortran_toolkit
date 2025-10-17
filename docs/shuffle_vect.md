@@ -1,4 +1,8 @@
 
+<span style="text-align:right;display:block;">
+<a href="https://borjapetit.github.io/fortran_toolkit/">Back to index</a>
+</span>
+
 ## ```shuffle_vect```
 
 ```fortran
@@ -13,13 +17,11 @@ subroutine shuffle_vect(input_vec, output_vec)
 
 This rubroutine takes an input vector ```input_vec``` and fills ```output_vec``` with the shuffled elements of ```input_vec``` using the Fisher-Yates algorithm.
 
-**Dependencies**: ```fisheryates```
+**Internal dependencies**: ```fisheryates```
 
 **Note**: ```shuffle_vect``` is an interface that calls specific functions depending on the type of ```input_vec``` and ```output_vec```(integer or double precision). The specific functions are:
 - ```shuffle_vect_int``` if ```input_vec``` and ```output_vec``` are of type ```integer```
 - ```shuffle_vect_dp``` if ```input_vec``` and ```output_vec``` are of type ```double precision```
-
-[(back to index)](../index.md)
 
 ---
 

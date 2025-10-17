@@ -1,4 +1,8 @@
 
+<span style="text-align:right;display:block;">
+<a href="https://borjapetit.github.io/fortran_toolkit/">Back to index</a>
+</span>
+
 ## ```crra```
 
 ```fortran
@@ -17,6 +21,4 @@ $$ u =
 $$
 where ```x``` and ```b```are supplied by the user.
 
-**Dependencies**: none
-
-[(back to index)](../index.md)
+**Internal dependencies**: none

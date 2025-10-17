@@ -1,4 +1,8 @@
 
+<span style="text-align:right;display:block;">
+<a href="https://borjapetit.github.io/fortran_toolkit/">Back to index</a>
+</span>
+
 ## ```grid```
 
 ```fortran
@@ -16,9 +20,7 @@ This function creates a grid of `n` points between `maxv` and `maxv` with a curv
 - if `s>1`: more grids points around `maxv`
 - if `s<1`: more grids points around `minv`
 
-**Dependencies**: [`error`](error.md)
-
-[(back to index)](../index.md)
+**Internal dependencies**: [`error`](error.md)
 
 ---
 

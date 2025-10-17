@@ -1,4 +1,8 @@
 
+<span style="text-align:right;display:block;">
+<a href="https://borjapetit.github.io/fortran_toolkit/">Back to index</a>
+</span>
+
 ## ```diag```
 
 ```fortran
@@ -10,9 +14,7 @@ function diag(mat) result(vec)
 
 This function returns the main diagonal of a matric `mat`.
 
-**Dependencies**: [```error```](error.md)
-
-[(back to index)](../index.md)
+**Internal dependencies**: [```error```](error.md)
 
 ---
 

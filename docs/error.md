@@ -1,4 +1,8 @@
 
+<span style="text-align:right;display:block;">
+<a href="https://borjapetit.github.io/fortran_toolkit/">Back to index</a>
+</span>
+
 ## ```error```
 
 ```fortran
@@ -10,9 +14,7 @@ subroutine error(mess,i)
 
 This subroutine prints an error message `mess`. If the user supplies any integer `i` the subroutine pauses the execution of the program until the user types any key.
 
-**Dependencies**: none
-
-[(back to index)](../index.md)
+**Internal dependencies**: none
 
 ---
 

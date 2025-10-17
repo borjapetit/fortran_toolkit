@@ -1,4 +1,8 @@
 
+<span style="text-align:right;display:block;">
+<a href="https://borjapetit.github.io/fortran_toolkit/">Back to index</a>
+</span>
+
 ## ```cdfn```
 
 ```fortran
@@ -10,9 +14,7 @@ elemental function cdfn(x) result(f)
 
 This function returns the cdf of a standard normal distribution. This subroutine is defined as `elemental`.
 
-**Dependencies**: none
-
-[(back to index)](../index.md)
+**Internal dependencies**: none
 
 ---
 

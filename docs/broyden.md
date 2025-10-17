@@ -22,4 +22,4 @@ The user must supply a pair of points `x0` and `x1`, the value of the function e
 
 *Note*: this function is used in [`lmmin`](lmmin.md)
 
-**Dependencies**: none
+**Internal dependencies**: none

@@ -1,4 +1,8 @@
 
+<span style="text-align:right;display:block;">
+<a href="https://borjapetit.github.io/fortran_toolkit/">Back to index</a>
+</span>
+
 ## ```randomnormal```
 
 ```fortran
@@ -10,10 +14,6 @@ subroutine randomnormal(shock,mu,std)
 
 This function returns a random number/vector drawn from a distribution $N(\mu,\sigma)$. The output, ```shock```, can either be a scalar or a vector of dimension-$n$ (it does not work with matrices).
 
-**Dependencies**: none
+**Note**: ```randomnormal``` is an interface that calls ```randomnormal_scalar``` or ```randomnormal_vec``` depending on whether ```shock``` is a scalar or a vector.
 
-_Note_: ```randomnormal``` is an interface that calls ```randomnormal_scalar``` or ```randomnormal_vec``` depending on whether ```shock``` is a scalar or a vector.
-
-[(back to index)](../index.md)
-
----
+**Internal dependencies**: none

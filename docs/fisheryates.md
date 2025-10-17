@@ -1,4 +1,8 @@
 
+<span style="text-align:right;display:block;">
+<a href="https://borjapetit.github.io/fortran_toolkit/">Back to index</a>
+</span>
+
 ## ```fisheryates```
 
 ```fortran
@@ -10,9 +14,7 @@ subroutine fisheryates(vect,seed)
 
 This subroutine takes an array ```vect``` of dimension ```n``` and fills it with integers from 1 to ```n``` and them shuffled using the the Fisher–Yates shuffle algorithm. The user can fixed the seed by providing ```seed```.
 
-**Dependencies**: none
-
-[(back to index)](../index.md)
+**Internal dependencies**: none
 
 ---
 

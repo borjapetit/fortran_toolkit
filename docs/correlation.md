@@ -1,4 +1,8 @@
 
+<span style="text-align:right;display:block;">
+<a href="https://borjapetit.github.io/fortran_toolkit/">Back to index</a>
+</span>
+
 ## ```correlation```
 
 ```fortran
@@ -15,9 +19,7 @@ This function returns the correlation coefficient between two (same size) vector
 
 The user can also supply a `mask` to compute the conditional correlation. The variable `mask` is a logical array of the same size of `xvar1` and `xvar2` indicating which observations should be considered.
 
-**Dependencies**: [`varmean`](varmean.md),  [`varvar`](varvar.md)
-
-[(back to index)](../index.md)
+**Internal dependencies**: [`varmean`](varmean.md),  [`varvar`](varvar.md)
 
 ---
 

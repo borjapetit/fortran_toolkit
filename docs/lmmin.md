@@ -1,4 +1,8 @@
 
+<span style="text-align:right;display:block;">
+<a href="https://borjapetit.github.io/fortran_toolkit/">Back to index</a>
+</span>
+
 ## ```lmmin```
 
 ```fortran
@@ -45,9 +49,7 @@ Optionally, the user can also supply a maximum number of function evaluations (`
 
 **Note**: for constrained optimization problems, one can make use of the [```normalize and denormalize```](normalize.md) subroutines.
 
-**Dependencies**: [```inverse```](inverse.md), [```broyden```](broyden.md)
-
-[(back to index)](../index.md)
+**Internal dependencies**: [```inverse```](inverse.md), [```broyden```](broyden.md)
 
 ---
 

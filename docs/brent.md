@@ -1,4 +1,8 @@
 
+<span style="text-align:right;display:block;">
+<a href="https://borjapetit.github.io/fortran_toolkit/">Back to index</a>
+</span>
+
 ## ```brent```
 
 ```fortran
@@ -38,9 +42,7 @@ The subroutine returns the value of ```x``` that makes ```func``` close enoughs 
 - ```exitcode``` = 3: the points ```x0``` and ```x1``` are too close
 - ```exitcode``` = 9: maximum number of function evaluations reached
 
-**Dependencies**: none
-
-[(back to index)](../index.md)
+**Internal dependencies**: none
 
 ---
 

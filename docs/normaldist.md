@@ -1,4 +1,8 @@
 
+<span style="text-align:right;display:block;">
+<a href="https://borjapetit.github.io/fortran_toolkit/">Back to index</a>
+</span>
+
 ## ```normaldist```
 
 ```fortran
@@ -20,8 +24,6 @@ where $\Phi(\cdot)$ is the cdf of a standard normal distribution and $\texttt{z}
 $$\texttt{dist}(1) = \Phi\left( \frac{\texttt{z}(2)+\texttt{z}(1)}{2}\right) \ \ \ \ \ \ \text{and} \ \ \ \ \ \ 
 \texttt{dist}(n) = 1 - \Phi\left( \frac{\texttt{z}(\texttt{n})+\texttt{z}(\texttt{n}-1)}{2}\right) $$
 
-**Dependencies**: [```cdfn```](cdfn.md)
-
-[(back to index)](../index.md)
+**Internal dependencies**: [```cdfn```](cdfn.md)
 
 ---

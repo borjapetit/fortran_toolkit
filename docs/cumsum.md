@@ -1,5 +1,9 @@
 
-## ```cumsum```
+<span style="text-align:right;display:block;">
+<a href="https://borjapetit.github.io/fortran_toolkit/">Back to index</a>
+</span>
+
+## ``cumsum```
 
 ```fortran
 function cumsum(vec0) result(vec1)
@@ -10,9 +14,7 @@ function cumsum(vec0) result(vec1)
 
 Returns the cummulative sum of a vector `vec0`, as the Matlab's `cumsum` function.
 
-**Dependencies**: none
-
-[(back to index)](../index.md)
+**Internal dependencies**: none
 
 ---
 

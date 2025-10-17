@@ -1,4 +1,8 @@
 
+<span style="text-align:right;display:block;">
+<a href="https://borjapetit.github.io/fortran_toolkit/">Back to index</a>
+</span>
+
 ## ```interpolation```
 
 ```fortran
@@ -22,9 +26,7 @@ The vector ```xvec``` should be monotonically increasing/decreasing, so that ```
 
 This subroutine is mainly used by the function [```interpolate```](interpolate.md).
 
-**Dependencies**: [```error```](error.md)
-
-[(back to index)](../index.md)
+**Internal dependencies**: [```error```](error.md)
 
 ---
 

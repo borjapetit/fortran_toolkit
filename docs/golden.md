@@ -1,4 +1,8 @@
 
+<span style="text-align:right;display:block;">
+<a href="https://borjapetit.github.io/fortran_toolkit/">Back to index</a>
+</span>
+
 ## ```golden```
 
 ```fortran
@@ -35,9 +39,7 @@ Optionally, the user can also supply a maximun number of function evaluations (`
 
 The subroutine returns the value of `x` that maximizes `func`, the value of `func` at `x` (`y`),  and the number of function evaluations (`numiter`)
 
-**Dependencies**: [```error```](error.md)
-
-[(back to index)](../index.md)
+**Internal dependencies**: [```error```](error.md)
 
 ---
 

@@ -1,4 +1,8 @@
 
+<span style="text-align:right;display:block;">
+<a href="https://borjapetit.github.io/fortran_toolkit/">Back to index</a>
+</span>
+
 ## ```trasnmat```
 
 ```fortran
@@ -13,6 +17,4 @@ This function returns the transpose of ```mat``` by applying:
 forall (i=1:size(mat,1)) matt(:,i) = mat(i,:)
 ```
 
-**Dependencies**: none
-
-[(back to index)](../index.md)
+**Internal dependencies**: none

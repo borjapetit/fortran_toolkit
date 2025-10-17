@@ -1,4 +1,8 @@
 
+<span style="text-align:right;display:block;">
+<a href="https://borjapetit.github.io/fortran_toolkit/">Back to index</a>
+</span>
+
 ## ```tauchen```
 
 ```fortran
@@ -15,9 +19,7 @@ $$x' = \texttt{mu} + \texttt{rho} \cdot  x + \texttt{sigma} \cdot u ,  \ \ \ \ \
 
 The vector with the values of $x$, ```xvec```, is of dimension ```n``` and does not need to be equally spaced.
 
-**Dependencies**: [```normaldist```](normaldist.md)
-
-[(back to index)](../index.md)
+**Internal dependencies**: [```normaldist```](normaldist.md)
 
 ---
 

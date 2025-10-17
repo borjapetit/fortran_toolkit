@@ -1,4 +1,8 @@
 
+<span style="text-align:right;display:block;">
+<a href="https://borjapetit.github.io/fortran_toolkit/">Back to index</a>
+</span>
+
 ## ```normalize``` & ```denormalize```
 
 The optimization subroutines included in this toolkit are design to handle unconstrained problems. However, the $\texttt{normalize}$ and $\texttt{denormalize}$ subroutines can transform a constrained optimization problem into an unconstrained one.
@@ -21,8 +25,6 @@ The problem $\max_{z} \ f(g(z))$ is an unconstrained optimization problem that c
 
 Download a complete example, explained below, from this [link](https://borjapetit.github.io/fortran_toolkit/src/test_normalize.f90).
 
-[(back to index)](../index.md)
-
 ---
 
 #### normalize
@@ -40,9 +42,7 @@ This subroutine, that corresponds to the inverse function $g^{-1}(x)$ explained 
 
 $$z = \log\left(\frac{\texttt{x} - \texttt{xmin}}{\texttt{xmax} - \texttt{x}}\right)$$
 
-**Dependencies**: none
-
-[(back to index)](../index.md)
+**internal dependencies**: none
 
 --- 
 
@@ -63,9 +63,7 @@ $$ \texttt{x} = \texttt{xmin} + \left(\frac{\exp(z)}{1+\exp(z)} \right)\cdot(\te
 
 to return a bounded variable $\texttt{x}$, constrained to be between $\texttt{xmin}$ and $\texttt{xmax}$.
 
-**Dependencies**: none
-
-[(back to index)](../index.md)
+**Internal dependencies**: none
 
 ---
 

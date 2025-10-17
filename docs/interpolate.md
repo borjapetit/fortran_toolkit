@@ -1,4 +1,8 @@
 
+<span style="text-align:right;display:block;">
+<a href="https://borjapetit.github.io/fortran_toolkit/">Back to index</a>
+</span>
+
 ## ```interpolate```
 
 ```fortran
@@ -11,11 +15,9 @@ function interpolate(x1,x2,...,xn,y1,y2,...,yn,mat) result(xi)
 
 This function returns the linearly interpolated value of an n-dimensional function, with ```n``` < 7. The variables ```x1```, ```x2```, ..., ```xn``` are the values of the variables to be interpolated over their coresponding grids ```y1```, ```y2```, ...., ```yn```, and ```mat``` is an n-dimensional array with the results.
 
-**Dependencies**: [```error```](error.md), [```interpolation```](interpolation.md)
+**Internal dependencies**: [```error```](error.md), [```interpolation```](interpolation.md)
 
 **Note**: ```interpolate``` is an interface that calls specific functions depending on the dimension of ```mat```. These functions are ```interpolate1d```, ```interpolate2d```, ..., ```interpolate6d```.
-
-[(back to index)](../index.md)
 
 ---
 

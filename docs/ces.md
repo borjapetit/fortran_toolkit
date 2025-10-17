@@ -1,4 +1,8 @@
 
+<span style="text-align:right;display:block;">
+<a href="https://borjapetit.github.io/fortran_toolkit/">Back to index</a>
+</span>
+
 ## ```ces```
 
 ```fortran
@@ -16,6 +20,4 @@ $$ u =
 \end{cases}
 $$
 
-**Dependencies**: none
-
-[(back to index)](../index.md)
+**Internal dependencies**: none

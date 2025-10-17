@@ -2089,18 +2089,18 @@ module toolkit
     real(dp)               :: den
     integer                :: i
     if (size(f1).ne.size(j0,1)) then
-      call error(' error in broyden: incosisten dimensions, size(y) /= size(j,1)')
+      call error(' error in broyden: size(y) /= size(j,1)')
       j1 = j0
       return
     end if
     if (size(x1).ne.size(j0,2)) then
-      call error(' error in broyden: incosisten dimensions, size(y) /= size(j,2)')
+      call error(' error in broyden: size(x) /= size(j,2)')
       j1 = j0
       return
     end if
     den = sum(dx(:)*dx(:))
     if (abs(den).lt.tolvl) then
-      call error(' error in broyden: incosisten dimensions, size(y) /= size(j,2)')
+      call error(' error in broyden: denominator close to 0')
       j1 = j0
       return
     end if
@@ -2111,11 +2111,6 @@ module toolkit
     end do
     return
   end subroutine broyden
-
-      ! j0 = j ; dx(:) = x1(:)-xa(:) ; dy(:) = y1(:)-ya(:)
-      ! do k = 1,m ; do i = 1,n
-      !   j(k,i) = j0(k,i) + dx(i)*( dy(k) - sum(j0(k,:)*dx(:)) )/sum(dx(:)*dx(:))
-      ! end do ; end do
 
   ! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

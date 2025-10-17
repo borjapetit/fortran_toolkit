@@ -42,8 +42,8 @@ If you find any mistake, or have any suggestion, [contact me](mailto:bpetit@cune
 - [```normaldist```](docs/normaldist.md): returns the distribution for a normal random variable given some mean and variance.
 - [```randomnormal```](docs/randomnormal.md): returns a random draw (either a scalar or a vector) for a normal distribution.
 - [```cdfn```](docs/cdfn.md): returns the cdf of a standard normal distribution.
-- [```fisheryates```](docs/fisheryates.md): this subroutine returns a vector of dimmension $n$ filled with integers from 1 to $n$ and then shuffled using the Fisher-Yates shuffle algorithm.
 - [```shuffle_vect```](docs/shuffle_vect.md): this subroutine returns a vector with the shuffled values of a used-provided vector using the Fisher-Yates algorithm.
+- [```fisheryates```](docs/fisheryates.md): this subroutine returns a vector filled with integers from 1 to $n$ and then shuffled using the Fisher-Yates algorithm.
 
 
 ## Linear algebra

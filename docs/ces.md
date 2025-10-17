@@ -13,6 +13,7 @@ function ces(x1,x2,a,b) result(u)
 ```
 
 This function aggregates ```x1``` and ```x2```with a CES function:
+
 $$ u = 
 \begin{cases}
   \left( a\,x_1^b + (1-a)\,x_2^b\right)^{1/b} & \text{ if } b>0 \\ \\ 

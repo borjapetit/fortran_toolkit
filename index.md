@@ -11,6 +11,21 @@ If you find any mistake, or have any suggestion, [contact me](mailto:bpetit@cune
 
 ---
 
+In the preambule, several parameters used across functions and subroutines are defined:
+
+```fortran
+  integer  , parameter :: dp    = kind(1.0d00)             ! double-precision real variables
+  real(dp) , parameter :: cero  = dble(0.00000000000000)   ! zero
+  real(dp) , parameter :: medio = dble(0.50000000000000)   ! one half
+  real(dp) , parameter :: uno   = dble(1.00000000000000)   ! one
+  real(dp) , parameter :: dos   = dble(2.00000000000000)   ! two
+  real(dp) , parameter :: cien  = dble(100.000000000000)   ! one hundred
+  real(dp) , parameter :: mil   = dble(1000.00000000000)   ! one thousand
+  real(dp) , parameter :: tolvl = dble(0.00000000010000)   ! tolerance level
+```
+
+---
+
 ## Econ-related functions and subroutines
 
 - [```crra```](docs/crra.md): a constant relative risk aversion utilit function.

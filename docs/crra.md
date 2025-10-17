@@ -13,12 +13,15 @@ function crra(x,b) result(u)
 ```
 
 This function evaluates a CRRA utility function:
+
 $$ u = 
 \begin{cases}
   \dfrac{x^b}{b} & \text{ if } b>0 \\ \\ 
   \log{x} & \text{ if } b\approx 0
 \end{cases}
 $$
+
 where ```x``` and ```b```are supplied by the user.
 
 **Internal dependencies**: none
+

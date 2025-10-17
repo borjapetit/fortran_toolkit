@@ -1,5 +1,4 @@
 
-
 **THIS SITE IS UNDER CONSTRUCTION**
 
 <a name="inicio"></a>
@@ -7,8 +6,6 @@
 This Fortran code provides a list of functions and subroutines that I typically use in my research. All functions and subroutines assume double precision for real variables.
 
 Efficiency of the algorithms is not guaranteed, and the code is distributed under the MIT license.
-
-You can download the code from this [link](https://borjapetit.github.io/fortran_toolkit/toolkit.f90).
 
 If you find any mistake, or have any suggestion, [contact me](mailto:bpetit@cunef.edu).
 

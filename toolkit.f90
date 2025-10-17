@@ -1,7 +1,7 @@
 
 ! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ! toolkit.f90, a toolkit for fortran90 programming
-! Borja Petit, CUNEF Universidad, © 2025
+! Borja Petit, CUNEF Universidad, 2025
 !
 ! The code is distributed under the MIT license.
 ! You are free to use and modify it as you wish acknowledging the source.
@@ -9,7 +9,7 @@
 !
 ! UPDATES:
 ! - October 2025 – Borja Petit:
-!      * the functions "ces" and "crra" werre added
+!      * the functions "ces" and "crra" were added
 !      * some minor typos and inconsistencies were fixed. 
 !      * modified the "error" call in different subroutines/functions to stop the execution when an error is found.
 !

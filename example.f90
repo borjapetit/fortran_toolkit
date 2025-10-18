@@ -1,17 +1,39 @@
+! this program tests different subroutines in the toolkit package.
+! to compile the code, use the following command:
+!   gfortran  toolkit.f90 example.f90 -o example
 
 program toolkit_examples
+
   use toolkit
+  
   implicit none
   
   call system('clear')
  
   write(*,'(a)') ' '
+  write(*,'(a)') ' ' 
   write(*,'(a)') ' '
+
+  write(*,'(a)') ' *************************************************************'
+  write(*,'(a)') ' TESTING THE LMMIN ALGORITHM WITH AND WITHOUT BROYDEN UPDATING'
+  write(*,'(a)') ' *************************************************************'
+  write(*,'(a)') ' '
+
+  ! this subroutine tests the lmmin algorithm by minimizing a 2-dimension non-linear system.
+  ! the system contains a dummy loop to make the computation slower, so that timing differences can be appreciated.
 
   call demo_lmmin()
 
   write(*,'(a)') ' '
   write(*,'(a)') ' '
+
+  write(*,'(a)') ' *************************************************************'
+  write(*,'(a)') ' TESTING THE SIMPLEX ALGORITHM USING THE MAYTAS FUNCTION '
+  write(*,'(a)') ' *************************************************************'
+  write(*,'(a)') ' '
+
+  ! this subroutine tests the simples algorithm by minimizing athe maytas function.
+  ! the function contains a dummy loop to make the computation slower, so that timing differences can be appreciated.
 
   call demo_simplex()
 
@@ -48,7 +70,6 @@ program toolkit_examples
 
       t_end = timing( )
 
-
       write(*,'(a,2f12.6)')  '  Solution found:           ', x
       write(*,'(a,2es12.4)') '  Residuals y:              ', y
       write(*,'(a,f12.6)')   '  Residual 2-norm:          ', residual_norm
@@ -56,7 +77,6 @@ program toolkit_examples
       write(*,'(a,i6)')      '  Exit code (ind):          ', exitcode
       write(*,'(a,f12.6)')   '  Time elapsed (secs):      ', t_end - t_start
       write(*,'(a)')         '  ----------------------------------------------------'
-      write(*,'(a)')         '                                                      '
       write(*,'(a)')         '                                                      '
 
       ! -----------------------------------------------------------------------------
@@ -80,11 +100,20 @@ program toolkit_examples
       write(*,'(a,i6)')      '  Exit code (ind):          ', exitcode
       write(*,'(a,f12.6)')   '  Time elapsed (secs):      ', t_end - t_start
       write(*,'(a)')         '  ----------------------------------------------------'
-      write(*,'(a)')         '                                                      '
 
       deallocate(x,y)
       return
     end subroutine demo_lmmin
+
+    function nonlinear_system(xvec) result(resid)
+      real(dp) :: xvec(:)
+      real(dp), allocatable :: resid(:)
+      call dummy_loop()
+      allocate(resid(2))
+      resid(1) = xvec(1)**2 + xvec(2) - 37.0_dp
+      resid(2) = xvec(1) - xvec(2)**2 - 5.0_dp
+      return
+    end function nonlinear_system
 
     subroutine demo_simplex( )
       implicit none
@@ -115,32 +144,25 @@ program toolkit_examples
       write(*,'(a,i6)')      '  Exit code (ind):          ', exitcode
       write(*,'(a,f12.6)')   '  Time elapsed (secs):      ', t_end - t_start
       write(*,'(a)')         '  ----------------------------------------------------'
-      write(*,'(a)')         '                                                      '
 
       deallocate(x)
       return
     end subroutine demo_simplex
 
-    function nonlinear_system(xvec) result(resid)
-      real(dp) :: xvec(:)
-      real(dp), allocatable :: resid(:)
-      integer :: i
-      allocate(resid(2))
-      ! this is just to make the computation slower
-      do i=1,100000000 ; resid(1) = cero ; end do
-      resid(1) = xvec(1)**2 + xvec(2) - 37.0_dp
-      resid(2) = xvec(1) - xvec(2)**2 - 5.0_dp
-      return
-    end function nonlinear_system
-
     function matyas(x) result(y)
       implicit none
       real(dp) :: x(:),y
-      integer  :: i
-      ! this is just to make the computation slower: oitherwise the simplex converges too fast and timing differences are negligible.
-      do i=1,100000000 ; y = cero ; end do
+      call dummy_loop()
       y = dble(0.26)*( x(1)*x(1) + x(2)*x(2)) - dble(0.48)*x(1)*x(2)
       return
     end function matyas
+
+    subroutine dummy_loop()
+      integer :: i
+      do i=1,50000000
+        ! do nothing
+      end do
+      return
+    end subroutine dummy_loop
 
 end program toolkit_examples

@@ -5,4 +5,5 @@ test.*
 *.mod
 Makefile
 README.md
-
+example
+example.dSYM

@@ -2090,8 +2090,8 @@ module toolkit
         end if
 
         ! if change in func is too small, compute new shocked parameter
-        if (abs(ej-eb).lt.tolvl) then ; ddx = xj(i,i) - xb(i)
-          do while (abs(ej-eb).lt.tolvl)
+        if (abs(ej-eb).lt.toler) then ; ddx = xj(i,i) - xb(i)
+          do while (abs(ej-eb).lt.toler)
             xj(i,i) = xj(i,i) + ddx
             yj(:,i) = func(xj(:,i)) ; ej = sum(yj(:,i)*yj(:,i)) ; iy = iy + 1
             if (ip.gt.1) write (*,90) i,ej
@@ -2117,8 +2117,6 @@ module toolkit
       j0 = j ; call broyden(j,j0,x1,xa,y1,ya)
 
     end if
-
-    
 
     ! for each iteration, starting point = best point
     ya = yb ; ea = eb ; xa = xb ; br = 1

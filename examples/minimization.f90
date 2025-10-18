@@ -1,8 +1,8 @@
 ! this program tests different subroutines in the toolkit package.
 ! to compile the code, use the following command:
-!   gfortran  toolkit.f90 example.f90 -o example
+!   gfortran  toolkit.f90 examples/minimization.f90 -o minimization_tes
 
-program toolkit_examples
+program minimization_examples
 
   use toolkit
   !use, intrinsic :: ieee_arithmetic
@@ -199,4 +199,4 @@ program toolkit_examples
       return
     end subroutine dummy_loop
 
-end program toolkit_examples
+end program minimization_examples

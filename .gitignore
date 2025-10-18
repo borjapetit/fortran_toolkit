@@ -5,5 +5,4 @@ test.*
 *.mod
 Makefile
 README.md
-example*
-example.*
+*_test*

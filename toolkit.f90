@@ -8,7 +8,7 @@
 ! If you modified version of this code, indicate the changes made along with your name and date.
 !
 ! UPDATES:
-! - October 2025 – Borja Petit:
+! - October 2025 (Borja Petit):
 !      * the functions "ces" and "crra" were added
 !      * some minor typos and inconsistencies were fixed. 
 !      * modified the "error" call in different subroutines/functions to stop the execution when an error is found.
@@ -2100,7 +2100,7 @@ module toolkit
           if (abs(xb(i)).gt.toler) shck(i) = abs( xb(i) - xj(i,i) ) / abs( xb(i) )
           if (abs(xb(i)).le.toler) shck(i) = abs( xj(i,i) )
         end if
-        
+
         ! compute numerical jacobian
         do k = 1,m
           j(k,i) = ( yj(k,i) - yb(k) )/( xj(i,i) - xb(i) )

@@ -86,10 +86,10 @@ module toolkit
                      interpolate6d
   end interface interpolate
   interface vect
-    module procedure vectorize_int_2d,vectorize_dp_2d,&
-                     vectorize_int_3d,vectorize_dp_3d,&
-                     vectorize_int_4d,vectorize_dp_4d,&
-                     vectorize_int_5d,vectorize_dp_5d
+    module procedure vectorize_int_2d,vectorize_dp_2d,vectorize_lo_2d,&
+                     vectorize_int_3d,vectorize_dp_3d,vectorize_lo_3d,&
+                     vectorize_int_4d,vectorize_dp_4d,vectorize_lo_4d,&
+                     vectorize_int_5d,vectorize_dp_5d,vectorize_lo_5d
   end interface vect
   interface randomnormal
     module procedure randomnormal_scalar,randomnormal_vec

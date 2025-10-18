@@ -13,7 +13,6 @@ function vec(mat) result(vec)
   real(kind=8) :: mat(:,:,...,:)
   real(kind=8) :: vec(:)
 ```
-
 ```fortran
 function vec(mat) result(vec)
   implicit none
@@ -27,9 +26,9 @@ This function returns a 1-dimensional array ```vec``` with all the elements of a
 **Dependencies**: none
 
 **Note**: ```vect``` is an interface that calls specific functions depending on the type of ```mat``` (integer, real or logical) and depending on the dimensions of ```mat```. The specific functions are:
-- ```mat``` is real $ \ \to \ $ ```vectorize_dp_2d```, ```vectorize_dp_3d```, ```...```, ```vectorize_in_6d```
-- ```mat``` is integer $ \ \to \ $ ```vectorize_in_2d```, ```vectorize_in_3d```, ```...```, ```vectorize_in_6d```
-- ```mat``` is logical $ \ \to \ $ ```vectorize_lo_2d```, ```vectorize_lo_3d```, ```...```, ```vectorize_lo_6d```
+- ```mat``` is real $ \ \to \ $ ```vectorize_dp_2d```, ```vectorize_dp_3d```, ```vectorize_dp_4d```, ```vectorize_dp_5d```
+- ```mat``` is integer $ \ \to \ $ ```vectorize_in_2d```, ```vectorize_in_3d```, ```vectorize_in_4d```, ```vectorize_in_5d```
+- ```mat``` is logical $ \ \to \ $ ```vectorize_lo_2d```, ```vectorize_lo_3d```, ```vectorize_lo_4d```, ```vectorize_lo_5d```
 
 [(back to index)](../index.md)
 

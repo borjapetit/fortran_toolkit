@@ -5,8 +5,11 @@
 program toolkit_examples
 
   use toolkit
+  !use, intrinsic :: ieee_arithmetic
   
   implicit none
+
+  !real(dp) , parameter :: nadp = ieee_value(0.0_dp, ieee_quiet_nan)
   
   call system('clear')
  
@@ -144,6 +147,28 @@ program toolkit_examples
       write(*,'(a,i6)')      '  Exit code (ind):          ', exitcode
       write(*,'(a,f12.6)')   '  Time elapsed (secs):      ', t_end - t_start
       write(*,'(a)')         '  ----------------------------------------------------'
+      write(*,'(a)')         '                                                      '
+
+
+      x0 = [1.0_dp, 4.0_dp]
+      x  = cero
+
+      t_start = timing( )
+
+      write(*,'(a)')         '  --- simplex example (non liner system) -------------'
+      write(*,'(a,2f12.6)')  '  Initial guess:            ', x0
+      write(*,'(a,2f12.6)')  '  Solution:                 ', [6.0_dp,1.0_dp]
+
+      call simplex(sum_nonlinear_system,x,residual_norm,iy,exitcode,x0)
+
+      t_end = timing( )
+
+      write(*,'(a,2f12.6)')  '  Found solution:           ', x
+      write(*,'(a,f12.6)')   '  Residual 2-norm:          ', residual_norm
+      write(*,'(a,i6)')      '  Function evaluations (iy):', iy
+      write(*,'(a,i6)')      '  Exit code (ind):          ', exitcode
+      write(*,'(a,f12.6)')   '  Time elapsed (secs):      ', t_end - t_start
+      write(*,'(a)')         '  ----------------------------------------------------'
 
       deallocate(x)
       return
@@ -156,6 +181,15 @@ program toolkit_examples
       y = dble(0.26)*( x(1)*x(1) + x(2)*x(2)) - dble(0.48)*x(1)*x(2)
       return
     end function matyas
+
+    function sum_nonlinear_system(xvec) result(y)
+      real(dp) :: xvec(:),ys(2),y
+      call dummy_loop()
+      ys(1) = xvec(1)**2 + xvec(2) - 37.0_dp
+      ys(2) = xvec(1) - xvec(2)**2 - 5.0_dp
+      y     = sum(ys**2)
+      return
+    end function sum_nonlinear_system
 
     subroutine dummy_loop()
       integer :: i

@@ -114,7 +114,9 @@ module toolkit
   ! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-   ! crra function with "x" being the argument and "b" being the rra parameter
+  ! ----------------------------------------------------------------------------
+  ! crra function with "x" being the argument and "b" being the rra parameter
+  ! if teh rra parameter is 0, the function returns log(x)
   function crra(x,b) result(u)
     implicit none
     real(dp) :: x,b,u ; u = cero
@@ -131,7 +133,8 @@ module toolkit
     return
   end function crra
 
-   ! CES function with "x1" and "x2" being the inputs, "b" being (inverse) elasticity of substitution and "a" being the share of input 1
+  ! ----------------------------------------------------------------------------
+  ! CES function with inputs "x1" and "x2"; "b" is the (inverse) elasticity of subsitution; "a" is share of input "x1"
   function ces(x1,x2,a,b) result(u)
     implicit none
     real(dp) :: x1,x2,a,b,u ; u = cero
@@ -154,7 +157,6 @@ module toolkit
   ! this function creates a grid betwee "maxv" and "minv" with a curvature of "s"
   !   - if s>1: more grids points around "maxv"
   !   - if s<1: more grids points around "minv"
-
   function grid(maxv,minv,n,s) result(v)
     implicit none
     integer             :: i,n
@@ -171,9 +173,8 @@ module toolkit
   end function grid
 
   ! ----------------------------------------------------------------------------
-  ! this subroutine finds the closest point in a given grid and return its
-  ! position and the relative distance
-
+  ! this subroutine linearly interpolates a variable !xnow" over a grid "xgrid".
+  ! it finds the closest point in the grid and return its position and the relative distance
   subroutine interpolation(pos,wth,xnow,xgrid,outof)
     implicit none
     integer                         :: j,n,ofs
@@ -230,16 +231,15 @@ module toolkit
   ! where "val1", "val2", ... are the values of the variables to be interpolated over
   ! their coresponding grids "vector1", "vector2, ...., and "matrix" is an
   ! n-dimensional array with the results.
-
   function interpolate1d(x1,y1,m) result(xi)
     implicit none
     integer      :: pos
-    real(dp) :: y1(:),m(:),x1,xi,wth
+    real(dp) :: y1(:),m(:),x1,xi,wth ; xi = cero
     if (size(y1).ne.size(m)) then
       call error(' error in interpolate: 1st dimension incorrect',0)
       return
     end if
-    if (size(y1).eq.1      ) then
+    if (size(y1).eq.1) then
       call error(' error in interpolate: 1st dimension with single element',0)
       return
     end if
@@ -252,12 +252,12 @@ module toolkit
     integer      :: pos2
     real(dp) :: wth2
     real(dp) :: x1,x2,xi
-    real(dp) :: y1(:),y2(:),m(:,:)
+    real(dp) :: y1(:),y2(:),m(:,:) ; xi = cero
     if (size(m,2).ne.size(y2)) then
       call error(' error in interpolate: 2nd dimension incorrect',0)
       return
     end if
-    if (size(y2).eq.1        ) then
+    if (size(y2).eq.1) then
       call error(' error in interpolate: 2st dimension with single element',0)
       return
     end if
@@ -270,12 +270,12 @@ module toolkit
     implicit none
     integer      :: pos3
     real(dp) :: y1(:),y2(:),y3(:),x1,x2,x3,xi
-    real(dp) :: wth3,m(:,:,:)
+    real(dp) :: wth3,m(:,:,:) ; xi = cero
     if (size(m,3).ne.size(y3)) then
       call error(' error in interpolate: 3rd dimension incorrect',0)
       return
     end if
-    if (size(y3).eq.1        ) then
+    if (size(y3).eq.1) then
       call error(' error in interpolate: 3rd dimension with single element',0)
       return
     end if
@@ -288,12 +288,12 @@ module toolkit
     implicit none
     integer  :: pos4
     real(dp) :: y1(:),y2(:),y3(:),y4(:),x1,x2,x3,x4,xi
-    real(dp) :: wth4,m(:,:,:,:)
+    real(dp) :: wth4,m(:,:,:,:) ; xi = cero
     if (size(m,4).ne.size(y4)) then
       call error(' error in interpolate: 4th dimension incorrect',0)
       return
     end if
-    if (size(y4).eq.1        ) then
+    if (size(y4).eq.1) then
       call error(' error in interpolate: 4th dimension with single element',0)
       return
     end if
@@ -306,12 +306,12 @@ module toolkit
     implicit none
     integer      :: pos5
     real(dp) :: y1(:),y2(:),y3(:),y4(:),y5(:),x1,x2,x3,x4,x5,xi
-    real(dp) :: wth5,m(:,:,:,:,:)
+    real(dp) :: wth5,m(:,:,:,:,:) ; xi = cero
     if (size(m,5).ne.size(y5)) then
       call error(' error in interpolate: 5th dimension incorrect',0)
       return
     end if
-    if (size(y5).eq.1        ) then
+    if (size(y5).eq.1) then
       call error(' error in interpolate: 5th dimension with single element',0)
       return
     end if
@@ -324,12 +324,12 @@ module toolkit
     implicit none
     integer      :: pos6
     real(dp) :: y1(:),y2(:),y3(:),y4(:),y5(:),y6(:),x1,x2,x3,x4,x5,x6,xi
-    real(dp) :: wth6,m(:,:,:,:,:,:)
+    real(dp) :: wth6,m(:,:,:,:,:,:) ; xi = cero
     if (size(m,6).ne.size(y6)) then
       call error(' error in interpolate: 6th dimension incorrect',0)
       return
     end if
-    if (size(y6).eq.1        ) then
+    if (size(y6).eq.1) then
       call error(' error in interpolate: 6th dimension with single element',0)
       return
     end if
@@ -346,35 +346,17 @@ module toolkit
   !   - if mode=1, time is measured in seconds (default).
   !   - if mode=2, time is measures in minutes.
   !   - if mode=3, time is measured in hours
-
   function timing(mode) result(time)
-
     implicit none
     integer , optional :: mode
     integer            :: v1(8)
-    real(dp)           :: mod,time,v2(8) ; time = cero ; v2 = cero
-    
-    mod = 1 ; if (present(mode)) mod = mode
-
-    call date_and_time(values=v1)  
-
-    v2(2) = dble(v1(2)*30*24*60*60) ! months
-    v2(3) = dble(v1(3)*   24*60*60) ! days
-    v2(5) = dble(v1(5)*      60*60) ! hours
-    v2(6) = dble(v1(6)*         60) ! minutes
-    v2(7) = dble(v1(7)            ) ! seconds
-
-    ! measured in hours
-    if (mod.eq.3) then 
-      time = sum(v2)/dble(60*60)
-    ! measured in minutes
-    else if (mod.eq.2) then 
-      time = sum(v2)/dble(60)
-    ! measured in seconds
-    else if (mod.eq.1) then 
-      time = sum(v2)
+    real(dp)           :: time
+    call date_and_time(values=v1) 
+    time = dble( sum( v1(2:7)*(/ 30*24*60*60,24*60*60,0,60*60,60,1/) )  )
+    if (present(mode)) then
+      if (mode.eq.3) time = time/dble(60*60)  ! measured in hours
+      if (mode.eq.2) time = time/dble(60)     ! measured in minutes
     end if
-
     return
   end function timing
 
@@ -1567,7 +1549,7 @@ module toolkit
       write(*,*) '  '
     end if
 
-    if (abs(x1-x0).lt.tol) then
+    if (abs(x1-x0).lt.toler) then
       if (ipri.ge.0) write(*,*) ' x0 and x1 are too close'
       ind = 3 ; return
     end if
@@ -2063,17 +2045,17 @@ module toolkit
 
      ! compute new numerical jacobian      
     if (iy.eq.1 .or. bro.eq.0 .or. br.eq.0) then
-      
+
       if (ip.gt.1) write (*,*) '  '
       do i = 1,n
 
         ! shock the i-th parameter
         xj(:,i) = xb(:)
-        if (xb(i).lt.-tol) then
+        if (xb(i).lt.-toler) then
           xj(i,i) = xb(i) - min(shck(i),shck(i)*max(0.30,eb))*abs(xb(i))
-        elseif (xb(i).gt.tol) then
+        elseif (xb(i).gt.toler) then
           xj(i,i) = xb(i) + min(shck(i),shck(i)*max(0.30,eb))*abs(xb(i))
-        elseif (abs(xb(i)).le.tol) then
+        elseif (abs(xb(i)).le.toler) then
           xj(i,i) = min(shck(i),shck(i)*max(0.30,eb))
         end if
         if (abs(xj(i,i)-xb(i)).lt.toler*dble(10.0)) then
@@ -2084,10 +2066,9 @@ module toolkit
         yj(:,i) = func(xj(:,i))
         ej = sum(yj(:,i)*yj(:,i))
         iy = iy + 1
-
+        
         ! print result
         if (ip.gt.1) write (*,90) i,ej
-
         ! if converged, finish
         if (ej.lt.toler .or. maxval(abs(yj(:,i))).lt.tolereach) then
           yb = yj(:,i) ; xb = xj(:,i) ; eb = ej ; goto 10
@@ -2104,8 +2085,8 @@ module toolkit
             if (ip.gt.1) write (*,90) i,ej
             if (iy.ge.maxiter) goto 19
           end do
-          if (abs(xb(i)).gt.tol) shck(i) = abs( xb(i) - xj(i,i) ) / abs( xb(i) )
-          if (abs(xb(i)).le.tol) shck(i) = abs( xj(i,i) )
+          if (abs(xb(i)).gt.toler) shck(i) = abs( xb(i) - xj(i,i) ) / abs( xb(i) )
+          if (abs(xb(i)).le.toler) shck(i) = abs( xj(i,i) )
         end if
 
         ! if change in func is too small, compute new shocked parameter
@@ -2116,10 +2097,10 @@ module toolkit
             if (ip.gt.1) write (*,90) i,ej
             if (iy.ge.maxiter) goto 19
           end do
-          if (abs(xb(i)).gt.tol) shck(i) = abs( xb(i) - xj(i,i) ) / abs( xb(i) )
-          if (abs(xb(i)).le.tol) shck(i) = abs( xj(i,i) )
+          if (abs(xb(i)).gt.toler) shck(i) = abs( xb(i) - xj(i,i) ) / abs( xb(i) )
+          if (abs(xb(i)).le.toler) shck(i) = abs( xj(i,i) )
         end if
-
+        
         ! compute numerical jacobian
         do k = 1,m
           j(k,i) = ( yj(k,i) - yb(k) )/( xj(i,i) - xb(i) )
@@ -2136,6 +2117,8 @@ module toolkit
       j0 = j ; call broyden(j,j0,x1,xa,y1,ya)
 
     end if
+
+    
 
     ! for each iteration, starting point = best point
     ya = yb ; ea = eb ; xa = xb ; br = 1
@@ -2271,7 +2254,10 @@ module toolkit
     real(dp)               :: dx(size(x1,1))
     real(dp)               :: den
     integer                :: i
-    j1 = j0
+    j1    = j0
+    dx(:) = x1(:)-x0(:)
+    df(:) = f1(:)-f0(:)
+    den   = sum(dx(:)*dx(:))
     if (size(f1).ne.size(j0,1)) then
       call error(' error in broyden: size(y) /= size(j,1)',0)
       return
@@ -2280,13 +2266,10 @@ module toolkit
       call error(' error in broyden: size(x) /= size(j,2)',0)
       return
     end if
-    den = sum(dx(:)*dx(:))
     if (abs(den).lt.tolvl) then
       call error(' error in broyden: denominator close to 0',0)
       return
     end if
-    dx(:) = x1(:)-x0(:)
-    df(:) = f1(:)-f0(:)
     do i=1,size(df)
       j1(i,:) = j0(i,:) + dx(:)*( df(i)-sum(j0(i,:)*dx(:)) ) / den
     end do

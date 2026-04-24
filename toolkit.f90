@@ -77,6 +77,7 @@ module toolkit
   real(dp) , parameter :: cien  = dble(100.000000000000)
   real(dp) , parameter :: mil   = dble(1000.00000000000)
   real(dp) , parameter :: tolvl = dble(0.00000000010000)
+  logical              :: print_err = .true.
   
   interface interpolate
     module procedure interpolate1d,&
@@ -104,7 +105,7 @@ module toolkit
   interface shuffle_vect
     module procedure shuffle_vect_int,shuffle_vect_dp
   end interface shuffle_vect
-  
+
   contains
 
 
@@ -185,9 +186,7 @@ module toolkit
     integer , intent(in) , optional :: outof
 
     pos = 0 ; wth = cero ; ofs = 0
-
-    if (present(outof)) ofs = outof
-    
+        
     if (isnan(xnow)) then
       call error(' errror in interpolation: xnow is nan')
       return
@@ -394,6 +393,7 @@ module toolkit
   subroutine error_0(mess)
     implicit none
     character(len=*) , intent(in)    :: mess
+    if (print_err.eqv..false.) return
     write(*,*) trim(adjustl(mess)) 
     return
   end subroutine error_0
@@ -402,6 +402,7 @@ module toolkit
     character(len=*) , intent(in) :: mess
     integer          , intent(in) :: i
     integer                       :: j
+    if (print_err.eqv..false.) return
     if (i.eq.0) then
       call error_0(mess)
     else
@@ -414,6 +415,7 @@ module toolkit
     character(len=*) , intent(in) :: mess
     logical          , intent(in) :: stpe
     integer                       :: j
+    if (print_err.eqv..false.) return
     if (stpe.eqv..false.) then
       call error_0(mess)
     else
@@ -425,14 +427,34 @@ module toolkit
   ! ----------------------------------------------------------------------------
   ! this returns a string with the interger supplied by the user
 
-  function int2text(inter) result(txt)
+  function int2text(inter,width,fill) result(txt)
     implicit none
     integer                        :: inter
+    integer , intent(in), optional :: width
+    character(len=1) , optional    :: fill
     character(len=100)             :: txt0
     character(len=:) , allocatable :: txt
-    write(txt0,'(i0)') inter 
-    allocate(character(len=len(trim(adjustl(txt0)))) :: txt)
-    txt = trim(adjustl(txt0))
+    integer                        :: j
+    write(txt0 , '(I0)') inter
+    if (present(width)) then
+      if (width.gt.len(trim(adjustl(txt0)))) then
+        allocate(character(len=width) :: txt)
+        if (present(fill)) then
+          forall (j=1:width) txt(j:j) = fill
+        else
+          forall (j=1:width) txt(j:j) = '0'
+        end if
+        txt(width-len(trim(adjustl(txt0)))+1:width) = trim(adjustl(txt0))
+      else
+        allocate(character(len=len(trim(adjustl(txt0)))) :: txt)
+        txt = trim(adjustl(txt0))
+      end if
+      return
+    else
+      allocate(character(len=len(trim(adjustl(txt0)))) :: txt)
+      txt = trim(adjustl(txt0))
+      return
+    end if
     return
   end function int2text
 
@@ -1045,7 +1067,7 @@ module toolkit
     do i=1,size(shock)
       call randomnormal_scalar(shock(i),mu,std)
     end do
-    q = sum(shock)/dble(size(shock))
+    q     = sum(shock)/dble(size(shock))
     shock = shock - q + mu
     return
   end subroutine randomnormal_vec
@@ -1087,22 +1109,14 @@ module toolkit
   ! integer numbers from 1 to n and them shuffled using the the Fisher–Yates
   ! shuffle algorithm
 
-  subroutine fisheryates(nums,seed)
+  subroutine fisheryates(nums)
     implicit none
     integer , intent(inout) :: nums(:)
-    integer , intent(in) , optional :: seed(:)
-    real(dp) :: r
-    integer :: i, j, temp , n ; n = size(nums)
+    real(dp)                :: r
+    integer                 :: i,j,temp,n
 
     ! Initialize the array with values 1 to 100
-    do i = 1,n ; nums(i) = i ; end do
-
-    ! Seed the random number generator
-    if (present(seed)) then
-      call random_seed(put=seed)
-    else
-      call random_seed()
-    end if
+    n = size(nums) ; do i = 1,n ; nums(i) = i ; end do
 
     ! Fisher–Yates shuffle
     do i = n, 2, -1
@@ -1123,7 +1137,7 @@ module toolkit
   ! if n > m: "output_vec" filled with "m" shuffled values of "input_vec"
   ! if n < m: "output_vec" filled with "n" shuffled values of "input_vec" until m. 
 
-  subroutine shuffle_vect_int(input_vec, output_vec)
+  subroutine shuffle_vect_int(input_vec,output_vec)
     implicit none
     integer , intent(in)  :: input_vec(:)
     integer , intent(out) :: output_vec(:)
@@ -1412,6 +1426,142 @@ module toolkit
   ! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
+  ! ----------------------------------------------------------------------------
+  ! bisection's method
+
+  subroutine bisection(func,x,iy,ind,x0,x1,itermax,tol,iprint)
+
+    ! this subroutine finds the root of a user-supplied single-valued function
+    ! with one unknown using the bisection method
+    !
+    ! the inputs are:
+    !
+    !   - func: user-provided function to be minimize. this function should of the form:
+    !
+    !       function func(x) result(y)
+    !         real(dp) :: x,y
+    !       end function func
+    !
+    !   - x0: lower bound of variable "x" such that func(x0)<0
+    !   - x1: upper bound of variable "x" such that func(x1)>0
+    !
+    ! there are also few optional inputs:
+    !
+    !   itermax:  max number of iterations (default = 500)
+    !   tol:      tolerance level (default = 1.0d-8)
+    !
+    ! the outputs of the subroutine are:
+    !
+    !   x:    the value of x that maximizes "func"
+    !   iy:   number of function evaluations required
+    !   ind:  exit indicator, taking value:
+    !           0: solved, func(x) = 0
+    !           1: not solved
+
+    implicit none
+    real(dp) , intent(out)           :: x
+    integer  , intent(out)           :: iy
+    integer  , intent(out)           :: ind
+    real(dp) , intent(in)            :: x0,x1
+    real(dp) , intent(in) , optional :: tol
+    integer  , intent(in) , optional :: itermax
+    integer  , intent(in) , optional :: iprint
+    integer                          :: maxiter,ipri
+    real(dp)                         :: toler,xa,ya,xb,yb,xc,yc
+
+    interface
+      function func(xx) result(resid)
+        real(kind=8) :: xx,resid
+      end function func
+    end interface
+
+    ! - ```exitcode``` = 0: the algorithm found a root
+    ! - ```exitcode``` = 10: ```x0``` is a root of ```func```
+    ! - ```exitcode``` = 11: ```x1``` is a root of ```func```
+    ! - ```exitcode``` = 2: the root is not within the interval (```x0```, ```x1```)
+    ! - ```exitcode``` = 3: the points ```x0``` and ```x1``` are too close
+    ! - ```exitcode``` = 9: maximum number of function evaluations reached
+
+    toler   = 1.0d-8 ; if (present(tol)    ) toler   = tol
+    maxiter = 1000   ; if (present(itermax)) maxiter = itermax
+    ipri    = 0      ; if (present(iprint) ) ipri    = iprint
+
+    if (ipri.gt.0) then
+      write(*,*) '  '
+      write(*,*) ' starting bisection algorithm'
+      write(*,*) '  '
+    end if
+
+    if (abs(x1-x0).lt.toler) goto 91
+
+    ! compute lower bound
+    xa = x0 ; ya = func(xa)
+    if (ipri.gt.0) write(*,*) '  lower bound: x0 = '//num2text(xa,2)//' | f(x0) = '//num2text(ya,2) 
+    if (abs(ya).lt.toler) then
+      x = xa ; goto 10 ; return
+    end if
+    xb = x1 ; yb = func(xb)
+    if (ipri.gt.0) write(*,*) '  upper bound: x1 = '//num2text(xb,2)//' | f(x1) = '//num2text(yb,2) 
+    if (abs(yb).lt.toler) then
+      x = xb ; goto 11 ; return
+    end if
+
+    if (ya.gt.cero .and. yb.lt.cero) then
+      xc = xa ; yc = ya ; xa = xb ; ya = yb ; xb = xc ; yb = yc
+    else if (ya.gt.cero .and. yb.gt.cero) then
+      goto 93
+    elseif (yb.lt.cero .and. ya.lt.cero) then
+      goto 94
+    end if
+
+    if (ipri.gt.1) then
+      write(*,*) '                          '
+      write(*,*) '  beginning iterations... '
+      write(*,*) '                          '
+    end if
+
+    ! beginning iterations
+    iy = 0 ; ind = 0
+
+    do while (abs(xb-xa).gt.toler .and. iy.lt.maxiter)
+      xc = medio*(xa+xb) ; yc = func(xc)
+      if (ipri.gt.1) then
+        write(*,87) iy,xa,xb,xc,ya,yb,yc
+      end if
+      if (yc.gt.cero) then
+        xb = xc ; yb = yc
+      else
+        xa = xc ; ya = yc
+      end if
+      if (abs(yc).lt.toler) then
+        x = xc ; goto 20
+      end if
+      if (iy.eq.maxiter) then
+        x = xc ; goto 99
+      end if
+    end do
+
+    if (ipri.gt.0) then
+      write(*,86) iy,xb,yb
+    end if
+
+    x = xb
+
+    return
+
+    91 ind = 3  ; if (ipri.gt.0) write(*,*) '  error: x0 and x1 are too close'            ; return
+    92 ind = 2  ; if (ipri.gt.0) write(*,*) '  error: f(x0) and f(x1) have the same sign' ; return
+    93 ind = 20 ; if (ipri.gt.0) write(*,*) '  error: f(x0) > 0 '                         ; return
+    94 ind = 21 ; if (ipri.gt.0) write(*,*) '  error: f(x1) < 0 '                         ; return
+    10 ind = 10 ; if (ipri.gt.0) write(*,*) '  solved: x0 is a root'                      ; return
+    11 ind = 11 ; if (ipri.gt.0) write(*,*) '  solved: x1 is a root'                      ; return
+    99 ind = 9  ; if (ipri.gt.0) write(*,*) '  max number of iterations reached'          ; return
+    20 ind = 0  ; if (ipri.gt.0) write(*,*) '  solved: root found'                        ; return
+         
+    87 format( '  iteration = ',i4,' | xa = ',f10.4,' | xb = ',f10.4,' | xc = ',f10.4,&
+    ' | f(xa) = ',f10.4,' | f(xb) = ',f10.4,' | f(xc) = ',f10.4)
+    86 format( '  solved: iterations = ',i4,' | x = ',f10.4,' | f(x) = ',f10.4)
+  end subroutine bisection
 
   ! ----------------------------------------------------------------------------
   ! golden search algorithm
@@ -1452,7 +1602,7 @@ module toolkit
     real(dp) , intent(in) , optional :: tol
     integer  , intent(in) , optional :: itermax
     integer  , intent(in) , optional :: iprint
-    real(dp) , parameter             :: alpha=0.61803399
+    real(dp) , parameter             :: alpha = (sqrt(5.d0) - 1.d0) / 2.d0
     real(dp)                         :: x0,x1,x2,x3,f1,f2,tolgold
     integer                          :: it,maxiter,ip
 
@@ -1492,7 +1642,7 @@ module toolkit
         x1 = alpha*x2 + (uno-alpha)*x0
         f1 = func(x1)
       end if
-      if (ip.gt.1) write(*,15) it , x1 , x2 , f1 , f2
+      if (ip.gt.1) write(*,15) it , x0 , x1 , x2 , x3 , f1 , f2
     end do
 
     if (f1.gt.f2) then
@@ -1507,8 +1657,9 @@ module toolkit
     if (ip.gt.0) write(*,16) it , x , y
 
     return
-    15 format( ' iteration = ',i4,' | x1 = ',f10.4,' | x2 = ',f10.4,' | f(x1) = ',f10.4,' | f(x2) = ',f10.4)
-    16 format( ' solved: iterations = ',i4,' | x = ',f10.4,' | f(x) = ',f10.4)
+    15 format( '  iteration = ',i4,' | x0 = ',f10.4,' | x1 = ',f10.4,&
+    ' | x2 = ',f10.4,' | x3 = ',f10.4,' | f(x1) = ',f10.4,' | f(x2) = ',f10.4)
+    16 format( '  solved: iterations = ',i4,' | x = ',f10.4,' | f(x) = ',f10.4)
   end subroutine golden
 
   ! ----------------------------------------------------------------------------
@@ -1560,9 +1711,9 @@ module toolkit
       end function func
     end interface
 
-
     ! - ```exitcode``` = 0: the algorithm found a root
-    ! - ```exitcode``` = 1: either ```x0``` or ```x1``` is a root of ```func```
+    ! - ```exitcode``` = 10: ```x0``` is a root of ```func```
+    ! - ```exitcode``` = 11: ```x1``` is a root of ```func```
     ! - ```exitcode``` = 2: the root is not within the interval (```x0```, ```x1```)
     ! - ```exitcode``` = 3: the points ```x0``` and ```x1``` are too close
     ! - ```exitcode``` = 9: maximum number of function evaluations reached
@@ -1571,56 +1722,67 @@ module toolkit
     maxiter = 500    ; if (present(itermax)) maxiter = itermax
     ipri    = 0      ; if (present(iprint) ) ipri    = iprint
 
-    if (ipri.ge.0) then
+    if (ipri.gt.0) then
       write(*,*) '  '
       write(*,*) ' starting brent algorithm'
       write(*,*) '  '
     end if
 
-    if (abs(x1-x0).lt.toler) then
-      if (ipri.ge.0) write(*,*) ' x0 and x1 are too close'
-      ind = 3 ; return
-    end if
+    if (abs(x1-x0).lt.toler) goto 91
 
+    ! compute lower bound
     xa = x0 ; ya = func(xa)
-
+    if (ipri.gt.0) write(*,*) '  lower bound: x0 = '//num2text(xa,2)//' | f(x0) = '//num2text(ya,2) 
     if (abs(ya).lt.toler) then
-      if (ipri.ge.0) write(*,*) ' x0 is a root'
-      ind = 1 ; x = xa ; return
+      x = xa ; goto 10 ; return
     end if
+    if (ya.gt.cero) goto 93
 
+    ! compute upper bound
     xb = x1 ; yb = func(xb)
-
+    if (ipri.gt.0) write(*,*) '  upper bound: x1 = '//num2text(xb,2)//' | f(x1) = '//num2text(yb,2) 
     if (abs(yb).lt.toler) then
-      if (ipri.ge.0) write(*,*) ' x1 is a root'
-      ind = 1 ; x = xb ; return
+      x = xb ; goto 11 ; return
+    end if
+    if (yb.lt.cero) goto 94
+
+    ! check that root is within bounds
+    if (ya*yb.gt.cero) goto 92
+
+    ! reorder if bounds are reversed
+    if (ya.gt.cero .and.yb.lt.cero) then ; 
+      xc = xa ; yc = ya ; xa = xb ; ya = yb ; xb = xc ; yb = yc
     end if
 
-    if (ya*yb.gt.cero) then
-      if (ipri.ge.0) write(*,*) ' f(x0) and f(x1) have the same sign'
-      ind = 2 ; x = xa ; return
-    end if
+    ! beginning iterations
+    xc = medio*(xa+xb) ; iy = 0 ; ind = 0
 
-    if (abs(ya).lt.abs(yb)) then
-      xc = xb ; xb = xa ; xa = x0 ; yc = ya ; ya = yb
+    if (ipri.gt.1) then
+      write(*,*) '                          '
+      write(*,*) '  beginning iterations... '
+      write(*,*) '                          '
     end if
-
-    xc = xa ; iy = 0 ; ind = 0
 
     do while (abs(xb-xa).gt.toler .and. iy.lt.maxiter)
+
       yc = func(xc)
+
+      if (abs(yc).lt.toler) then
+        x = xc ; goto 20
+      end if
+
       if (abs(yc-ya).gt.toler .and. abs(yc-yb).gt.toler) then
         xs = xa*yb*yc/((ya-yb)*(ya-yc)) + xb*ya*yc/((yb-ya)*(yb-yc)) + xc*ya*yb/((yc-ya)*(yc-yb))
       else
         xs = xb - yb*(xb-xa)/(yb-ya)
       end if
+
       ys = func(xs) ; iy = iy + 1
-      if (abs(ys).lt.toler) then
-        ind = 0 ; x = xs ; return
+
+      if (ipri.gt.1) then
+        write(*,*) '  iter = '//num2text(iy)//' | xs = '//num2text(xs,2)//' | f(xs) = '//num2text(ys,2) 
       end if
-      if (iy.eq.maxiter) then
-        ind = 9 ; x = xs ; return
-      end if
+
       if (ya*ys.lt.cero) then
         xc = xb ; xb = xs ; yb = ys
       else
@@ -1629,10 +1791,15 @@ module toolkit
       if (abs(ya).lt.abs(yb)) then
         xc = xb ; xb = xa ; xa = xc ; yc = yb ; yb = ya ; ya = yc
       end if
-      if (ipri.ge.1) then
-        write(*,87) iy , xa , xb , xc , ya , yb , yc
+      if (abs(ys).lt.toler) then
+        x = xs ; goto 20
       end if
+      if (iy.eq.maxiter) then
+        x = xs ; goto 99
+      end if
+
     end do
+
     if (ipri.gt.0) then
       write(*,86) iy,xb,yb
     end if
@@ -1640,9 +1807,17 @@ module toolkit
     x = xb
 
     return
-    87 format( ' iteration = ',i4,' | xa = ',f10.4,' | xb = ',f10.4,' | xc = ',f10.4,&
-    ' | f(xa) = ',f10.4,' | f(xb) = ',f10.4,' | f(xc) = ',f10.4)
-    86 format( ' solved: iterations = ',i4,' | x = ',f10.4,' | f(x) = ',f10.4)
+
+    91 ind = 3  ; if (ipri.gt.0) write(*,*) '  error: x0 and x1 are too close'            ; return
+    92 ind = 2  ; if (ipri.gt.0) write(*,*) '  error: f(x0) and f(x1) have the same sign' ; return
+    93 ind = 20 ; if (ipri.gt.0) write(*,*) '  error: f(x0) > 0 '                         ; return
+    94 ind = 21 ; if (ipri.gt.0) write(*,*) '  error: f(x1) < 0 '                         ; return
+    10 ind = 10 ; if (ipri.gt.0) write(*,*) '  solved: x0 is a root'                      ; return
+    11 ind = 11 ; if (ipri.gt.0) write(*,*) '  solved: x1 is a root'                      ; return
+    99 ind = 9  ; if (ipri.gt.0) write(*,*) '  max number of iterations reached'          ; return
+    20 ind = 0  ; if (ipri.gt.0) write(*,*) '  solved: root found'                        ; return
+         
+    86 format( '  solved: iterations = ',i4,' | x = ',f10.4,' | f(x) = ',f10.4)
   end subroutine brent
 
   ! ----------------------------------------------------------------------------
@@ -2145,7 +2320,7 @@ module toolkit
     end do
     if (ip.gt.1) write (*,*) '  '
 
-    bad_jac = 0  ! mark newly computed jacobian as good (broyden updating is allowed)
+    bad_jac = 9  ! mark newly computed jacobian as good (broyden updating is allowed)
     
     2 continue 
 
@@ -2186,8 +2361,13 @@ module toolkit
     if (e1.lt.eb) da = da/dble(2.0)
     if (e1.ge.eb) da = da*dble(5.0)
 
+    if (bad_jac.eq.9) then
+      if (e1.lt.eb) bad_jac = 0
+      if (e1.ge.eb) bad_jac = 1
+    end if
+
     ! if the point is good, update the best point.
-    ! if no bad point was found with current jacobian, update with broyden
+    ! if no bad point was found previously with current jacobian, update with broyden
     ! otherwise (or if broyden is not allowed), compute a new jacobian
     if (e1.lt.eb) then 
       if (bad_jac.ne.1 .and. bro.eq.1) then
@@ -2199,10 +2379,10 @@ module toolkit
     end if
 
     ! if the point is bad, use same jacobian until a good point is found.
-    ! then forces the code to compute a new jacobian numerically after a good point
+    ! then forces the code to compute a new jacobian after the first good point
     if (e1.ge.eb) then
-      bad_jac = 1  ! mark that last jacobian as bad (no broyden updating is allowed)
-      goto 2       ! try again with sme jacobian and larger dumping factor
+      if (bad_jac.eq.1) goto 2
+      if (bad_jac.eq.0) goto 1
     end if
 
     10 ind = 0 ; goto 7

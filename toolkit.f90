@@ -9,9 +9,12 @@
 !
 ! UPDATES:
 ! - October 2025 (Borja Petit):
-!      * the functions "ces" and "crra" were added
-!      * some minor typos and inconsistencies were fixed. 
-!      * modified the "error" call in different subroutines/functions to stop the execution when an error is found.
+!     * the functions "ces" and "crra" were added
+!     * some minor typos and inconsistencies were fixed. 
+!     * modified the "error" call in different subroutines/functions to stop the execution when an error is found.
+! - April 2026 (Borja Petit)
+!     * add a global variable "print_err" to deactivate error printing (by setting it to .false.)
+!     * some minor errors
 !
 ! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 !

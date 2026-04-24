@@ -26,7 +26,9 @@ In the preambule, several parameters used across functions and subroutines are d
   real(dp) , parameter :: cien  = dble(100.000000000000)   ! one hundred
   real(dp) , parameter :: mil   = dble(1000.00000000000)   ! one thousand
   real(dp) , parameter :: tolvl = dble(0.00000000010000)   ! tolerance level
+  logical              :: print_err = .true.               ! control error printing
 ```
+The variable ```print_err``` controls error printing: the user can deactivate error printing by setting its value to ```.false.``` (by default it is set to ```.true.```).
 
 ---
 

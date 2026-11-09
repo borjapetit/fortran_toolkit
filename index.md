@@ -1,4 +1,3 @@
-
 **THIS SITE IS UNDER CONSTRUCTION**
 
 <a name="inicio"></a>
@@ -9,9 +8,9 @@ Efficiency of the algorithms is not guaranteed.
 
 All functions and subroutines assume double precision for real variables.
 
-> **License**:  
-The code is distributed under the MIT license. You are free to use and modify it as you wish, but please acknowledge the source.
-If you distributte a modified version ofthis code, please indicate in the preambule the changes made along with your name and date.
+> **License**:
+> The code is distributed under the MIT license. You are free to use and modify it as you wish, but please acknowledge the source.
+> If you distributte a modified version ofthis code, please indicate in the preambule the changes made along with your name and date.
 
 ---
 
@@ -19,15 +18,19 @@ In the preambule, several parameters used across functions and subroutines are d
 
 ```fortran
   integer  , parameter :: dp    = kind(1.0d00)             ! double-precision real variables
+  
   real(dp) , parameter :: cero  = dble(0.00000000000000)   ! zero
   real(dp) , parameter :: medio = dble(0.50000000000000)   ! one half
   real(dp) , parameter :: uno   = dble(1.00000000000000)   ! one
   real(dp) , parameter :: dos   = dble(2.00000000000000)   ! two
   real(dp) , parameter :: cien  = dble(100.000000000000)   ! one hundred
   real(dp) , parameter :: mil   = dble(1000.00000000000)   ! one thousand
+  
   real(dp) , parameter :: tolvl = dble(0.00000000010000)   ! tolerance level
+  
   logical              :: print_err = .true.               ! control error printing
 ```
+
 The variable ```print_err``` controls error printing: the user can deactivate error printing by setting its value to ```.false.``` (by default it is set to ```.true.```).
 
 ---
@@ -63,7 +66,6 @@ The variable ```print_err``` controls error printing: the user can deactivate er
 - [```shuffle_vect```](docs/shuffle_vect.md): this subroutine returns a vector with the shuffled values of a used-provided vector using the Fisher-Yates algorithm.
 - [```fisheryates```](docs/fisheryates.md): this subroutine returns a vector filled with integers from 1 to $n$ and then shuffled using the Fisher-Yates algorithm.
 
-
 ## Linear algebra
 
 - [```vect```](docs/vect.md): transform a matrix of into a vector (similar to ```reshape```).
@@ -93,10 +95,8 @@ The variable ```print_err``` controls error printing: the user can deactivate er
 
 - [```broyden```](docs/broyden.md): updates a Jacobian matrix using the Broyden's method.
 
-
-> **Constrained optimization**:<br>
-None of the algorithms in this toolkit is explicitly written to allow for constraints, but one can transform a constrained optimization problem into an unconstrained one using the [```normalize``` and ```denormalize```](docs/normalize.md) subroutines.
-
+> **Constrained optimization**:
+> None of the algorithms in this toolkit is explicitly written to allow for constraints, but one can transform a constrained optimization problem into an unconstrained one using the [```normalize``` and ```denormalize```](docs/normalize.md) subroutines.
 
 <br>
 <br>
@@ -108,4 +108,3 @@ None of the algorithms in this toolkit is explicitly written to allow for constr
 <br>
 <br>
 <br>
-

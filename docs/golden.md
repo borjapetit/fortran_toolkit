@@ -13,9 +13,9 @@ subroutine golden(func,x,y,xmax,xmin,itermax,tol,iprint)
   real(kind=8) , intent(out)           :: y         ! output: max of func
   real(kind=8) , intent(in)            :: xmax      ! input: upper-bound of x
   real(kind=8) , intent(in)            :: xmin      ! input: lower-bound of x
-  real(kind=8) , intent(in) , optional :: tol       ! input: (optional) level of tolerance [detault = 1.0d-8]
+  real(kind=8) , intent(in) , optional :: tol       ! input: (optional) level of tolerance [default = 1.0d-8]
   integer      , intent(in) , optional :: itermax   ! input: (optional) maximum function evaluations [default = 500]
-  integer      , intent(in) , optional :: iprint    ! input: (optional) control what's printed [detault = 0]
+  integer      , intent(in) , optional :: iprint    ! input: (optional) control what's printed [default = 0]
 ```
 
 This subroutine finds the maximum of a user-supplied single-valued function, `func`, with one unknown using the Golden Search algorithm. The function `func` must be of the form:
@@ -28,17 +28,17 @@ function func(x) result(f)
 end function func
 ```
 
-The idea of this algorithm is to keep shrinking an interval (`x1`,`x2`) inside which the optimal $x$ lays. The user needs to provide the initial interval (`xmin`,`xmax`)$.
+The idea of this algorithm is to keep shrinking an interval inside which the optimal $x$ lies, keeping two interior points placed at the golden ratio, so that each iteration requires a single function evaluation and reduces the interval by a factor of 0.618. The user needs to provide the initial interval (`xmin`,`xmax`). The function should be unimodal in that interval; otherwise the algorithm returns a local maximum.
 
-Optionally, the user can also supply a maximun number of function evaluations (`itermax`, 500 by default), the level of tolerance (`tol`, 1.0d-8 by default). Finally, the user can also control what it is printed during execution by setting the corresponding value of `iprint`:
+Optionally, the user can also supply a maximum number of iterations (`itermax`, 500 by default) and the level of tolerance (`tol`, 1.0d-8 by default), relative to the size of the interior points: the algorithm stops when `abs(x3-x0)` $\leq$ `tol*(abs(x1)+abs(x2))`. Finally, the user can also control what it is printed during execution by setting the corresponding value of `iprint`:
 
 - `iprint` = 0: don't print anything (default)
-- `iprint` = 1: print warnings
-- `iprint` = 2: print warnings and every iteration
+- `iprint` = 1: print the final result
+- `iprint` = 2: print the final result and every iteration
 
 The subroutine returns the value of `x` that maximizes `func` and the value of `func` at `x` (`y`).
 
-**Internal dependencies**: [```error```](error.md)
+**Internal dependencies**: none
 
 ---
 
@@ -63,7 +63,7 @@ program example
   real(dp) :: xmax,xmin
 
   ! max and min values for x
-  xmax = 10.0 ; xmin = 0.0
+  xmax = 10.0d0 ; xmin = 0.0d0
 
   ! maximize the function func
   call golden(func,xvar,fx,xmax,xmin,iprint=2)
@@ -75,7 +75,7 @@ program example
   function func(x) result(y)
     implicit none
     real(dp) :: x,y
-    y = x**2.0d0 - 3.5d0*x
+    y = 10.0d0*x**0.3d0 - x
     return
   end function func
 
@@ -85,50 +85,20 @@ end program example
 The output is:
 
 ```
- starting golden search algorithm
-
- iteration =   19  | x1 =     2.3607  x2 =     3.8197  | f(x1) =    10.5786  f(x2) =    11.1292
- iteration =   20  | x1 =     3.8197  x2 =     5.2786  | f(x1) =    11.1292  f(x2) =    11.1937
- iteration =   21  | x1 =     5.2786  x2 =     6.1803  | f(x1) =    11.1937  f(x2) =    11.0901
- iteration =   22  | x1 =     4.7214  x2 =     5.2786  | f(x1) =    11.2088  f(x2) =    11.1937
- iteration =   23  | x1 =     4.3769  x2 =     4.7214  | f(x1) =    11.1953  f(x2) =    11.2088
- iteration =   24  | x1 =     4.7214  x2 =     4.9342  | f(x1) =    11.2088  f(x2) =    11.2081
- iteration =   25  | x1 =     4.5898  x2 =     4.7214  | f(x1) =    11.2059  f(x2) =    11.2088
- iteration =   26  | x1 =     4.7214  x2 =     4.8027  | f(x1) =    11.2088  f(x2) =    11.2093
- iteration =   27  | x1 =     4.8027  x2 =     4.8529  | f(x1) =    11.2093  f(x2) =    11.2091
- iteration =   28  | x1 =     4.7716  x2 =     4.8027  | f(x1) =    11.2092  f(x2) =    11.2093
- iteration =   29  | x1 =     4.8027  x2 =     4.8219  | f(x1) =    11.2093  f(x2) =    11.2093
- iteration =   30  | x1 =     4.7908  x2 =     4.8027  | f(x1) =    11.2093  f(x2) =    11.2093
- iteration =   31  | x1 =     4.8027  x2 =     4.8100  | f(x1) =    11.2093  f(x2) =    11.2093
- iteration =   32  | x1 =     4.7981  x2 =     4.8027  | f(x1) =    11.2093  f(x2) =    11.2093
- iteration =   33  | x1 =     4.8027  x2 =     4.8055  | f(x1) =    11.2093  f(x2) =    11.2093
- iteration =   34  | x1 =     4.8009  x2 =     4.8027  | f(x1) =    11.2093  f(x2) =    11.2093
- iteration =   35  | x1 =     4.8027  x2 =     4.8037  | f(x1) =    11.2093  f(x2) =    11.2093
- iteration =   36  | x1 =     4.8037  x2 =     4.8044  | f(x1) =    11.2093  f(x2) =    11.2093
- iteration =   37  | x1 =     4.8033  x2 =     4.8037  | f(x1) =    11.2093  f(x2) =    11.2093
- iteration =   38  | x1 =     4.8037  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
- iteration =   39  | x1 =     4.8040  x2 =     4.8041  | f(x1) =    11.2093  f(x2) =    11.2093
- iteration =   40  | x1 =     4.8039  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
- iteration =   41  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
- iteration =   42  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
- iteration =   43  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
- iteration =   44  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
- iteration =   45  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
- iteration =   46  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
- iteration =   47  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
- iteration =   48  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
- iteration =   49  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
- iteration =   50  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
- iteration =   51  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
- iteration =   52  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
- iteration =   53  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
- iteration =   54  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
- iteration =   55  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
- iteration =   56  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
- iteration =   57  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
- iteration =   58  | x1 =     4.8040  x2 =     4.8040  | f(x1) =    11.2093  f(x2) =    11.2093
- 
- solved: iterations =   58  | x =     4.8040  | f(x) =    11.2093
+  starting golden search algorithm 
+                                   
+  iteration =    1 | x0 =     0.0000 | x1 =     2.3607 | x2 =     3.8197 | x3 =     6.1803 | f(x1) =    10.5786 | f(x2) =    11.1292
+  iteration =    2 | x0 =     2.3607 | x1 =     3.8197 | x2 =     4.7214 | x3 =     6.1803 | f(x1) =    11.1292 | f(x2) =    11.2088
+  iteration =    3 | x0 =     3.8197 | x1 =     4.7214 | x2 =     5.2786 | x3 =     6.1803 | f(x1) =    11.2088 | f(x2) =    11.1937
+  iteration =    4 | x0 =     3.8197 | x1 =     4.3769 | x2 =     4.7214 | x3 =     5.2786 | f(x1) =    11.1953 | f(x2) =    11.2088
+  iteration =    5 | x0 =     4.3769 | x1 =     4.7214 | x2 =     4.9342 | x3 =     5.2786 | f(x1) =    11.2088 | f(x2) =    11.2081
+  iteration =    6 | x0 =     4.3769 | x1 =     4.5898 | x2 =     4.7214 | x3 =     4.9342 | f(x1) =    11.2059 | f(x2) =    11.2088
+  ...
+  iteration =   37 | x0 =     4.8040 | x1 =     4.8040 | x2 =     4.8040 | x3 =     4.8040 | f(x1) =    11.2093 | f(x2) =    11.2093
+  iteration =   38 | x0 =     4.8040 | x1 =     4.8040 | x2 =     4.8040 | x3 =     4.8040 | f(x1) =    11.2093 | f(x2) =    11.2093
+  iteration =   39 | x0 =     4.8040 | x1 =     4.8040 | x2 =     4.8040 | x3 =     4.8040 | f(x1) =    11.2093 | f(x2) =    11.2093
+    
+  solved: iterations =   39 | x =     4.8040 | f(x) =    11.2093
 ```
 
 

@@ -6,20 +6,22 @@
 ## ```percentile```
 
 ```fortran
-function percentile(var,pct,w,mask) result(cutoff)
+function percentile(xvec,pct,w,mask) result(cutoff)
   implicit none
   real(kind=8)            :: cutoff
-  real(kind=8)            :: var(:)
+  real(kind=8)            :: xvec(:)
   real(kind=8)            :: pct
   real(kind=8) , optional :: w(:)    
   logical      , optional :: mask(:) 
 ```
 
-This function returns the percentile ```pct``` for a distribution ```var```, given some (optional) weights ```w```. The value of ```pct``` should be between 0 and 1. If supplied, the vector ```w``` should have the same size as ```var```. If not supplied, the program assums uniform weigthing.
+This function returns the percentile ```pct``` for a distribution ```xvec```, given some (optional) weights ```w```. If supplied, the vector ```w``` should have the same size as ```xvec```. If not supplied, the program assumes uniform weighting.
+
+The value of ```pct``` can be given either as a fraction (0 $\leq$ ```pct``` $\leq$ 1) or as a percentage (1 < ```pct``` $\leq$ 100). Note that ```pct``` = 1 is read as a fraction (i.e., the maximum): for the 1st percentile use ```pct``` = 0.01.
 
 The subroutine finds the percentile ```pct``` using a Bisection method.
 
-The user can also supply a ```mask``` to compute the conditional percentile. The input ```mask``` is a logical array of the same size of ```var```.
+The user can also supply a ```mask``` to compute the conditional percentile. The input ```mask``` is a logical array of the same size of ```xvec```.
 
 **Internal dependencies**: [```error```](error.md)
 
@@ -28,7 +30,7 @@ The user can also supply a ```mask``` to compute the conditional percentile. The
 **Example**
 
 ```fortran
-pc60 = percentile(var,0.60d0,mask = var.gt.0.0d0 .and. var.lt.5.0d0)
+pc60 = percentile(xvec,0.60d0,mask = xvec.gt.0.0d0 .and. xvec.lt.5.0d0)
 ```
 
-This computes the 60th percentile of ```var``` conditional on ```var``` being between 0 and 5.
+This computes the 60th percentile of ```xvec``` conditional on ```xvec``` being between 0 and 5 (```pct``` = 60.0d0 gives the same result).

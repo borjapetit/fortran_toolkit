@@ -1,4 +1,8 @@
 
+<span style="text-align:right;display:block;">
+<a href="https://borjapetit.github.io/fortran_toolkit/">Back to index</a>
+</span>
+
 ## ```varvar```
 
 ```fortran
@@ -10,13 +14,11 @@ function varvar(var,w,mask) result(variance)
   logical      , optional :: mask(:)
 ```
 
-This function returns the variance of a variable ```var``` given some (optional) weights ```w```. If supplied, the vector ```w``` should have the same size as ```var```. If not supplied, the program assumes uniform weighting.
+This function returns the (population) variance of a variable ```var```, ```sum(w*(var-mean)**2)/sum(w)```, given some (optional) weights ```w```. If supplied, the vector ```w``` should have the same size as ```var```. If not supplied, the program assumes uniform weighting.
 
-The user can also supply a ```mask``` to compute the conditional variance. The input ```mask``` is a logical array of the same size of ```var```.
+The user can also supply a ```mask``` to compute the conditional variance. The input ```mask``` is a logical array of the same size of ```var```. Observations with ```var``` = NaN are excluded from both the mean and the variance.
 
-**Dependencies**: [```error```](error.md), [```varmean```](varmean.md)
-
-[(back to index)](../index.md)
+**Internal dependencies**: [```error```](error.md), [```varmean```](varmean.md)
 
 ---
 

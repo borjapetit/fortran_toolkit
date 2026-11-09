@@ -15,10 +15,12 @@ function grid(maxv,minv,n,s) result(v)
   real(kind=8) , optional :: s     ! input: (optional) curvatura parameter 
 ```
 
-This function creates a grid of `n` points between `maxv` and `maxv` with a curvature of `s`:
+This function creates a grid of `n` points between `minv` and `maxv` with a curvature of `s`, $v(i) = \texttt{minv} + \left(\frac{i-1}{n-1}\right)^s(\texttt{maxv}-\texttt{minv})$:
 - if `s=1` or missing: linear grid (default)
-- if `s>1`: more grids points around `maxv`
-- if `s<1`: more grids points around `minv`
+- if `s>1`: more grid points around `minv`
+- if `s<1`: more grid points around `maxv`
+
+The grid requires `n` $\geq 2$ and `s` $>0$; otherwise the function prints an error message and returns a vector of zeros.
 
 **Internal dependencies**: [`error`](error.md)
 

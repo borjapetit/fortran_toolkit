@@ -6,3 +6,4 @@ test.*
 Makefile
 README.md
 *_test*
+*_base.*

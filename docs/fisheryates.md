@@ -6,13 +6,12 @@
 ## ```fisheryates```
 
 ```fortran
-subroutine fisheryates(vect,seed)
+subroutine fisheryates(nums)
   implicit none
-  integer , intent(inout)         :: vect(:)
-  integer , intent(in) , optional :: seed(:)
+  integer , intent(inout) :: nums(:)
 ```
 
-This subroutine takes an array ```vect``` of dimension ```n``` and fills it with integers from 1 to ```n``` and them shuffled using the the Fisher–Yates shuffle algorithm. The user can fixed the seed by providing ```seed```.
+This subroutine takes an array ```nums``` of dimension ```n```, fills it with the integers from 1 to ```n```, and then shuffles them using the Fisher–Yates shuffle algorithm. The initial values of ```nums``` are overwritten. The subroutine uses the intrinsic ```random_number```, so the user can fix the seed with the intrinsic ```random_seed``` before calling it.
 
 **Internal dependencies**: none
 

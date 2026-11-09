@@ -13,7 +13,9 @@ function interpolate(x1,x2,...,xn,y1,y2,...,yn,mat) result(xi)
   real(kind=8) :: mat(:,:,...,:)
 ```
 
-This function returns the linearly interpolated value of an n-dimensional function, with ```n``` < 7. The variables ```x1```, ```x2```, ..., ```xn``` are the values of the variables to be interpolated over their coresponding grids ```y1```, ```y2```, ...., ```yn```, and ```mat``` is an n-dimensional array with the results.
+This function returns the linearly interpolated value of an n-dimensional function, with ```n``` < 7. The variables ```x1```, ```x2```, ..., ```xn``` are the values of the variables to be interpolated over their coresponding grids ```y1```, ```y2```, ...., ```yn```, and ```mat``` is an n-dimensional array with the results, such that ```size(mat,k)``` = ```size(yk)```. Each grid should be increasing and have at least 2 points.
+
+Values outside a grid are not extrapolated: if ```xk``` < ```yk(1)``` (or ```xk``` > ```yk(n)```), the function uses ```yk(1)``` (or ```yk(n)```), see [```interpolation```](interpolation.md).
 
 **Internal dependencies**: [```error```](error.md), [```interpolation```](interpolation.md)
 

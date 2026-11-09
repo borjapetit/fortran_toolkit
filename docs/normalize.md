@@ -42,7 +42,9 @@ This subroutine, that corresponds to the inverse function $g^{-1}(x)$ explained 
 
 $$z = \log\left(\frac{\texttt{x} - \texttt{xmin}}{\texttt{xmax} - \texttt{x}}\right)$$
 
-**internal dependencies**: none
+To avoid infinite values at the bounds, the relative position $r = (\texttt{x}-\texttt{xmin})/(\texttt{xmax}-\texttt{xmin})$ is restricted to $[10^{-4},\,1-10^{-4}]$, so that $|z|\leq 9.21$. Within that interval, ```normalize``` is the exact inverse of ```denormalize```. The subroutine requires ```xmax``` > ```xmin``` and ```xmin``` $\leq$ ```x``` $\leq$ ```xmax```; otherwise it prints an error message and returns ```z``` = 0.
+
+**Internal dependencies**: [```error```](error.md)
 
 --- 
 
@@ -61,9 +63,9 @@ This subroutine, that corresponds to the function $g(z)$ explained above, takes 
 
 $$ \texttt{x} = \texttt{xmin} + \left(\frac{\exp(z)}{1+\exp(z)} \right)\cdot(\texttt{xmax}-\texttt{xmin}) $$
 
-to return a bounded variable $\texttt{x}$, constrained to be between $\texttt{xmin}$ and $\texttt{xmax}$.
+to return a bounded variable $\texttt{x}$, constrained to be between $\texttt{xmin}$ and $\texttt{xmax}$. The transformation is evaluated in a way that does not overflow for large values of $|z|$.
 
-**Internal dependencies**: none
+**Internal dependencies**: [```error```](error.md)
 
 ---
 

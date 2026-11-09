@@ -1,4 +1,8 @@
 
+<span style="text-align:right;display:block;">
+<a href="https://borjapetit.github.io/fortran_toolkit/">Back to index</a>
+</span>
+
 ## ```varstd```
 
 ```fortran
@@ -10,13 +14,11 @@ function varstd(var,w,mask) result(stdvar)
   logical      , optional :: mask(:)
 ```
 
-This function returns the standard deviation of a variable ```var``` given some (optional) weights ```w```. If supplied, the vector ```w``` should have the same size as ```var```. If not supplied, the program assumes uniform weighting.
+This function returns the standard deviation of a variable ```var``` given some (optional) weights ```w```. If supplied, the vector ```w``` should have the same size as ```var```. If not supplied, the program assumes uniform weighting. The standard deviation is the square root of [```varvar```](varvar.md), i.e., the population standard deviation (the weighted sum of squared deviations is divided by the sum of weights, without degrees-of-freedom correction).
 
 The user can also supply a ```mask``` to compute the conditional standard deviation. The input ```mask``` is a logical array of the same size of ```var```.
 
-**Dependencies**: [```error```](error.md), [```varmean```](varmean.md),  [```varvar```](varvar.md)
-
-[(back to index)](../index.md)
+**Internal dependencies**: [```error```](error.md), [```varmean```](varmean.md),  [```varvar```](varvar.md)
 
 ---
 

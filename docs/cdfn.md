@@ -12,7 +12,7 @@ elemental function cdfn(x) result(f)
   real(kind=8)             :: f   ! output: cdf of standard normal at x
 ```
 
-This function returns the cdf of a standard normal distribution. This subroutine is defined as `elemental`.
+This function returns the cdf of a standard normal distribution, $\Phi(x) = P(X\leq x)$ with $X\sim N(0,1)$, using the algorithm AS 66 (Hill, 1973). The function is defined as `elemental`, so `x` can be a scalar or an array (the output has the same shape as `x`).
 
 **Internal dependencies**: none
 
@@ -21,7 +21,7 @@ This function returns the cdf of a standard normal distribution. This subroutine
 **Example**
 
 ```fortran
-print * , 'Result =', cdf(0.0)                  ! Result =   0.500
-print * , 'Result =', cdf(-1.0)                 ! Result =   0.158
-print * , 'Result =', cdf( (/ 0.0 , -1.0 /) )   ! Result =   0.500   0.158
+print * , 'Result =', cdfn(0.0d0)                    ! Result =   0.500
+print * , 'Result =', cdfn(-1.0d0)                   ! Result =   0.158
+print * , 'Result =', cdfn( (/ 0.0d0 , -1.0d0 /) )   ! Result =   0.500   0.158
 ```

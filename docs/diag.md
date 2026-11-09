@@ -12,7 +12,7 @@ function diag(mat) result(vec)
   real(kind=8) :: vec(size(mat,dim=1))  ! output: vector with main diagonal of mat
 ```
 
-This function returns the main diagonal of a matric `mat`.
+This function returns the main diagonal of a square matrix `mat`. If `mat` is not square, the function prints an error message (see [`error`](error.md)).
 
 **Internal dependencies**: [```error```](error.md)
 
@@ -21,9 +21,9 @@ This function returns the main diagonal of a matric `mat`.
 **Example**
 
 ```fortran
-mat(:,1) = (/ 1.0, 2.0, 1.0 /)
-mat(:,2) = (/ 3.0, 3.0, 4.0 /)
-mat(:,3) = (/ 5.0, 1.0, 3.0 /)
+mat(:,1) = (/ 1.0d0, 2.0d0, 1.0d0 /)
+mat(:,2) = (/ 3.0d0, 3.0d0, 4.0d0 /)
+mat(:,3) = (/ 5.0d0, 1.0d0, 3.0d0 /)
 
 vec = diag(mat)
 

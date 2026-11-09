@@ -38,6 +38,7 @@ The variable ```print_err``` controls error printing: the user can deactivate er
 ## Econ-related functions and subroutines
 
 - [```crra```](docs/crra.md): a constant relative risk aversion utilit function.
+- [```dcrra```](docs/dcrra.md): derivative of the ```crra``` function (marginal utility).
 - [```ces```](docs/ces.md): a constant elasticity of substitution aggregator.
 
 ## General purpose
@@ -58,8 +59,9 @@ The variable ```print_err``` controls error printing: the user can deactivate er
 - [```varstd```](docs/varstd.md): returns the standard deviation of a variable (allows for weights and mask).
 - [```correlation```](docs/correlation.md): returns the correlation between two variables (allows for weights and mask).
 - [```percentile```](docs/percentile.md): returns the i-th percentile of a distribution (allows for weights and mask).
-- [```olsreg```](docs/olsreg.md): returns the OLS coefficients of a linear regression with up to 8 explanatory variables (allows for weights and mask).
+- [```olsreg```](docs/olsreg.md): returns the OLS coefficients of a linear regression with up to 8 explanatory variables (allows for weights and mask, and standardized coefficients).
 - [```tauchen```](docs/tauchen.md): returns the transition matrix for a discretized AR(1) process.
+- [```rouwenhorst_grid``` and ```rouwenhorst_transition```](docs/rouwenhorst.md): grid and transition matrix for a discretized AR(1) process using the Rouwenhorst method.
 - [```normaldist```](docs/normaldist.md): returns the distribution for a normal random variable given some mean and variance.
 - [```randomnormal```](docs/randomnormal.md): returns a random draw (either a scalar or a vector) for a normal distribution.
 - [```cdfn```](docs/cdfn.md): returns the cdf of a standard normal distribution.
@@ -71,7 +73,7 @@ The variable ```print_err``` controls error printing: the user can deactivate er
 - [```vect```](docs/vect.md): transform a matrix of into a vector (similar to ```reshape```).
 - [```cumsum```](docs/cumsum.md): returns the vector with cumulative sum of a vector (as Matlab's ```cumsum``` function).
 - [```diag```](docs/diag.md): returns a vector with the main diagonal of a matrix.
-- [```inverse```](docs/inverse.md): returns the inverse of a squared matrix.
+- [```inverse```](docs/inverse.md): returns the inverse of a squared matrix (Gauss-Jordan, QR or SVD).
 - [```transmat```](docs/transmat.md): returns the transpose of a matrix.
 
 ## Optimization
@@ -89,14 +91,14 @@ The variable ```print_err``` controls error printing: the user can deactivate er
 
 - [```lmmin```](docs/lmmin.md): minimize a multivariate system of equations using the Levenberg–Marquardt algorithm.
 
-  The Levenberg–Marquardt algorithm uses the Jacobian of the system to find the minimum. When evaluating the objective function is time-costly, computing the Jacobian may take too long. In those cases, one potential way of speeding up the algorithm is to update the Jacobian matrix using the Broyden's method, that does not require further function evaluations.
-
 *Other functions:*
 
 - [```broyden```](docs/broyden.md): updates a Jacobian matrix using the Broyden's method.
 
-> **Constrained optimization**:
-> None of the algorithms in this toolkit is explicitly written to allow for constraints, but one can transform a constrained optimization problem into an unconstrained one using the [```normalize``` and ```denormalize```](docs/normalize.md) subroutines.
+**_Constrained optimization_**:
+
+* [```lmmin```](docs/lmmin.md) accepts lower and upper bounds for the unknowns (optional inputs ```lb``` and ```ub```).
+* For the other algorithms, one can transform a constrained optimization problem into an unconstrained one using the [```normalize``` and ```denormalize```](docs/normalize.md) subroutines.
 
 <br>
 <br>

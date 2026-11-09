@@ -18,7 +18,9 @@ This function returns the (population) variance of a variable ```var```, ```sum(
 
 The user can also supply a ```mask``` to compute the conditional variance. The input ```mask``` is a logical array of the same size of ```var```. Observations with ```var``` = NaN are excluded from both the mean and the variance.
 
-**Internal dependencies**: [```error```](error.md), [```varmean```](varmean.md)
+**Arrays**: ```var``` (and ```w``` and ```mask```) can also be 2-dimensional arrays, all of the same shape. In that case the function uses all their elements, as if they were vectorized with [```vect```](vect.md): ```varvar(vect(var),w=vect(w),mask=vect(mask))```.
+
+**Internal dependencies**: [```error```](error.md), [```varmean```](varmean.md), [```vect```](vect.md)
 
 ---
 

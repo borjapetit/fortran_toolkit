@@ -25,14 +25,14 @@ function vect(mat) result(vec)
 ```
 
 
-This function returns a 1-dimensional array ```vec``` with all the elements of a user-supplied ```n```-dimensional array ```mat```, where $2\leq$ ```n``` $\leq5$. The input matrix can be double precision, integer or logical. The elements are taken in column-major order (as in ```reshape(mat,(/size(mat)/))```): first all the rows of the first column, then those of the second column, and so on.
+This function returns a 1-dimensional array ```vec``` with all the elements of a user-supplied ```n```-dimensional array ```mat```, where $1\leq$ ```n``` $\leq5$ (for a 1-dimensional array, ```vec``` is a copy of ```mat```; this is useful in generic code that may receive arrays of any dimension). The input matrix can be double precision, integer or logical. The elements are taken in column-major order (as in ```reshape(mat,(/size(mat)/))```): first all the rows of the first column, then those of the second column, and so on.
 
 **Internal dependencies**: none
 
 **Note**: ```vect``` is an interface that calls specific functions depending on the type of ```mat``` (integer, real or logical) and depending on the dimensions of ```mat```. The specific functions are:
-- ```mat``` is real $ \ \to \ $ ```vectorize_dp_2d```, ```vectorize_dp_3d```, ```vectorize_dp_4d```, ```vectorize_dp_5d```
-- ```mat``` is integer $ \ \to \ $ ```vectorize_int_2d```, ```vectorize_int_3d```, ```vectorize_int_4d```, ```vectorize_int_5d```
-- ```mat``` is logical $ \ \to \ $ ```vectorize_lo_2d```, ```vectorize_lo_3d```, ```vectorize_lo_4d```, ```vectorize_lo_5d```
+- ```mat``` is real $ \ \to \ $ ```vectorize_dp_1d```, ```vectorize_dp_2d```, ```vectorize_dp_3d```, ```vectorize_dp_4d```, ```vectorize_dp_5d```
+- ```mat``` is integer $ \ \to \ $ ```vectorize_int_1d```, ```vectorize_int_2d```, ```vectorize_int_3d```, ```vectorize_int_4d```, ```vectorize_int_5d```
+- ```mat``` is logical $ \ \to \ $ ```vectorize_lo_1d```, ```vectorize_lo_2d```, ```vectorize_lo_3d```, ```vectorize_lo_4d```, ```vectorize_lo_5d```
 
 ---
 

@@ -39,6 +39,14 @@
 !     * num2text: zero-padding of negative integers (-005).
 !     * varvar: nan observations excluded from both the mean and the variance.
 !     * correlation: corrected error messages.
+!     * lmmin: optional box constraints lb and ub (projected levenberg-marquardt with an active set);
+!       the step is computed with qrsolve and the jacobian is updated with broyden (no internal copies).
+!     * inverse: optional argument "method": 'gj' (default), 'qr' (qr with column pivoting) or 'svd'
+!       (moore-penrose pseudo-inverse); new inverse_gj, inverse_qr, inverse_svd and qrsolve.
+!     * varmean, varvar, varstd, correlation, percentile and olsreg accept 2-dimensional arrays.
+!     * olsreg: observations with nan excluded; explanatory variables with zero variance dropped
+!       (coefficient = 0); optional standardized coefficients (betas).
+!     * new: dcrra, rouwenhorst_grid, rouwenhorst_transition; vect accepts 1-dimensional arrays.
 !
 ! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -103,8 +111,8 @@ module toolkit_tools
   !   - grid: generates a grid for a continuous variable
   !   - interpolation: interpolates a value over a grid, returning position and distance
   !   - interpolate: linearly interpolates a value over an n-dimensional grid, with n <= 6
-  !   - vect: transforms a matrix of dimension (n x m) into a vector of n·m rows
-  !   - timing: returns the number of seconds since 00:00h of the 1st day of the month [robust to parallelization]
+  !   - vect: transforms an array of 1 to 5 dimensions (real, integer or logical) into a vector
+  !   - timing: returns the number of seconds since 1970-01-01 utc [robust to parallelization]
   !   - multiplo: returns 1 if an integer is a multiple of another user-provided integer
   !   - iseven: returns 1 if a user-provided integer is even
   !   - error: prints an error message
@@ -122,7 +130,8 @@ module toolkit_tools
   end interface interpolate
 
   interface vect
-    module procedure vectorize_int_2d,vectorize_dp_2d,vectorize_lo_2d,&
+    module procedure vectorize_int_1d,vectorize_dp_1d,vectorize_lo_1d,&
+                     vectorize_int_2d,vectorize_dp_2d,vectorize_lo_2d,&
                      vectorize_int_3d,vectorize_dp_3d,vectorize_lo_3d,&
                      vectorize_int_4d,vectorize_dp_4d,vectorize_lo_4d,&
                      vectorize_int_5d,vectorize_dp_5d,vectorize_lo_5d
@@ -564,6 +573,27 @@ module toolkit_tools
   ! the function allows both double precission and integer matrices of
   ! 2-, 3- and 4-dimensions
 
+  function vectorize_dp_1d(mat) result(vec)
+    implicit none
+    real(dp) :: mat(:)
+    real(dp) :: vec(size(mat)) 
+    vec = mat
+    return
+  end function vectorize_dp_1d
+  function vectorize_int_1d(mat) result(vec)
+    implicit none
+    integer :: mat(:)
+    integer :: vec(size(mat))
+    vec = mat
+    return
+  end function vectorize_int_1d
+  function vectorize_lo_1d(mat) result(vec)
+    implicit none
+    logical :: mat(:)
+    logical :: vec(size(mat))
+    vec = mat
+    return
+  end function vectorize_lo_1d
   function vectorize_dp_2d(mat) result(vec)
     implicit none
     real(dp) :: mat(:,:)
@@ -663,10 +693,11 @@ module toolkit_econ
   ! ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   !
   !   - crra: CRRA function
+  !   - dcrra: derivative of the CRRA function (marginal utility)
   !   - ces: CES function
   ! ----------------------------------------------------------------------------
   
-  use toolkit_pars  , only : dp,cero,medio,uno,cien,tolvl
+  use toolkit_pars  , only : dp,cero,medio,uno,dos,cien,tolvl
   use toolkit_tools , only : error
   implicit none
 
@@ -694,6 +725,25 @@ module toolkit_econ
     end if
     return
   end function crra
+
+  ! ----------------------------------------------------------------------------
+  ! derivative of the crra function with respect to "x" (marginal utility). below
+  ! "tolfun" (default = tolvl) it is extended linearly, as crra
+
+  elemental function dcrra(x,b,tolfun) result(u)
+    implicit none
+    real(dp) , intent(in)            :: x,b
+    real(dp) , intent(in) , optional :: tolfun
+    real(dp)                         :: tolf,u ; u = cero ; tolf = tolvl ; if (present(tolfun)) tolf = tolfun
+    if (abs(b).gt.tolvl) then
+      if (x.gt.tolf) u = x**(b-uno)
+      if (x.le.tolf) u = tolf**(b-uno) - (x-tolf)*(b-uno)*tolf**(b-uno-uno)
+    else if (abs(b).le.tolvl) then
+      if (x.gt.tolf) u = uno/x
+      if (x.le.tolf) u = uno/tolf - (x-tolf)*(uno/(tolf**dos))
+    end if
+    return
+  end function dcrra
 
   ! ----------------------------------------------------------------------------
   ! CES function with inputs "x1" and "x2"; "b" is the (inverse) elasticity of subsitution; "a" is share of input "x1"
@@ -746,10 +796,13 @@ module toolkit_linalg
   !   - diag: returns the main diagonal of a matrix
   !   - eye: returns an identity matrix of size n x n
   !   - transmat: returns the transpose of a square matrix
-  !   - inverse: returns the inverse of a square matrix
+  !   - inverse: returns the inverse of a square matrix: gauss-jordan with partial pivoting
+  !     (default), qr with column pivoting, or svd (moore-penrose pseudo-inverse)
+  !   - inverse_gj, inverse_qr, inverse_svd: the three methods used by inverse
+  !   - qrsolve: solves a linear system a·x = b using qr decomposition with column pivoting
   ! ----------------------------------------------------------------------------
   
-  use toolkit_pars  , only : dp,cero,medio,uno,cien,tolvl
+  use toolkit_pars  , only : dp,cero,medio,uno,dos,cien,tolvl
   use toolkit_tools , only : error
   implicit none
 
@@ -793,11 +846,48 @@ module toolkit_linalg
   end function transmat
 
   ! ----------------------------------------------------------------------------
-  ! compute the inverse of a square matrix "m" by gauss-jordan elimination with
-  ! partial pivoting. the input matrix is not modified. if the matrix is
-  ! (numerically) singular, the function prints an error and returns zeros.
+  ! compute the inverse of a square matrix "m". the optional argument "method"
+  ! selects the algorithm:
+  !
+  !   'gj'  (default) gauss-jordan elimination with partial pivoting (inverse_gj).
+  !         if the matrix is (numerically) singular, it prints an error and
+  !         returns zeros.
+  !   'qr'  qr decomposition with column pivoting (inverse_qr, via qrsolve).
+  !         more robust for ill-conditioned matrices; returns a stable
+  !         pseudo-inverse when the matrix is numerically rank-deficient.
+  !   'svd' one-sided jacobi svd (inverse_svd). the most robust option: returns
+  !         the moore-penrose pseudo-inverse, zeroing out the contributions of
+  !         singular values below tol*svmax*n.
+  !
+  ! the input matrix is not modified.
 
-  function inverse(m) result(im)
+  function inverse(m,method) result(im)
+    implicit none
+    real(dp)         , intent(in)           :: m(:,:)
+    character(len=*) , intent(in) , optional :: method
+    real(dp)                                :: im(size(m,1),size(m,1))
+    character(len=3)                        :: meth
+    meth = 'gj' ; if (present(method)) meth = method
+    select case (trim(meth))
+      case('gj')
+        im = inverse_gj(m)
+      case('qr')
+        call inverse_qr(m,im)
+      case('svd')
+        call inverse_svd(m,im)
+      case default
+        call error(' error in inverse: method must be gj, qr or svd')
+        im = cero
+    end select
+    return
+  end function inverse
+
+  ! ----------------------------------------------------------------------------
+  ! inverse of a square matrix "m" by gauss-jordan elimination with partial
+  ! pivoting. the input matrix is not modified. if the matrix is (numerically)
+  ! singular, the function prints an error and returns zeros.
+
+  function inverse_gj(m) result(im)
     implicit none
     real(dp) , intent(in) :: m(:,:)
     real(dp)              :: im(size(m,1),size(m,1))
@@ -840,7 +930,271 @@ module toolkit_linalg
       end do
     end do
     return
-  end function inverse
+  end function inverse_gj
+
+  ! ----------------------------------------------------------------------------
+  ! solve the linear system A*x=b using QR decomposition with column pivoting.
+  ! if A is rank deficient, the routine returns the basic least-squares solution
+  ! setting to zero the components associated with tiny pivots.
+
+  subroutine qrsolve(a,b,x,rank0,tol0)
+    implicit none
+    real(dp) , intent(in)            :: a(:,:),b(:)
+    real(dp) , intent(out)           :: x(:)
+    integer  , intent(out) , optional :: rank0
+    real(dp) , intent(in)  , optional :: tol0
+    integer                           :: m,n,rk,i,k,j,imax,idx(1),tmpi
+    integer  , allocatable            :: perm(:)
+    real(dp)                          :: toluse,scale,pivtol,normx,alpha,vnorm2,tau,rhs
+    real(dp) , allocatable            :: r(:,:),qtb(:),cnorm(:),xp(:),v(:),tmpcol(:)
+
+    m = size(a,1) ; n = size(a,2)
+    x = cero
+
+    if (size(b).ne.m) then
+      call error(' error in qrsolve: size of b does not match rows of a')
+      if (present(rank0)) rank0 = 0
+      return
+    end if
+    if (size(x).ne.n) then
+      call error(' error in qrsolve: size of x does not match cols of a')
+      if (present(rank0)) rank0 = 0
+      return
+    end if
+
+    toluse = sqrt(epsilon(uno)) ; if (present(tol0)) toluse = max(tol0,tiny(uno))
+    scale  = max(uno,maxval(abs(a)))
+    pivtol = toluse*scale
+
+    allocate(r(m,n),qtb(m),cnorm(n),xp(n),perm(n),tmpcol(m))
+    r   = a
+    qtb = b
+    xp  = cero
+    forall (j=1:n) perm(j) = j
+    do j=1,n
+      cnorm(j) = sqrt(sum(r(:,j)*r(:,j)))
+    end do
+
+    rk = 0
+    do k = 1,min(m,n)
+
+      idx  = maxloc(cnorm(k:n))
+      imax = k + idx(1) - 1
+
+      if (cnorm(imax).le.pivtol) exit
+
+      if (imax.ne.k) then
+        tmpcol    = r(:,k)
+        r(:,k)    = r(:,imax)
+        r(:,imax) = tmpcol
+        normx     = cnorm(k)
+        cnorm(k)  = cnorm(imax)
+        cnorm(imax) = normx
+        tmpi      = perm(k)
+        perm(k)   = perm(imax)
+        perm(imax)= tmpi
+      end if
+
+      allocate(v(m-k+1))
+      v     = r(k:m,k)
+      normx = sqrt(sum(v*v))
+      if (normx.le.pivtol) then
+        deallocate(v)
+        exit
+      end if
+
+      alpha = -sign(normx,r(k,k))
+      v(1)  = v(1) - alpha
+      vnorm2 = sum(v*v)
+
+      if (vnorm2.le.tiny(uno)) then
+        deallocate(v)
+        exit
+      end if
+
+      do j = k,n
+        tau      = dos*dot_product(v,r(k:m,j))/vnorm2
+        r(k:m,j) = r(k:m,j) - tau*v
+      end do
+
+      tau      = dos*dot_product(v,qtb(k:m))/vnorm2
+      qtb(k:m) = qtb(k:m) - tau*v
+
+      r(k,k) = alpha
+      if (k.lt.m) r(k+1:m,k) = cero
+
+      do j = k+1,n
+        if (k.lt.m) then
+          cnorm(j) = sqrt(sum(r(k+1:m,j)*r(k+1:m,j)))
+        else
+          cnorm(j) = cero
+        end if
+      end do
+
+      rk = k
+      deallocate(v)
+    end do
+
+    if (rk.gt.0) then
+      do i = rk,1,-1
+        rhs = qtb(i)
+        if (i.lt.rk) rhs = rhs - dot_product(r(i,i+1:rk),xp(i+1:rk))
+        xp(i) = rhs/r(i,i)
+      end do
+      do i = 1,rk
+        x(perm(i)) = xp(i)
+      end do
+    end if
+
+    if (present(rank0)) rank0 = rk
+
+    deallocate(r,qtb,cnorm,xp,perm,tmpcol)
+    return
+  end subroutine qrsolve
+
+  ! ----------------------------------------------------------------------------
+  ! compute the inverse of a square matrix by repeatedly solving A*x=e_i using
+  ! qrsolve. if the matrix is nearly singular, the result is a stable
+  ! pseudo-inverse based on the numerical rank detected by qrsolve.
+
+  subroutine inverse_qr(a,ainv,rank0,tol0)
+    implicit none
+    real(dp) , intent(in)             :: a(:,:)
+    real(dp) , intent(out)            :: ainv(:,:)
+    integer  , intent(out) , optional :: rank0
+    real(dp) , intent(in)  , optional :: tol0
+    integer                           :: n,i,rk,rkmin
+    real(dp) , allocatable            :: e(:),col(:)
+
+    if (size(a,1).ne.size(a,2)) then
+      call error(' error in inverse_qr: matrix is not square')
+      if (present(rank0)) rank0 = 0
+      return
+    end if
+    if (size(ainv,1).ne.size(a,1) .or. size(ainv,2).ne.size(a,2)) then
+      call error(' error in inverse_qr: output matrix of incorrect size')
+      if (present(rank0)) rank0 = 0
+      return
+    end if
+
+    n = size(a,1)
+    ainv = cero
+    rkmin = n
+    allocate(e(n),col(n))
+
+    do i = 1,n
+      e   = cero
+      e(i)= uno
+      if (present(tol0)) then
+        call qrsolve(a,e,col,rk,tol0)
+      else
+        call qrsolve(a,e,col,rk)
+      end if
+      ainv(:,i) = col
+      rkmin = min(rkmin,rk)
+    end do
+
+    if (present(rank0)) rank0 = rkmin
+
+    deallocate(e,col)
+    return
+  end subroutine inverse_qr
+
+  ! ----------------------------------------------------------------------------
+  ! compute the inverse (or pseudo-inverse) of a square matrix using a
+  ! one-sided Jacobi SVD. A = U * S * V^T  =>  A^{-1} = V * S^{-1} * U^T.
+  ! singular values smaller than tol * svmax * n are treated as zero, giving
+  ! the Moore-Penrose pseudo-inverse when the matrix is rank-deficient.
+
+  subroutine inverse_svd(a, ainv, rank0, tol0)
+    implicit none
+    real(dp) , intent(in)             :: a(:,:)
+    real(dp) , intent(out)            :: ainv(:,:)
+    integer  , intent(out) , optional :: rank0
+    real(dp) , intent(in)  , optional :: tol0
+    integer                :: n, p, q, iter, rk
+    real(dp)               :: tol, tau, t, c, s, d, ap, aq, svmax, sinv
+    real(dp) , allocatable :: B(:,:), U(:,:), V(:,:), sv(:), tp(:), tq(:)
+    logical                :: converged
+
+    if (size(a,1).ne.size(a,2)) then
+      call error(' error in inverse_svd: matrix is not square')
+      if (present(rank0)) rank0 = 0
+      return
+    end if
+    if (size(ainv,1).ne.size(a,1) .or. size(ainv,2).ne.size(a,2)) then
+      call error(' error in inverse_svd: output matrix of incorrect size')
+      if (present(rank0)) rank0 = 0
+      return
+    end if
+
+    n   = size(a,1)
+    tol = tolvl ; if (present(tol0)) tol = tol0
+
+    allocate(B(n,n), U(n,n), V(n,n), sv(n), tp(n), tq(n))
+
+    ! initialise: B = a, V = I
+    B = a
+    V = cero ; do p = 1,n ; V(p,p) = uno ; end do
+
+    ! one-sided Jacobi: apply right Jacobi rotations until columns of B are
+    ! mutually orthogonal; right rotations accumulate in V
+    do iter = 1, 100*n*n
+      converged = .true.
+      do p = 1,n-1 ; do q = p+1,n
+        ap = dot_product(B(:,p), B(:,p))
+        aq = dot_product(B(:,q), B(:,q))
+        d  = dot_product(B(:,p), B(:,q))
+        if (abs(d) > tol * sqrt(ap * aq)) then
+          converged = .false.
+          tau = (aq - ap) / (dos * d)
+          if (tau >= cero) then
+            t = uno  / ( tau + sqrt(uno + tau*tau))
+          else
+            t = -uno / (-tau + sqrt(uno + tau*tau))
+          end if
+          c = uno / sqrt(uno + t*t) ; s = t * c
+          tp = c*B(:,p) - s*B(:,q) ; tq = s*B(:,p) + c*B(:,q)
+          B(:,p) = tp ; B(:,q) = tq
+          tp = c*V(:,p) - s*V(:,q) ; tq = s*V(:,p) + c*V(:,q)
+          V(:,p) = tp ; V(:,q) = tq
+        end if
+      end do ; end do
+      if (converged) exit
+    end do
+
+    ! singular values = column norms of B; find the largest
+    svmax = cero
+    do p = 1,n
+      sv(p) = sqrt(dot_product(B(:,p), B(:,p)))
+      if (sv(p) > svmax) svmax = sv(p)
+    end do
+
+    ! normalise columns of B to obtain U; count numerical rank
+    rk   = 0
+    ainv = cero
+    do p = 1,n
+      if (sv(p) > tol * svmax * dble(n)) then
+        U(:,p) = B(:,p) / sv(p) ; rk = rk + 1
+      else
+        U(:,p) = cero
+      end if
+    end do
+
+    ! ainv = V * diag(1/sv) * U^T  (skip near-zero singular values)
+    do p = 1,n
+      if (sv(p) > tol * svmax * dble(n)) then
+        sinv = uno / sv(p)
+        do q = 1,n
+          ainv(:,q) = ainv(:,q) + sinv * V(:,p) * U(q,p)
+        end do
+      end if
+    end do
+
+    if (present(rank0)) rank0 = rk
+    deallocate(B, U, V, sv, tp, tq)
+    return
+  end subroutine inverse_svd
 
   ! ----------------------------------------------------------------------------
   ! this function returns a vector "vec1" with the cummmulative sum of the elements
@@ -867,33 +1221,56 @@ module toolkit_stats
   ! statistics
   ! ^^^^^^^^^^
   !
+  !   (varmean, varvar, varstd, correlation, percentile and olsreg accept vectors or
+  !   2-dimensional arrays)
   !   - varmean: returns the average of a variable, allowing for weights
   !   - varvar: returns the variance of a variable, allowing for weights
   !   - varstd: returns the standard deviation of a variable, allowing for weights
   !   - correlation: returns the correlation of two variables, allowing for weights
   !   - percentile: returns the i-th percentile of a variable, allowing for weights
-  !   - olsreg: returns the ols coefficients of a regression with up to 8 regressors, allowing for weights
+  !   - olsreg: returns the ols coefficients of a regression with up to 8 regressors, allowing for weights;
+  !     optionally, standardized coefficients (betas)
   !   - tauchen: returns the transition matrix for a discretized ar(1) process
+  !   - rouwenhorst_grid, rouwenhorst_transition: grid and transition matrix for a discretized
+  !     ar(1) process using the rouwenhorst method (better for highly persistent processes)
   !   - normaldist: returns the distribution of a normal variable discretized over a grid
   !   - randomnormal: returns a random draw from a normal distribution
   !   - cdfn: returns the cdf of a standard normal distribution
   ! ----------------------------------------------------------------------------
   
-  use toolkit_pars   , only : dp,cero,medio,uno,cien,tolvl
-  use toolkit_tools  , only : error,num2text
+  use toolkit_pars   , only : dp,cero,medio,uno,dos,cien,tolvl
+  use toolkit_tools  , only : error,num2text,vect
   use toolkit_linalg , only : diag,inverse,transmat
   implicit none
 
   interface randomnormal
     module procedure randomnormal_scalar,randomnormal_vec
   end interface randomnormal
+  interface varmean
+    module procedure varmean_vect,varmean_mat
+  end interface varmean
+  interface varvar
+    module procedure varvar_vect,varvar_mat
+  end interface varvar
+  interface varstd
+    module procedure varstd_vect,varstd_mat
+  end interface varstd
+  interface correlation
+    module procedure correlation_vect,correlation_mat
+  end interface correlation
+  interface percentile
+    module procedure percentile_vect,percentile_mat
+  end interface percentile
+  interface olsreg
+    module procedure olsreg_vect,olsreg_mat
+  end interface olsreg
 
   contains
 
   ! ----------------------------------------------------------------------------
   ! this function returns the avarage of a variable "var"
 
-  function varmean(var,w,mask) result(meanvar)
+  function varmean_vect(var,w,mask) result(meanvar)
 
     implicit none
     real(dp)               :: var(:),meanvar
@@ -937,13 +1314,32 @@ module toolkit_stats
     deallocate(mask1)
 
     return
-  end function varmean
+  end function varmean_vect
+
+  ! ----------------------------------------------------------------------------
+  ! same as varmean_vect for 2-dimensional arrays (and weights and mask)
+
+  function varmean_mat(var,w,mask) result(meanvar)
+    implicit none
+    real(dp)            :: var(:,:), meanvar
+    real(dp), optional  :: w(:,:)
+    logical,  optional  :: mask(:,:)
+    if (present(w) .and. present(mask)) then
+      meanvar = varmean_vect(vect(var),w=vect(w),mask=vect(mask))
+    else if (present(w)) then
+      meanvar = varmean_vect(vect(var),w=vect(w))
+    else if (present(mask)) then
+      meanvar = varmean_vect(vect(var),mask=vect(mask))
+    else
+      meanvar = varmean_vect(vect(var))
+    end if
+  end function varmean_mat
 
   ! ----------------------------------------------------------------------------
   ! this function returns the variance of a variable "var" (observations with
   ! var = nan are excluded)
 
-  function varvar(var,w,mask) result(varian)
+  function varvar_vect(var,w,mask) result(varian)
 
     implicit none
     real(dp)               :: var(:),varian,mvar
@@ -991,12 +1387,31 @@ module toolkit_stats
     deallocate(mask1)
 
     return
-  end function varvar
+  end function varvar_vect
+
+  ! ----------------------------------------------------------------------------
+  ! same as varvar_vect for 2-dimensional arrays (and weights and mask)
+
+  function varvar_mat(var,w,mask) result(varian)
+    implicit none
+    real(dp)            :: var(:,:), varian
+    real(dp), optional  :: w(:,:)
+    logical,  optional  :: mask(:,:)
+    if (present(w) .and. present(mask)) then
+      varian = varvar_vect(vect(var),w=vect(w),mask=vect(mask))
+    else if (present(w)) then
+      varian = varvar_vect(vect(var),w=vect(w))
+    else if (present(mask)) then
+      varian = varvar_vect(vect(var),mask=vect(mask))
+    else
+      varian = varvar_vect(vect(var))
+    end if
+  end function varvar_mat
 
   ! ----------------------------------------------------------------------------
   ! this function returns the standard deviation of a variable "var"
 
-  function varstd(var,w,mask) result(stdvar)
+  function varstd_vect(var,w,mask) result(stdvar)
 
     implicit none
     real(dp)               :: var(:),stdvar
@@ -1040,12 +1455,31 @@ module toolkit_stats
     deallocate(mask1)
 
     return
-  end function varstd
+  end function varstd_vect
+
+  ! ----------------------------------------------------------------------------
+  ! same as varstd_vect for 2-dimensional arrays (and weights and mask)
+
+  function varstd_mat(var,w,mask) result(stdvar)
+    implicit none
+    real(dp)            :: var(:,:), stdvar
+    real(dp), optional  :: w(:,:)
+    logical,  optional  :: mask(:,:)
+    if (present(w) .and. present(mask)) then
+      stdvar = varstd_vect(vect(var),w=vect(w),mask=vect(mask))
+    else if (present(w)) then
+      stdvar = varstd_vect(vect(var),w=vect(w))
+    else if (present(mask)) then
+      stdvar = varstd_vect(vect(var),mask=vect(mask))
+    else
+      stdvar = varstd_vect(vect(var))
+    end if
+  end function varstd_mat
 
   ! ----------------------------------------------------------------------------
   ! this function returns the correlation coefficient between two variables "xvar1" and "xvar2"
 
-  function correlation(xvar1,xvar2,w,mask) result(corr)
+  function correlation_vect(xvar1,xvar2,w,mask) result(corr)
 
     implicit none
     real(dp) , optional    :: w(:)
@@ -1108,7 +1542,26 @@ module toolkit_stats
     deallocate(mask1)
 
     return
-  end function correlation
+  end function correlation_vect
+
+  ! ----------------------------------------------------------------------------
+  ! same as correlation_vect for 2-dimensional arrays (and weights and mask)
+
+  function correlation_mat(xvar1,xvar2,w,mask) result(corr)
+    implicit none
+    real(dp)           :: xvar1(:,:), xvar2(:,:), corr
+    real(dp), optional :: w(:,:)
+    logical,  optional :: mask(:,:)
+    if (present(w) .and. present(mask)) then
+      corr = correlation_vect(vect(xvar1),vect(xvar2),w=vect(w),mask=vect(mask))
+    else if (present(w)) then
+      corr = correlation_vect(vect(xvar1),vect(xvar2),w=vect(w))
+    else if (present(mask)) then
+      corr = correlation_vect(vect(xvar1),vect(xvar2),mask=vect(mask))
+    else
+      corr = correlation_vect(vect(xvar1),vect(xvar2))
+    end if
+  end function correlation_mat
 
   ! ----------------------------------------------------------------------------
   ! this function returns the percentile "pct" for a distribution "xvec".
@@ -1116,7 +1569,7 @@ module toolkit_stats
   ! (1 < pct <= 100). note that pct = 1 is read as a fraction (the maximum):
   ! for the 1st percentile use pct = 0.01.
 
-  function percentile(xvec,pct,w,mask) result(cutoff)
+  function percentile_vect(xvec,pct,w,mask) result(cutoff)
 
     implicit none
     real(dp)               :: xvec(:),pct,cutoff
@@ -1188,7 +1641,26 @@ module toolkit_stats
     deallocate(mask1)
 
     return
-  end function percentile
+  end function percentile_vect
+
+  ! ----------------------------------------------------------------------------
+  ! same as percentile_vect for 2-dimensional arrays (and weights and mask)
+
+  function percentile_mat(xvec,pct,w,mask) result(cutoff)
+    implicit none
+    real(dp)            :: xvec(:,:), pct, cutoff
+    real(dp), optional  :: w(:,:)
+    logical,  optional  :: mask(:,:)
+    if (present(w) .and. present(mask)) then
+      cutoff = percentile_vect(vect(xvec),pct,w=vect(w),mask=vect(mask))
+    else if (present(w)) then
+      cutoff = percentile_vect(vect(xvec),pct,w=vect(w))
+    else if (present(mask)) then
+      cutoff = percentile_vect(vect(xvec),pct,mask=vect(mask))
+    else
+      cutoff = percentile_vect(vect(xvec),pct)
+    end if
+  end function percentile_mat
 
   ! ----------------------------------------------------------------------------
   ! these functions return the coefficients from a ols regresion.
@@ -1198,7 +1670,7 @@ module toolkit_stats
   ! the subroutine. The program will automatically call the corresponding subroutine
   ! depending on the number of variables and on the format of output variables
 
-  subroutine olsreg(coeffs,yvec,x1vec,x2vec,x3vec,x4vec,x5vec,x6vec,x7vec,x8vec,w,mask,table,stds)
+  subroutine olsreg_vect(coeffs,yvec,x1vec,x2vec,x3vec,x4vec,x5vec,x6vec,x7vec,x8vec,w,mask,table,stds,betas)
     implicit none
     real(dp) , intent(out)            :: coeffs(:)
     real(dp) , intent(out) , optional :: stds(:)
@@ -1207,11 +1679,15 @@ module toolkit_stats
     real(dp) , intent(in) , optional  :: w(:)
     logical  , intent(in) , optional  :: mask(:)
     logical  , intent(in) , optional  :: table
+    logical  , intent(in) , optional  :: betas
     logical  , allocatable            :: mask1(:)
     real(dp) , allocatable            :: yvar(:),xvars(:,:),zvar(:),wvar(:)
     real(dp) , allocatable            :: xTx(:,:),ixTx(:,:),xTy(:),wx(:,:)
     real(dp) , allocatable            :: evar(:),sdbeta(:,:),sdcoefs(:),tstats(:),inter(:,:)
-    real(dp)                          :: rsq,arsq    
+    real(dp)                          :: rsq,arsq,aux1,aux2
+    real(dp) , allocatable            :: xvars_act(:,:),coeffs_act(:)
+    logical  , allocatable            :: active(:)
+    integer                           :: j,nc_act
     integer                           :: i,n0,no,nc,wc,nx ; nx = 0
 
     n0     = size(yvec)
@@ -1226,13 +1702,6 @@ module toolkit_stats
       else
         mask1 = mask
       end if
-    end if
-
-    ! number of valid observations
-    no = count(mask1)  
-    if (no.eq.0) then 
-      call error('error in olsreg!! no (valid) observations')
-      return
     end if
 
     ! weigths
@@ -1252,50 +1721,68 @@ module toolkit_stats
         call error('error in olsreg!! yvec and x1vec different observations')
         return
       end if
+      where(isnan(x1vec)) mask1 = .false.
     end if
     if (present(x2vec)) then ; nx = 2
       if (n0.ne.size(x2vec)) then
         call error('error in olsreg!! yvec and x2vec different observations')
         return
       end if
+      where(isnan(x2vec)) mask1 = .false.
     end if
     if (present(x3vec)) then ; nx = 3
       if (n0.ne.size(x3vec)) then
         call error('error in olsreg!! yvec and x3vec different observations')
         return
       end if
+      where(isnan(x3vec)) mask1 = .false.
     end if
     if (present(x4vec)) then ; nx = 4
       if (n0.ne.size(x4vec)) then
         call error('error in olsreg!! yvec and x4vec different observations')
         return
       end if
+      where(isnan(x4vec)) mask1 = .false.
     end if
     if (present(x5vec)) then ; nx = 5
       if (n0.ne.size(x5vec)) then
         call error('error in olsreg!! yvec and x5vec different observations')
         return
       end if
+      where(isnan(x5vec)) mask1 = .false.
     end if
     if (present(x6vec)) then ; nx = 6
       if (n0.ne.size(x6vec)) then
         call error('error in olsreg!! yvec and x6vec different observations')
         return
       end if
+      where(isnan(x6vec)) mask1 = .false.
     end if
     if (present(x7vec)) then ; nx = 7
       if (n0.ne.size(x7vec)) then
         call error('error in olsreg!! yvec and x7vec different observations')
         return
       end if
+      where(isnan(x7vec)) mask1 = .false.
     end if
     if (present(x8vec)) then ; nx = 8
       if (n0.ne.size(x8vec)) then
         call error('error in olsreg!! yvec and x8vec different observations')
         return
       end if
+      where(isnan(x8vec)) mask1 = .false.
     end if
     
+    ! observations with nan in y or in any explanatory variable are excluded
+    where(isnan(yvec)) mask1 = .false.
+
+    ! number of valid observations
+    no = count(mask1)
+    if (no.eq.0) then 
+      call error('error in olsreg!! no (valid) observations')
+      return
+    end if
+
     nc = size(coeffs)  ! number of coefficients
     wc = nc-nx         ! with constant = 1, 0 if not
 
@@ -1340,40 +1827,74 @@ module toolkit_stats
     if (present(x7vec)) xvars(:,7+wc) = pack(x7vec(:),mask1)
     if (present(x8vec)) xvars(:,8+wc) = pack(x8vec(:),mask1)
 
-    ! weigthed x-variables
-    allocate(wx(no,nc))
-    do i=1,no
-      wx(i,:) = xvars(i,:)*zvar(i)
+    ! explanatory variables with zero variance (would make X'X singular) are
+    ! dropped: their coefficient (and standard deviation) is set to zero
+    allocate(active(nc)) ; active = .true.
+    do i = 1+wc, nc
+      if (varstd_vect(xvars(:,i),w=zvar) .lt. tolvl) active(i) = .false.
+    end do
+    nc_act = count(active)
+    allocate(xvars_act(no,nc_act))
+    j = 0
+    do i = 1, nc
+      if (active(i)) then ; j = j+1 ; xvars_act(:,j) = xvars(:,i) ; end if
     end do
 
-    ! allocate matrices for betas
-    allocate(xTx(nc,nc),ixTx(nc,nc),xTy(nc))
+    ! standardized coefficients (if required): variables in standard deviations
+    if (present(betas)) then ; if (betas) then
+      do i = 1, nc_act-wc
+        aux1 = varmean_vect(xvars_act(:,i+wc),w=zvar)
+        aux2 = varstd_vect(xvars_act(:,i+wc),w=zvar)
+        xvars_act(:,i+wc) = (xvars_act(:,i+wc)-aux1)/aux2
+      end do
+      aux1 = varmean_vect(yvar,w=zvar)
+      aux2 = varstd_vect(yvar,w=zvar)
+      yvar = (yvar-aux1)/aux2
+    end if ; end if
+
+    ! weigthed x-variables
+    allocate(wx(no,nc_act))
+    do i=1,no
+      wx(i,:) = xvars_act(i,:)*zvar(i)
+    end do
 
     ! compute betas
-    xTx    = matmul(transmat(xvars),wx)
-    ixTx   = inverse(xTx)
-    xTy    = matmul(transmat(xvars),yvar(:)*zvar(:))
-    coeffs = matmul(ixTx,xTy)
+    allocate(xTx(nc_act,nc_act),ixTx(nc_act,nc_act),xTy(nc_act),coeffs_act(nc_act))
+    xTx        = matmul(transmat(xvars_act),wx)
+    ixTx       = inverse(xTx)
+    xTy        = matmul(transmat(xvars_act),yvar(:)*zvar(:))
+    coeffs_act = matmul(ixTx,xTy)
 
-    allocate(evar(no),sdbeta(nc,nc),sdcoefs(nc),tstats(nc),inter(nc,2))
+    ! map back to the full vector of coefficients (zero for dropped variables)
+    coeffs = cero
+    j = 0
+    do i = 1, nc
+      if (active(i)) then ; j = j+1 ; coeffs(i) = coeffs_act(j) ; end if
+    end do
 
-    evar    = yvar - matmul(xvars,coeffs)
-    sdbeta  = ixTx*( sum(zvar*evar*evar) / dble(no-nc) )
+    allocate(evar(no),sdbeta(nc_act,nc_act),sdcoefs(nc_act),tstats(nc_act),inter(nc_act,2))
+
+    evar    = yvar - matmul(xvars_act,coeffs_act)
+    sdbeta  = ixTx*( sum(zvar*evar*evar) / dble(no-nc_act) )
     sdcoefs = sqrt(diag(sdbeta))
-    tstats  = abs(coeffs/sdcoefs)
+    tstats  = abs(coeffs_act/sdcoefs)
 
     if (present(stds)) then
-      stds = sdcoefs
+      stds = cero
+      j = 0
+      do i = 1, nc
+        if (active(i)) then ; j = j+1 ; stds(i) = sdcoefs(j) ; end if
+      end do
     end if
 
     if (present(table)) then 
       if (table .eqv. .true.) then
 
-        inter(:,1) = coeffs - dble(1.959964)*sdcoefs
-        inter(:,2) = coeffs + dble(1.959964)*sdcoefs
+        inter(:,1) = coeffs_act - dble(1.959964)*sdcoefs
+        inter(:,2) = coeffs_act + dble(1.959964)*sdcoefs
 
         rsq  = uno - varvar(evar,w=zvar)/varvar(yvar,w=zvar)
-        arsq = uno - ( (uno-rsq)*dble(no-1)/dble(no-nc) )
+        arsq = uno - ( (uno-rsq)*dble(no-1)/dble(no-nc_act) )
 
         write(*,99) '   '
         write(*,99) '   '
@@ -1387,10 +1908,16 @@ module toolkit_stats
         write(*,99) '                beta     sd(b)      minb      maxb    t-stat'
         write(*,99) ' -----------------------------------------------------------'
         if (wc.eq.1) then
-          write(*,99) ' Constant ' ,coeffs(wc),sdcoefs(wc),inter(wc,:),tstats(wc)
+          write(*,99) ' Constant ' ,coeffs_act(wc),sdcoefs(wc),inter(wc,:),tstats(wc)
         end if
+        j = wc
         do i=1,nx
-          write(*,98) ' Var ' ,i, '    ',coeffs(i+wc),sdcoefs(i+wc),inter(i+wc,:),tstats(i+wc)
+          if (active(i+wc)) then
+            j = j+1
+            write(*,98) ' Var ' ,i, '    ',coeffs_act(j),sdcoefs(j),inter(j,:),tstats(j)
+          else
+            write(*,97) ' Var ' ,i, ' (dropped: constant)'
+          end if
         end do
         write(*,99) ' -----------------------------------------------------------'
         write(*,99) '   '
@@ -1399,12 +1926,99 @@ module toolkit_stats
     end if
 
     deallocate(evar,sdbeta,sdcoefs,tstats,inter)
-    deallocate(xvars,xTx,ixTx,xTy,yvar,zvar,mask1,wvar)
+    deallocate(xvars,xvars_act,active,coeffs_act,xTx,ixTx,xTy,yvar,zvar,mask1,wvar,wx)
 
     return
     99 format (a,f10.4,f10.4,f10.4,f10.4,f10.4)
     98 format (a,i1,a,f10.4,f10.4,f10.4,f10.4,f10.4)
-  end subroutine olsreg
+    97 format (a,i1,a,a)
+  end subroutine olsreg_vect
+
+  ! ----------------------------------------------------------------------------
+  ! same as olsreg_vect for 2-dimensional arrays (and weights and mask)
+
+  subroutine olsreg_mat(coeffs,yvec,x1vec,x2vec,x3vec,x4vec,x5vec,x6vec,x7vec,x8vec,w,mask,table,stds,betas)
+    implicit none
+    !
+    real(dp) , intent(out)             :: coeffs(:)
+    real(dp) , intent(out)  , optional :: stds(:)
+    !
+    real(dp) , intent(in)              :: yvec(:,:)
+    !
+    real(dp) , intent(in)              :: x1vec(:,:)
+    real(dp) , intent(in)  , optional  :: x2vec(:,:)
+    real(dp) , intent(in)  , optional  :: x3vec(:,:)
+    real(dp) , intent(in)  , optional  :: x4vec(:,:)
+    real(dp) , intent(in)  , optional  :: x5vec(:,:)
+    real(dp) , intent(in)  , optional  :: x6vec(:,:)
+    real(dp) , intent(in)  , optional  :: x7vec(:,:)
+    real(dp) , intent(in)  , optional  :: x8vec(:,:)
+    !
+    real(dp) , intent(in)  , optional  :: w(:,:)
+    logical  , intent(in)  , optional  :: mask(:,:)
+    !
+    logical  , intent(in)  , optional  :: table
+    logical  , intent(in)  , optional  :: betas
+    !
+    real(dp) :: stdsb(size(coeffs))
+    real(dp) :: bw(size(yvec,1),size(yvec,2))
+    logical  :: bmask(size(yvec,1),size(yvec,2))
+    logical  :: btable
+    logical  :: bbetas
+    
+    bw     = uno     ; if (present(w)     ) bw = w
+    bmask  = .true.  ; if (present(mask)  ) bmask = mask
+    bbetas = .false. ; if (present(betas) ) bbetas = betas
+    btable = .false. ; if (present(table) ) btable = table
+
+    ! check number of explanatory variabkes
+    if (present(x8vec)) then 
+      call olsreg_vect(coeffs,vect(yvec),vect(x1vec),vect(x2vec),&
+      vect(x3vec),vect(x4vec),vect(x5vec),vect(x6vec),vect(x7vec),&
+      vect(x8vec),w=vect(bw),mask=vect(bmask),table=btable,stds=stdsb,betas=bbetas)
+      goto 10
+    end if
+    if (present(x7vec)) then 
+      call olsreg_vect(coeffs,vect(yvec),vect(x1vec),vect(x2vec),&
+      vect(x3vec),vect(x4vec),vect(x5vec),vect(x6vec),vect(x7vec),&
+      w=vect(bw),mask=vect(bmask),table=btable,stds=stdsb,betas=bbetas)
+      goto 10
+    end if
+    if (present(x6vec)) then 
+      call olsreg_vect(coeffs,vect(yvec),vect(x1vec),vect(x2vec),&
+      vect(x3vec),vect(x4vec),vect(x5vec),vect(x6vec),w=vect(bw),mask=vect(bmask),table=btable,stds=stdsb,betas=bbetas)
+      goto 10
+    end if
+    if (present(x5vec)) then 
+      call olsreg_vect(coeffs,vect(yvec),vect(x1vec),vect(x2vec),&
+      vect(x3vec),vect(x4vec),vect(x5vec),w=vect(bw),mask=vect(bmask),table=btable,stds=stdsb,betas=bbetas)
+      goto 10
+    end if
+    if (present(x4vec)) then 
+      call olsreg_vect(coeffs,vect(yvec),vect(x1vec),vect(x2vec),&
+      vect(x3vec),vect(x4vec),w=vect(bw),mask=vect(bmask),table=btable,stds=stdsb,betas=bbetas)
+      goto 10
+    end if
+    if (present(x3vec)) then 
+      call olsreg_vect(coeffs,vect(yvec),vect(x1vec),vect(x2vec),&
+      vect(x3vec),w=vect(bw),mask=vect(bmask),table=btable,stds=stdsb,betas=bbetas)
+      goto 10
+    end if
+    if (present(x2vec)) then
+      call olsreg_vect(coeffs,vect(yvec),vect(x1vec),vect(x2vec),&
+      w=vect(bw),mask=vect(bmask),table=btable,stds=stdsb,betas=bbetas)
+      goto 10
+    end if
+    call olsreg_vect(coeffs,vect(yvec),vect(x1vec),w=vect(bw),mask=vect(bmask),table=btable,stds=stdsb,betas=bbetas)
+
+    10 continue
+
+    if (present(stds)) then
+      stds = stdsb
+    end if
+
+    return
+  end subroutine olsreg_mat
 
   ! ----------------------------------------------------------------------------
   ! this function returns the transition matrix for a discretized ar(1) process
@@ -1422,6 +2036,94 @@ module toolkit_stats
     end do
     return
   end subroutine tauchen
+
+  ! ----------------------------------------------------------------------------
+  ! grid for a discretized ar(1) process z' = rho*z + e, e ~ n(0,sigma_e^2), with the
+  ! rouwenhorst method: n equally spaced points in [-psi,psi], psi = sigma_z*sqrt(n-1)
+
+  subroutine rouwenhorst_grid(n, rho, sigma_e, zgrid)
+    implicit none
+    integer, intent(in)    :: n
+    real(dp), intent(in)   :: rho, sigma_e
+    real(dp), intent(out)  :: zgrid(n)
+    integer                :: i
+    real(dp)               :: sigma_z, psi, step
+    if (n < 2) then
+      call error(' error in rouwenhorst_grid: n must be at least 2')
+      return
+    end if
+    sigma_z = sigma_e / sqrt(1.0d0 - rho**2.0d0)
+    psi     = sigma_z * sqrt(dble(n - 1))
+    step    = 2.0d0 * psi / dble(n - 1)
+    do i = 1, n
+      zgrid(i) = -psi + dble(i - 1) * step
+    end do
+    return
+  end subroutine rouwenhorst_grid
+
+  ! ----------------------------------------------------------------------------
+  ! transition matrix for a discretized ar(1) process with the rouwenhorst method
+  ! (better than tauchen for highly persistent processes). use with rouwenhorst_grid
+
+  subroutine rouwenhorst_transition(n, rho, Pfin)
+    implicit none
+    integer, intent(in)   :: n
+    real(dp), intent(in)  :: rho
+    real(dp), intent(out) :: Pfin(n,n)
+    integer               :: m, i, j
+    real(dp)              :: p, q
+    real(dp), allocatable :: Pold(:,:), Pnew(:,:)
+    if (n < 2) then
+      call error(' error in rouwenhorst_transition: n must be at least 2')
+      return
+    end if
+    p = (1.0d0 + rho) / 2.0d0
+    q = p
+    allocate(Pold(2,2))
+    Pold(1,1) = p
+    Pold(1,2) = 1.0d0 - p
+    Pold(2,1) = 1.0d0 - q
+    Pold(2,2) = q
+    if (n == 2) then
+      Pfin = Pold
+      deallocate(Pold)
+      return
+    end if
+    do m = 3, n
+      allocate(Pnew(m,m))
+      Pnew = 0.0d0
+      do i = 1, m-1
+        do j = 1, m-1
+          Pnew(i,j) = Pnew(i,j) + p * Pold(i,j)
+        end do
+      end do
+      do i = 1, m-1
+        do j = 1, m-1
+          Pnew(i,j+1) = Pnew(i,j+1) + (1.0d0 - p) * Pold(i,j)
+        end do
+      end do
+      do i = 1, m-1
+        do j = 1, m-1
+          Pnew(i+1,j) = Pnew(i+1,j) + (1.0d0 - q) * Pold(i,j)
+        end do
+      end do
+      do i = 1, m-1
+        do j = 1, m-1
+          Pnew(i+1,j+1) = Pnew(i+1,j+1) + q * Pold(i,j)
+        end do
+      end do
+      do i = 2, m-1
+        Pnew(i,:) = Pnew(i,:) / 2.0d0
+      end do
+      deallocate(Pold)
+      allocate(Pold(m,m))
+      Pold = Pnew
+      deallocate(Pnew)
+    end do
+    Pfin = Pold
+    deallocate(Pold)
+    return
+  end subroutine rouwenhorst_transition
 
   ! ----------------------------------------------------------------------------
   ! this function returns the transition matrix for a discretized ar(1) process
@@ -1533,7 +2235,7 @@ module toolkit_optim
   !   - brent: root of a single-value function with one unknown (brent method)
   !   - simplex: minimum of a single-value function with "n" unknowns (nelder-mead)
   !   - lmmin: minimum of the sum of squares of a system of "m" functions with "n"
-  !     unknowns (levenberg–marquardt algorithm)
+  !     unknowns (levenberg–marquardt algorithm), optionally with bounds lb <= x <= ub
   !
   ! it also includes some other functions/subroutines used for optimization:
   !
@@ -1552,8 +2254,9 @@ module toolkit_optim
   ! sure your function has the correct form.
   ! ----------------------------------------------------------------------------
 
-  use toolkit_pars  , only : dp,cero,medio,uno,dos,cien,tolvl
-  use toolkit_tools , only : error,num2text
+  use toolkit_pars   , only : dp,cero,medio,uno,dos,cien,tolvl
+  use toolkit_tools  , only : error,num2text
+  use toolkit_linalg , only : qrsolve
 
   implicit none
   contains
@@ -2187,7 +2890,7 @@ module toolkit_optim
   ! ----------------------------------------------------------------------------
   ! levenberg–marquardt algorithm
 
-  subroutine lmmin(func,x,y,iy,ind,x0,itermax,damp,tol,toleach,shock,usebro,iprint,tolrel,maxstall)
+  subroutine lmmin(func,x,y,iy,ind,x0,itermax,damp,tol,toleach,shock,usebro,iprint,tolrel,maxstall,lb,ub)
 
     ! this subroutine minimizes the sum of squared errors of a system of "m" equations
     ! in "n" unknowns using the levenberg-marquardt algorithm. given the current point
@@ -2202,7 +2905,7 @@ module toolkit_optim
     ! rho = (actual reduction)/(predicted reduction) as in nielsen (1999):
     !   - if the step reduces the error: lambda = lambda·max(1/3, 1-(2·rho-1)^3)
     !   - otherwise: lambda = lambda·nu, nu = 2·nu
-    ! the linear system is solved by cholesky decomposition.
+    ! the linear system is solved with qrsolve, after scaling it by its diagonal.
     !
     ! the inputs are:
     !
@@ -2231,6 +2934,21 @@ module toolkit_optim
     !             considered unproductive (default = 1.0d-6)
     !   maxstall: number of consecutive unproductive iterations after which the
     !             algorithm stops (default = 10)
+    !   lb, ub:   vectors of dimension "n" with lower and upper bounds for x (box
+    !             constraints, lb <= x <= ub). either or both can be supplied. with
+    !             bounds, the algorithm is a projected levenberg-marquardt with an
+    !             active set:
+    !               - the initial point is projected onto the box
+    !               - the numerical jacobian is computed towards the interior of the box
+    !               - a variable at a bound whose gradient pushes it out of the box is
+    !                 fixed (zero step), and the step is computed for the free variables
+    !               - if the step leaves the box, it is truncated at the bound when only
+    !                 one variable hits it (keeping the direction), and projected onto
+    !                 the box otherwise; the gain ratio uses the step actually taken
+    !               - convergence (ind = 1) is checked with the projected gradient,
+    !                 which is zero at an optimum on the bound
+    !             the variables are not transformed, so there is no need to use
+    !             normalize/denormalize when bounds are supplied.
     !   iprint:   indicator for printing results (default = 0)
     !               0: print no results
     !               1: print main results
@@ -2243,7 +2961,8 @@ module toolkit_optim
     !   iy:   the number of total function evaluations
     !   ind:  exit indicator, taking value:
     !           0: system has converged, func(x) = 0
-    !           1: gradient J'·y is close to 0 (or the linear system cannot be solved)
+    !           1: gradient J'·y (projected, with bounds) is close to 0 (or the linear
+    !              system cannot be solved)
     !           2: step in x is close to 0
     !           3: no progress: maxstall consecutive unproductive iterations
     !           9: max number of function evaluations reached
@@ -2252,12 +2971,13 @@ module toolkit_optim
     ! jacobian is enlarged at most 5 times when the residuals do not change (it was
     ! enlarged without limit, until itermax, and the test was on the sum of squared
     ! errors instead of the residuals); if the residuals still do not change the
-    ! column is set to 0; (2) scaling with a positive floor and cholesky solve instead
+    ! column is set to 0; (2) scaling with a positive floor and a linear solve instead
     ! of the inverse of (1+lambda)·diag(J'·J), which was singular with a zero column;
     ! (3) damping updated with the gain ratio; (4) stop after maxstall unproductive
     ! iterations (ind = 3) and relative test on the step; (5) points evaluated to
     ! compute the jacobian are used when they improve on the current point, and the
-    ! best point evaluated is returned; (6) documentation and minor fixes.
+    ! best point evaluated is returned; (6) documentation and minor fixes; (7) optional
+    ! box constraints lb and ub (projected levenberg-marquardt with an active set).
 
     implicit none
 
@@ -2271,9 +2991,11 @@ module toolkit_optim
     real(dp) , intent(in)            :: x0(:)
     real(dp) , intent(in) , optional :: damp,tol,toleach,shock,tolrel
     integer  , intent(in) , optional :: itermax,usebro,iprint,maxstall
+    real(dp) , intent(in) , optional :: lb(:),ub(:)
 
     ! other variables
     integer                :: n,m,i,maxiter,ip,bro,mstall,nstall,itry
+    real(dp) , allocatable :: sc(:)           ! scaling of the linear system
     real(dp)               :: lam,nu,toler,tolereach,tolr,shck0
     real(dp)               :: e0,eb,e1,ec,es,pred,rho,dfloor
     logical                :: newjac   ! compute a new numerical jacobian
@@ -2292,6 +3014,11 @@ module toolkit_optim
     real(dp) , allocatable :: xs(:),ys(:)     ! best point evaluated overall
     real(dp) , allocatable :: xj(:),yj(:)     ! point evaluated for the jacobian
     real(dp)               :: ej              ! error at xj
+    real(dp) , allocatable :: lbv(:),ubv(:)   ! bounds (-huge/+huge if not supplied)
+    logical  , allocatable :: free(:)         ! variables not fixed at a bound
+    logical                :: box             ! bounds supplied
+    real(dp)               :: alpha,aa        ! fraction of the step that fits in the box
+    integer                :: nhit,ihit       ! variables that hit a bound, and the first one
     integer                :: ij              ! unknown being shocked
 
     interface
@@ -2323,6 +3050,28 @@ module toolkit_optim
     allocate(xc(n),yc(m),xs(n),ys(m),xj(n),yj(m))
     shck = shck0 ; dg = cero ; nu = dos ; nstall = 0 ; ind = 9
 
+    ! bounds
+    allocate(sc(n),lbv(n),ubv(n),free(n)) ; lbv = -huge(uno) ; ubv = huge(uno) ; free = .true.
+    box = present(lb) .or. present(ub)
+    if (present(lb)) then
+      if (size(lb,1).ne.n) then
+        write(*,*) ' error in lmmin: size of lb does not match size of x '
+        stop
+      end if
+      lbv = lb
+    end if
+    if (present(ub)) then
+      if (size(ub,1).ne.n) then
+        write(*,*) ' error in lmmin: size of ub does not match size of x '
+        stop
+      end if
+      ubv = ub
+    end if
+    if (any(ubv.le.lbv)) then
+      write(*,*) ' error in lmmin: ub <= lb '
+      stop
+    end if
+
     if (ip.ge.1) then
       write(*,'(a)'   ) '                              '
       write(*,'(a)'   ) '  starting lmmin algorithm    '
@@ -2333,7 +3082,9 @@ module toolkit_optim
     end if
 
     ! initial point
-    xb = x0 ; yb = func(xb) ; eb = sum(yb*yb) ; e0 = eb ; iy = 1
+    xb = min(ubv,max(lbv,x0))
+    if (box .and. ip.ge.1 .and. any(xb.ne.x0)) write(*,*) ' lmmin: initial point outside the bounds, projected'
+    yb = func(xb) ; eb = sum(yb*yb) ; e0 = eb ; iy = 1
     xs = xb ; ys = yb ; es = eb ; ec = huge(uno)
     if (ip.ge.1) write (*,91) eb
 
@@ -2358,7 +3109,22 @@ module toolkit_optim
 
       ! gradient
       g = matmul(transpose(j),yb)
-      if (maxval(abs(g)).lt.toler) then
+
+      ! active set: a variable at a bound is fixed if the gradient pushes it out of the
+      ! box (the descent direction is -J'·y)
+      if (box) then
+        do i=1,n
+          aa = 1.0d-10*max(uno,abs(xb(i)))   ! tolerance to be at a bound
+          free(i) = .not.( (xb(i).le.lbv(i)+aa .and. g(i).gt.cero) .or. &
+                           (xb(i).ge.ubv(i)-aa .and. g(i).lt.cero) )
+        end do
+      end if
+
+      ! (projected) gradient close to zero
+      if (.not.any(free)) then
+        ind = 1 ; exit
+      end if
+      if (maxval(abs(g),mask=free).lt.toler) then
         ind = 1 ; exit
       end if
 
@@ -2369,10 +3135,28 @@ module toolkit_optim
       end do
       dfloor = 1.0d-10*max(maxval(dg),uno)
 
-      ! step: cholesky solve; if it fails, increase damping
+      ! fixed variables: identity row/column and zero gradient, so that their step is zero
+      do i=1,n
+        if (.not.free(i)) then
+          a(i,:) = cero ; a(:,i) = cero ; a(i,i) = uno ; g(i) = cero
+        end if
+      end do
+
+      ! step: solve (J'·J + lam·D)·dx = -J'·y with qrsolve, after scaling the system by
+      ! its diagonal (so that all the unknowns have the same scale in the rank
+      ! detection of qrsolve). if the solution is not finite, increase damping
       ok = .false.
       do itry=1,30
-        call lm_cholsolve(a,max(dg,dfloor),lam,g,dx,ok)
+        do i=1,n
+          a(i,i) = a(i,i) + lam*max(dg(i),dfloor)
+        end do
+        sc = uno/sqrt(max([(a(i,i),i=1,n)],tiny(uno)))
+        call qrsolve(a*spread(sc,2,n)*spread(sc,1,n),-g*sc,dx,tol0=epsilon(uno))
+        dx = dx*sc
+        do i=1,n
+          a(i,i) = a(i,i) - lam*max(dg(i),dfloor)
+        end do
+        ok = all(dx.eq.dx) .and. all(abs(dx).lt.huge(uno))
         if (ok) exit
         lam = lam*10.0_dp
       end do
@@ -2380,14 +3164,46 @@ module toolkit_optim
         ind = 1 ; exit
       end if
 
+      ! new point. with bounds: truncate the step at the bound if only one variable hits
+      ! it (keeping the direction), project onto the box otherwise
+      x1 = xb + dx
+      if (box) then
+        alpha = uno ; nhit = 0 ; ihit = 0
+        do i=1,n
+          aa = uno
+          if (xb(i)+dx(i).gt.ubv(i)) aa = (ubv(i)-xb(i))/dx(i)
+          if (xb(i)+dx(i).lt.lbv(i)) aa = (lbv(i)-xb(i))/dx(i)
+          if (aa.lt.uno) then
+            nhit = nhit + 1
+            if (aa.lt.alpha) then
+              alpha = aa ; ihit = i
+            end if
+          end if
+        end do
+        if (nhit.eq.1 .and. alpha.gt.cero) then
+          x1 = xb + alpha*dx
+          if (dx(ihit).gt.cero) x1(ihit) = ubv(ihit)
+          if (dx(ihit).lt.cero) x1(ihit) = lbv(ihit)
+        end if
+        x1 = min(ubv,max(lbv,x1))
+        dx = x1 - xb
+      end if
+
       ! if step in x is too small, finish
       if (sum(abs(dx)).le.toler*(uno+sum(abs(xb)))) then
         ind = 2 ; exit
       end if
 
-      ! predicted and actual reduction
+      ! predicted reduction (with the step actually taken). with bounds, if the projected
+      ! step does not reduce the linear model, increase damping without evaluating func
       pred = eb - sum((yb+matmul(j,dx))**2)
-      x1 = xb + dx
+      if (box .and. pred.le.cero) then
+        lam = lam*nu ; nu = dos*nu ; nstall = nstall + 1
+        if (nstall.ge.mstall .or. lam.gt.1.0d16) then
+          ind = 3 ; exit
+        end if
+        cycle
+      end if
       y1 = func(x1) ; e1 = sum(y1*y1) ; iy = iy + 1
       call lm_keepbest(x1,y1,e1)
       rho = (eb-e1)/max(pred,tiny(uno))
@@ -2404,7 +3220,7 @@ module toolkit_optim
           nstall = 0
         end if
         if (bro.eq.1) then
-          call lm_broyden(j,x1-xb,y1-yb) ; brojac = .true.
+          call broyden(j,x1,xb,y1,yb) ; brojac = .true.
         else
           newjac = .true.
         end if
@@ -2419,7 +3235,7 @@ module toolkit_optim
           nstall = 0
         end if
         if (bro.eq.1) then
-          call lm_broyden(j,xc-xb,yc-yb) ; brojac = .true.
+          call broyden(j,xc,xb,yc,yb) ; brojac = .true.
         else
           newjac = .true.
         end if
@@ -2464,10 +3280,17 @@ module toolkit_optim
       write(*,*          ) ' evaluations = ', iy
       write(*,'(a,es12.4)') ' error       = ', eb
       write(*,'(a,f10.4)' ) ' reduction   = ', eb/max(e0,tiny(uno)) - uno
+      if (box) then
+        do i=1,n
+          aa = 1.0d-10*max(uno,abs(xb(i)))
+          if (xb(i).le.lbv(i)+aa) write(*,'(a,i3,a)') ' variable ',i,' at the lower bound'
+          if (xb(i).ge.ubv(i)-aa) write(*,'(a,i3,a)') ' variable ',i,' at the upper bound'
+        end do
+      end if
       write(*,*          ) '  '
     end if
 
-    deallocate(j,a,g,dg,shck,xb,yb,x1,y1,dx,xc,yc,xs,ys,xj,yj)
+    deallocate(j,a,g,dg,shck,xb,yb,x1,y1,dx,xc,yc,xs,ys,xj,yj,sc,lbv,ubv,free)
 
     return
     97 format ('  new point    ',i5,'  ',3(es12.4))
@@ -2510,6 +3333,16 @@ module toolkit_optim
           xj(ij) = sh
         end if
         if (abs(xj(ij)-xb(ij)).lt.10.0_dp*toler) xj(ij) = xb(ij) + 10.0_dp*toler
+        ! with bounds: if the shocked point is outside the box, shock towards the side
+        ! with more room (without leaving the box)
+        if (xj(ij).gt.ubv(ij) .or. xj(ij).lt.lbv(ij)) then
+          sh = abs(xj(ij)-xb(ij))
+          if (ubv(ij)-xb(ij).ge.xb(ij)-lbv(ij)) then
+            xj(ij) = xb(ij) + min(sh,ubv(ij)-xb(ij))
+          else
+            xj(ij) = xb(ij) - min(sh,xb(ij)-lbv(ij))
+          end if
+        end if
         call lm_evalj(done) ; if (done) return
 
         ! if change in the error is too large, reduce the shock (at most 10 times)
@@ -2526,7 +3359,9 @@ module toolkit_optim
         if (maxval(abs(yj-yb)).lt.toler) then
           k = 0
           do while (maxval(abs(yj-yb)).lt.toler .and. k.lt.5)
-            xj(ij) = xb(ij) + dos*(xj(ij)-xb(ij)) ; k = k + 1
+            sh = min(ubv(ij),max(lbv(ij),xb(ij) + dos*(xj(ij)-xb(ij))))
+            if (sh.eq.xj(ij)) exit
+            xj(ij) = sh ; k = k + 1
             call lm_evalj(done) ; if (done) return
           end do
           if (maxval(abs(yj-yb)).ge.toler) call lm_newshock( )
@@ -2567,47 +3402,6 @@ module toolkit_optim
       if (abs(xb(ij)).gt.toler) shck(ij) = abs(xb(ij)-xj(ij))/abs(xb(ij))
       if (abs(xb(ij)).le.toler) shck(ij) = abs(xj(ij))
     end subroutine lm_newshock
-
-    ! solve (am + lm·diag(d))·dxv = -gv by cholesky decomposition
-    subroutine lm_cholsolve(am,d,lm,gv,dxv,ok)
-      real(dp) , intent(in)  :: am(:,:),d(:),lm,gv(:)
-      real(dp) , intent(out) :: dxv(:)
-      logical  , intent(out) :: ok
-      real(dp) :: b(size(gv),size(gv)),l(size(gv),size(gv)),z(size(gv)),s
-      integer  :: i,k,nn
-      nn = size(gv) ; b = am ; l = cero ; ok = .false. ; dxv = cero
-      do i=1,nn
-        b(i,i) = am(i,i) + lm*d(i)
-      end do
-      do k=1,nn
-        s = b(k,k) - sum(l(k,1:k-1)**2)
-        if (s.le.cero .or. s.ne.s) return
-        l(k,k) = sqrt(s)
-        do i=k+1,nn
-          l(i,k) = (b(i,k) - sum(l(i,1:k-1)*l(k,1:k-1)))/l(k,k)
-        end do
-      end do
-      do i=1,nn
-        z(i) = (-gv(i) - sum(l(i,1:i-1)*z(1:i-1)))/l(i,i)
-      end do
-      do i=nn,1,-1
-        dxv(i) = (z(i) - sum(l(i+1:nn,i)*dxv(i+1:nn)))/l(i,i)
-      end do
-      ok = all(dxv.eq.dxv)
-    end subroutine lm_cholsolve
-
-    ! broyden's update of the jacobian given a step dxv and the change in residuals dyv
-    subroutine lm_broyden(jac,dxv,dyv)
-      real(dp) , intent(inout) :: jac(:,:)
-      real(dp) , intent(in)    :: dxv(:),dyv(:)
-      real(dp) :: den
-      integer  :: k
-      den = sum(dxv*dxv)
-      if (den.le.tiny(uno)) return
-      do k=1,size(dyv)
-        jac(k,:) = jac(k,:) + dxv(:)*( dyv(k) - sum(jac(k,:)*dxv(:)) )/den
-      end do
-    end subroutine lm_broyden
 
   end subroutine lmmin
 

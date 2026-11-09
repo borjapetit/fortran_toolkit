@@ -7,16 +7,17 @@
 
 
 ```fortran
-subroutine olsreg(coeffs,yvar,xvar1,xvar2,...,xvar8,w,mask,table,stds)
+subroutine olsreg(coeffs,yvar,xvar1,xvar2,...,xvar8,w,mask,table,stds,betas)
   implicit none
   real(kind=8) , intent(out)            :: coeffs(:)
-  logical      , intent(out) , optional :: stds(:)
+  real(kind=8) , intent(out) , optional :: stds(:)
   real(kind=8) , intent(in)             :: yvar(:)
   real(kind=8) , intent(in)             :: xvar1(:)
   real(kind=8) , intent(in) , optional  :: xvar2(:),xvar3(:),...,xvar8(:)
   real(kind=8) , intent(in) , optional  :: w(:)     
   logical      , intent(in) , optional  :: mask(:)
   logical      , intent(in) , optional  :: table
+  logical      , intent(in) , optional  :: betas
 ```
 
 This subroutine returns the OLS coefficients from a linear regression model:
@@ -33,9 +34,17 @@ call olsreg(coeffs,yvar,xvar1,xvar2,mask = xvar1.gt.0.0d0 .and. xvar2.lt.5.0d0)
 
 This code computes the OLS coefficients from a linear regression of ```yvar``` on ```xvar1``` and ```xvar2``` conditional on ```xvar1``` being positive and ```xvar2``` being smaller than 5. If ```coeffs``` is of size 3, the model includes a contant term so that $\texttt{coeffs} = (\beta_0,\beta_1,\beta_2)$. If the size of ```coefs``` is 2, then the returned vector is $\texttt{coeffs} = (\beta_1,\beta_2)$.
 
+Observations with NaN in ```yvar``` or in any of the explanatory variables are excluded. Explanatory variables with zero variance (constant, given the mask) would make the regression singular, so they are dropped: their coefficient (and standard deviation) is set to zero, and the regression table shows them as dropped.
+
+If ```stds``` is supplied (a vector of the same size as ```coeffs```), the subroutine also returns the standard deviations of the coefficients.
+
+If ```betas``` is ```.true.```, the subroutine returns standardized coefficients: the dependent and the explanatory variables are measured in (weighted) standard deviations, so that each coefficient is the change in ```yvar```, in standard deviations, associated with a one-standard-deviation change in the explanatory variable. The constant, if included, is then zero.
+
+The dependent and explanatory variables (and ```w``` and ```mask```) can also be 2-dimensional arrays, all of the same shape. In that case the subroutine uses all their elements, as if they were vectorized with [```vect```](vect.md).
+
 Finally, the variable ```table``` controls the output of the subroutine. If ```table``` is ```.false.``` (or missing), the subroutine returns the coefficients in the vector ```coeffs```. If ```table``` is ```.true.```, the subroutine prints a regression table with the coefficients and some additional statistics (t-stats, R-squared, etc).
 
-**Internal dependencies**: [```error```](error.md), [```varmean```](varmean.md),  [```varvar```](varvar.md), [```inverse```](inverse.md), [```transmat```](transmat.md), [```diag```](diag.md)
+**Internal dependencies**: [```error```](error.md), [```num2text```](num2text.md), [```varmean```](varmean.md),  [```varvar```](varvar.md), [```varstd```](varstd.md), [```inverse```](inverse.md), [```transmat```](transmat.md), [```diag```](diag.md), [```vect```](vect.md)
 
 ---
 

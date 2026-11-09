@@ -6,7 +6,7 @@
 ## ```lmmin```
 
 ```fortran
-subroutine lmmin(func,x,y,iy,exitcode,x0,itermax,damp,tol,toleach,shock,usebro,iprint,tolrel,maxstall)
+subroutine lmmin(func,x,y,iy,exitcode,x0,itermax,damp,tol,toleach,shock,usebro,iprint,tolrel,maxstall,lb,ub)
   implicit none
   external                             :: func        ! user-supplied function to be minimize
   real(kind=8) , intent(out)           :: x(:)        ! values of "x" at minimum
@@ -23,11 +23,13 @@ subroutine lmmin(func,x,y,iy,exitcode,x0,itermax,damp,tol,toleach,shock,usebro,i
   integer      , intent(in) , optional :: iprint      ! indicator for printing behaviour
   integer      , intent(in) , optional :: usebro      ! indicator for the use of Broyden method to update Jacobian
   integer      , intent(in) , optional :: maxstall    ! max number of consecutive unproductive iterations
+  real(kind=8) , intent(in) , optional :: lb(:)       ! lower bounds for x
+  real(kind=8) , intent(in) , optional :: ub(:)       ! upper bounds for x
 ```
 
 This subroutine applies the Levenberg–Marquardt algorithm (click [here](https://en.wikipedia.org/wiki/Levenberg–Marquardt_algorithm) for more information) which minimizes the sum of squared errors of a (possibly nonlinear) system of multivariate equations.
 
-Given the current point, with residuals ```y``` and (numerical) Jacobian ```J```, the step ```dx``` solves ```(J'J + lambda D) dx = -J'y```, where ```D``` is a diagonal scaling matrix (the largest diagonal of ```J'J``` observed so far for each unknown, with a positive floor; Moré, 1978) and ```lambda``` is the damping factor. The linear system is solved by Cholesky decomposition. The damping factor is updated with the gain ratio (actual over predicted reduction in the error), as in Nielsen (1999).
+Given the current point, with residuals ```y``` and (numerical) Jacobian ```J```, the step ```dx``` solves ```(J'J + lambda D) dx = -J'y```, where ```D``` is a diagonal scaling matrix (the largest diagonal of ```J'J``` observed so far for each unknown, with a positive floor; Moré, 1978) and ```lambda``` is the damping factor. The linear system is solved with [```qrsolve```](inverse.md) (QR decomposition with column pivoting), after scaling it by its diagonal so that all the unknowns have the same scale. The damping factor is updated with the gain ratio (actual over predicted reduction in the error), as in Nielsen (1999).
 
 The user should input the function ```func``` and the initial guess ```x0```. The function ```func``` must be of the form:
 
@@ -43,7 +45,7 @@ The size of ```x``` must be equal to the size of ```x0``` (number of unknowns), 
 
 The subroutine returns the value(s) of ```x``` with the lowest sum of squared errors found, the residuals at that point (```y```), the number of function evaluations (```iy```), and an indicator, ```exitcode```:
 - ```exitcode``` = 0: the algorithm found a root (sum of squared errors below ```tol```, or every residual below ```toleach``` in absolute value)
-- ```exitcode``` = 1: the gradient ```J'y``` is close to zero (or the linear system cannot be solved)
+- ```exitcode``` = 1: the gradient ```J'y``` (the projected gradient, with bounds) is close to zero (or the linear system cannot be solved)
 - ```exitcode``` = 2: the step in ```x``` is close to zero
 - ```exitcode``` = 3: no progress: ```maxstall``` consecutive unproductive iterations
 - ```exitcode``` = 9: maximum number of function evaluations reached
@@ -64,8 +66,24 @@ Optionally, the user can also supply:
   - ```usebro``` = 0: re-compute the Jacobian numerically after every successful step (default)
   - ```usebro``` = 1: update the existing Jacobian using the Broyden method; a new numerical Jacobian is computed when a Broyden-updated Jacobian fails to produce a better point
 
-**Note**: for constrained optimization problems, one can make use of the [```normalize and denormalize```](normalize.md) subroutines.
+- ```lb```, ```ub``` (double precision vectors of dimension "n"): lower and upper bounds for ```x``` (box constraints, ```lb``` <= ```x``` <= ```ub```). Either or both can be supplied. With bounds, the algorithm is a projected Levenberg–Marquardt with an active set:
+  - the initial point is projected onto the box;
+  - the numerical Jacobian is computed towards the interior of the box;
+  - a variable at a bound whose gradient pushes it out of the box is fixed (zero step), and the step is computed for the free variables;
+  - if the step leaves the box, it is truncated at the bound when only one variable hits it (keeping the direction), and projected onto the box otherwise; the gain ratio uses the step actually taken;
+  - convergence (```exitcode``` = 1) is checked with the projected gradient, which is zero at an optimum on the bound.
 
-**Internal dependencies**: none (it only uses the kind ```dp``` and the constants of ```toolkit_pars```)
+  Without ```lb``` and ```ub```, the algorithm is exactly the unconstrained one.
 
-**Updates**: November 2026. (1) The shock used to compute a column of the Jacobian is enlarged at most 5 times when the residuals do not change (it was enlarged without limit, until ```itermax```, and the test was on the sum of squared errors instead of the residuals); (2) scaling with a positive floor and Cholesky solve, instead of the inverse of ```(1+lambda) diag(J'J)```, which was singular with a zero column; (3) damping updated with the gain ratio; (4) stop after ```maxstall``` unproductive iterations (```exitcode``` = 3) and relative test on the step; (5) points evaluated to compute the Jacobian are used when they improve on the current point, and the best point evaluated is returned.
+**Note**: for constrained optimization problems, one can either supply ```lb``` and ```ub``` or make use of the [```normalize and denormalize```](normalize.md) subroutines. With ```lb``` and ```ub```, the variables are not transformed.
+
+**Example with bounds**
+
+```fortran
+  ! minimize the sum of squares of "func" with 0 <= x(1) <= 1 and x(2) >= -5
+  call lmmin(func,x,y,iy,exitcode,x0,lb=(/0.0d0,-5.0d0/),ub=(/1.0d0,huge(1.0d0)/))
+```
+
+**Internal dependencies**: [```qrsolve```](inverse.md), [```broyden```](broyden.md)
+
+**Updates**: November 2026. (1) The shock used to compute a column of the Jacobian is enlarged at most 5 times when the residuals do not change (it was enlarged without limit, until ```itermax```, and the test was on the sum of squared errors instead of the residuals); (2) scaling with a positive floor and Cholesky solve, instead of the inverse of ```(1+lambda) diag(J'J)```, which was singular with a zero column; (3) damping updated with the gain ratio; (4) stop after ```maxstall``` unproductive iterations (```exitcode``` = 3) and relative test on the step; (5) points evaluated to compute the Jacobian are used when they improve on the current point, and the best point evaluated is returned; (6) optional box constraints ```lb``` and ```ub```.

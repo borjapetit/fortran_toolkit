@@ -23,7 +23,9 @@ The subroutine finds the percentile ```pct``` using a Bisection method.
 
 The user can also supply a ```mask``` to compute the conditional percentile. The input ```mask``` is a logical array of the same size of ```xvec```.
 
-**Internal dependencies**: [```error```](error.md)
+**Arrays**: ```xvec``` (and ```w``` and ```mask```) can also be 2-dimensional arrays, all of the same shape. In that case the function uses all their elements, as if they were vectorized with [```vect```](vect.md): ```percentile(vect(xvec),pct,w=vect(w),mask=vect(mask))```.
+
+**Internal dependencies**: [```error```](error.md), [```vect```](vect.md)
 
 ---
 

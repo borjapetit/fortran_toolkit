@@ -18,7 +18,9 @@ This function returns the (weighted) mean of a variable ```var```, ```sum(w*var)
 
 The user can also supply a ```mask``` to compute the conditional mean. The input ```mask``` is a logical array of the same size of ```var```.
 
-**Internal dependencies**: [```error```](error.md)
+**Arrays**: ```var``` (and ```w``` and ```mask```) can also be 2-dimensional arrays, all of the same shape. In that case the function uses all their elements, as if they were vectorized with [```vect```](vect.md): ```varmean(vect(var),w=vect(w),mask=vect(mask))```.
+
+**Internal dependencies**: [```error```](error.md), [```vect```](vect.md)
 
 ---
 

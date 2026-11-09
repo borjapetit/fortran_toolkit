@@ -21,9 +21,11 @@ This function returns the correlation coefficient between two (same size) vector
 
 The user can also supply a `mask` to compute the conditional correlation. The variable `mask` is a logical array of the same size of `xvar1` and `xvar2` indicating which observations should be considered.
 
+**Arrays**: ```xvar1``` and ```xvar2``` (and ```w``` and ```mask```) can also be 2-dimensional arrays, all of the same shape. In that case the function uses all their elements, as if they were vectorized with [```vect```](vect.md): ```correlation(vect(xvar1),vect(xvar2),w=vect(w),mask=vect(mask))```.
+
 If either variable is constant (zero standard deviation), the function prints an error message and returns 0.
 
-**Internal dependencies**: [`varmean`](varmean.md),  [`varstd`](varstd.md), [`error`](error.md)
+**Internal dependencies**: [`varmean`](varmean.md),  [`varstd`](varstd.md), [`error`](error.md), [`vect`](vect.md)
 
 ---
 

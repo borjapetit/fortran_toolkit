@@ -18,7 +18,9 @@ This function returns the standard deviation of a variable ```var``` given some 
 
 The user can also supply a ```mask``` to compute the conditional standard deviation. The input ```mask``` is a logical array of the same size of ```var```.
 
-**Internal dependencies**: [```error```](error.md), [```varmean```](varmean.md),  [```varvar```](varvar.md)
+**Arrays**: ```var``` (and ```w``` and ```mask```) can also be 2-dimensional arrays, all of the same shape. In that case the function uses all their elements, as if they were vectorized with [```vect```](vect.md): ```varstd(vect(var),w=vect(w),mask=vect(mask))```.
+
+**Internal dependencies**: [```error```](error.md), [```varmean```](varmean.md),  [```varvar```](varvar.md), [```vect```](vect.md)
 
 ---
 

@@ -6,7 +6,7 @@
 ## ```lmmin```
 
 ```fortran
-subroutine lmmin(func,x,y,iy,exitcode,x0,itermax,damp,tol,toleach,shock,usebro,iprint,tolrel,maxstall,lb,ub)
+subroutine lmmin(func,x,y,iy,exitcode,x0,itermax,damp,tol,toleach,shock,usebro,iprint,tolrel,maxstall,lb,ub,maxstep)
   implicit none
   external                             :: func        ! user-supplied function to be minimize
   real(kind=8) , intent(out)           :: x(:)        ! values of "x" at minimum
@@ -25,6 +25,7 @@ subroutine lmmin(func,x,y,iy,exitcode,x0,itermax,damp,tol,toleach,shock,usebro,i
   integer      , intent(in) , optional :: maxstall    ! max number of consecutive unproductive iterations
   real(kind=8) , intent(in) , optional :: lb(:)       ! lower bounds for x
   real(kind=8) , intent(in) , optional :: ub(:)       ! upper bounds for x
+  real(kind=8) , intent(in) , optional :: maxstep     ! max step in each unknown
 ```
 
 This subroutine applies the Levenberg–Marquardt algorithm (click [here](https://en.wikipedia.org/wiki/Levenberg–Marquardt_algorithm) for more information) which minimizes the sum of squared errors of a (possibly nonlinear) system of multivariate equations.
@@ -74,6 +75,7 @@ Optionally, the user can also supply:
   - convergence (```exitcode``` = 1) is checked with the projected gradient, which is zero at an optimum on the bound.
 
   Without ```lb``` and ```ub```, the algorithm is exactly the unconstrained one.
+- ```maxstep``` (double precision): maximum size of the step in each unknown (a trust region), as a fraction of the width of the box (```ub```-```lb```) for unknowns with both bounds, and of ```max(1,|x|)``` otherwise. If a component of the step exceeds it, the whole step is scaled down, keeping its direction. By default there is no limit. A value such as 0.25 makes the algorithm more conservative when the objective is noisy or the Jacobian is a poor approximation far from the current point.
 
 **Note**: for constrained optimization problems, one can either supply ```lb``` and ```ub``` or make use of the [```normalize and denormalize```](normalize.md) subroutines. With ```lb``` and ```ub```, the variables are not transformed.
 
@@ -86,4 +88,4 @@ Optionally, the user can also supply:
 
 **Internal dependencies**: [```qrsolve```](inverse.md), [```broyden```](broyden.md)
 
-**Updates**: November 2026. (1) The shock used to compute a column of the Jacobian is enlarged at most 5 times when the residuals do not change (it was enlarged without limit, until ```itermax```, and the test was on the sum of squared errors instead of the residuals); (2) scaling with a positive floor and Cholesky solve, instead of the inverse of ```(1+lambda) diag(J'J)```, which was singular with a zero column; (3) damping updated with the gain ratio; (4) stop after ```maxstall``` unproductive iterations (```exitcode``` = 3) and relative test on the step; (5) points evaluated to compute the Jacobian are used when they improve on the current point, and the best point evaluated is returned; (6) optional box constraints ```lb``` and ```ub```.
+**Updates**: November 2026. (1) The shock used to compute a column of the Jacobian is enlarged at most 5 times when the residuals do not change (it was enlarged without limit, until ```itermax```, and the test was on the sum of squared errors instead of the residuals); (2) scaling with a positive floor and Cholesky solve, instead of the inverse of ```(1+lambda) diag(J'J)```, which was singular with a zero column; (3) damping updated with the gain ratio; (4) stop after ```maxstall``` unproductive iterations (```exitcode``` = 3) and relative test on the step; (5) points evaluated to compute the Jacobian are used when they improve on the current point, and the best point evaluated is returned; (6) optional box constraints ```lb``` and ```ub```; (7) optional maximum step ```maxstep```.

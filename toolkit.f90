@@ -40,7 +40,8 @@
 !     * varvar: nan observations excluded from both the mean and the variance.
 !     * correlation: corrected error messages.
 !     * lmmin: optional box constraints lb and ub (projected levenberg-marquardt with an active set);
-!       the step is computed with qrsolve and the jacobian is updated with broyden (no internal copies).
+!       the step is computed with qrsolve and the jacobian is updated with broyden (no internal copies);
+!       optional maximum step (maxstep).
 !     * inverse: optional argument "method": 'gj' (default), 'qr' (qr with column pivoting) or 'svd'
 !       (moore-penrose pseudo-inverse); new inverse_gj, inverse_qr, inverse_svd and qrsolve.
 !     * varmean, varvar, varstd, correlation, percentile and olsreg accept 2-dimensional arrays.
@@ -2236,6 +2237,7 @@ module toolkit_optim
   !   - simplex: minimum of a single-value function with "n" unknowns (nelder-mead)
   !   - lmmin: minimum of the sum of squares of a system of "m" functions with "n"
   !     unknowns (levenberg–marquardt algorithm), optionally with bounds lb <= x <= ub
+  !     and a maximum step
   !
   ! it also includes some other functions/subroutines used for optimization:
   !
@@ -2890,7 +2892,7 @@ module toolkit_optim
   ! ----------------------------------------------------------------------------
   ! levenberg–marquardt algorithm
 
-  subroutine lmmin(func,x,y,iy,ind,x0,itermax,damp,tol,toleach,shock,usebro,iprint,tolrel,maxstall,lb,ub)
+  subroutine lmmin(func,x,y,iy,ind,x0,itermax,damp,tol,toleach,shock,usebro,iprint,tolrel,maxstall,lb,ub,maxstep)
 
     ! this subroutine minimizes the sum of squared errors of a system of "m" equations
     ! in "n" unknowns using the levenberg-marquardt algorithm. given the current point
@@ -2949,6 +2951,10 @@ module toolkit_optim
     !                 which is zero at an optimum on the bound
     !             the variables are not transformed, so there is no need to use
     !             normalize/denormalize when bounds are supplied.
+    !   maxstep:  max size of the step in each unknown (trust region), as a fraction of
+    !             the width of the box (ub-lb) for unknowns with both bounds, and of
+    !             max(1,|x|) otherwise. if a component of the step exceeds it, the whole
+    !             step is scaled down (keeping its direction). default: no limit.
     !   iprint:   indicator for printing results (default = 0)
     !               0: print no results
     !               1: print main results
@@ -2977,7 +2983,8 @@ module toolkit_optim
     ! iterations (ind = 3) and relative test on the step; (5) points evaluated to
     ! compute the jacobian are used when they improve on the current point, and the
     ! best point evaluated is returned; (6) documentation and minor fixes; (7) optional
-    ! box constraints lb and ub (projected levenberg-marquardt with an active set).
+    ! box constraints lb and ub (projected levenberg-marquardt with an active set);
+    ! (8) optional maximum step (maxstep).
 
     implicit none
 
@@ -2992,6 +2999,7 @@ module toolkit_optim
     real(dp) , intent(in) , optional :: damp,tol,toleach,shock,tolrel
     integer  , intent(in) , optional :: itermax,usebro,iprint,maxstall
     real(dp) , intent(in) , optional :: lb(:),ub(:)
+    real(dp) , intent(in) , optional :: maxstep
 
     ! other variables
     integer                :: n,m,i,maxiter,ip,bro,mstall,nstall,itry
@@ -3019,6 +3027,7 @@ module toolkit_optim
     logical                :: box             ! bounds supplied
     real(dp)               :: alpha,aa        ! fraction of the step that fits in the box
     integer                :: nhit,ihit       ! variables that hit a bound, and the first one
+    real(dp) , allocatable :: smax(:)         ! max step of each unknown (maxstep)
     integer                :: ij              ! unknown being shocked
 
     interface
@@ -3051,7 +3060,7 @@ module toolkit_optim
     shck = shck0 ; dg = cero ; nu = dos ; nstall = 0 ; ind = 9
 
     ! bounds
-    allocate(sc(n),lbv(n),ubv(n),free(n)) ; lbv = -huge(uno) ; ubv = huge(uno) ; free = .true.
+    allocate(sc(n),lbv(n),ubv(n),free(n),smax(n)) ; lbv = -huge(uno) ; ubv = huge(uno) ; free = .true.
     box = present(lb) .or. present(ub)
     if (present(lb)) then
       if (size(lb,1).ne.n) then
@@ -3070,6 +3079,12 @@ module toolkit_optim
     if (any(ubv.le.lbv)) then
       write(*,*) ' error in lmmin: ub <= lb '
       stop
+    end if
+    if (present(maxstep)) then
+      if (maxstep.le.cero) then
+        write(*,*) ' error in lmmin: maxstep <= 0 '
+        stop
+      end if
     end if
 
     if (ip.ge.1) then
@@ -3162,6 +3177,20 @@ module toolkit_optim
       end do
       if (.not.ok) then
         ind = 1 ; exit
+      end if
+
+      ! trust region: limit each component of the step to maxstep times the width of the
+      ! box (both bounds) or max(1,|x|) (otherwise), scaling down the whole step
+      if (present(maxstep)) then
+        do i=1,n
+          if (lbv(i).gt.-huge(uno) .and. ubv(i).lt.huge(uno)) then
+            smax(i) = maxstep*(ubv(i)-lbv(i))
+          else
+            smax(i) = maxstep*max(uno,abs(xb(i)))
+          end if
+        end do
+        aa = maxval(abs(dx)/smax)
+        if (aa.gt.uno) dx = dx/aa
       end if
 
       ! new point. with bounds: truncate the step at the bound if only one variable hits
@@ -3290,7 +3319,7 @@ module toolkit_optim
       write(*,*          ) '  '
     end if
 
-    deallocate(j,a,g,dg,shck,xb,yb,x1,y1,dx,xc,yc,xs,ys,xj,yj,sc,lbv,ubv,free)
+    deallocate(j,a,g,dg,shck,xb,yb,x1,y1,dx,xc,yc,xs,ys,xj,yj,sc,lbv,ubv,free,smax)
 
     return
     97 format ('  new point    ',i5,'  ',3(es12.4))

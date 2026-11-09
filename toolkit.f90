@@ -21,7 +21,8 @@
 !     * some minor errors
 ! - November 2026 (Borja Petit)
 !     * simplex: corrected the expansion and contraction points; adaptive coefficients (Gao and Han, 2012);
-!       convergence on the spread of func; optional inputs tolx, step and fzero.
+!       convergence on the spread of func; optional inputs tolx, step and fzero; optional bounds lb and ub
+!       (internal transformation).
 !     * lmmin: bounded enlargement of the jacobian step; cholesky solve with scaling floor; gain-ratio damping
 !       (Nielsen, 1999); stop after maxstall unproductive iterations (ind = 3); reuse of jacobian points;
 !       optional inputs tolrel and maxstall.
@@ -2233,7 +2234,8 @@ module toolkit_optim
   !   - bisection: root of a single-value function with one unknown (bisection method)
   !   - golden: maximum of a single-value function with one unknown (golden search)
   !   - brent: root of a single-value function with one unknown (brent method)
-  !   - simplex: minimum of a single-value function with "n" unknowns (nelder-mead)
+  !   - simplex: minimum of a single-value function with "n" unknowns (nelder-mead),
+  !     optionally with bounds lb <= x <= ub
   !   - lmmin: minimum of the sum of squares of a system of "m" functions with "n"
   !     unknowns (levenberg–marquardt algorithm), optionally with bounds lb <= x <= ub
   !     and a maximum step
@@ -2659,7 +2661,7 @@ module toolkit_optim
   ! ----------------------------------------------------------------------------
   ! simplex algorithm
 
-  subroutine simplex(func,x,y,iy,ind,x0,itermax,tol,iprint,tolx,step,fzero)
+  subroutine simplex(func,x,y,iy,ind,x0,itermax,tol,iprint,tolx,step,fzero,lb,ub)
 
     ! this subroutine minimizes a single-valued function with "n" unknowns using the
     ! nelder-mead simplex algorithm, with the adaptive coefficients of gao and han
@@ -2693,6 +2695,19 @@ module toolkit_optim
     !             1: print main results
     !             2: print all the iterations
     !
+    !   lb, ub:   vectors of dimension "n" with lower and upper bounds for x (box
+    !             constraints, lb <= x <= ub). either or both can be supplied; use
+    !             -huge(1.0d0) or huge(1.0d0) for an unknown without a lower or upper
+    !             bound. the bounds are imposed by an internal transformation: the
+    !             simplex works on a free variable z, and func is evaluated at x(z):
+    !               - both bounds:      x = lb + (ub-lb)*sin(z)^2
+    !               - lower bound only: x = lb + z^2
+    !               - upper bound only: x = ub - z^2
+    !               - no bounds:        x = z
+    !             so func is never evaluated outside the box, and the bounds can be
+    !             attained. note that, for bounded unknowns, "step" and "tolx" refer to
+    !             z, not to x. the initial point is projected onto the box.
+    !
     ! the outputs of the subroutine are:
     !
     !   x:    the vector of x that minimizes func
@@ -2720,12 +2735,15 @@ module toolkit_optim
     integer  , intent(in) , optional :: itermax
     integer  , intent(in) , optional :: iprint
     logical  , intent(in) , optional :: fzero
+    real(dp) , intent(in) , optional :: lb(:),ub(:)
 
     integer  :: n,i,ib,iw,iw2,maxiter,ipri
     real(dp) :: xp(size(x0,1),size(x0,1)+1),yp(size(x0,1)+1)
     real(dp) :: xm(size(x0,1)),xr(size(x0,1)),xe(size(x0,1)),xc(size(x0,1))
     real(dp) :: y0,yr,ye,yc,toler,tolerx,stp,size0,ca,cg,cr,cs
     logical  :: fz,shrink
+    real(dp) :: lbv(size(x0,1)),ubv(size(x0,1)),z0(size(x0,1))
+    integer  :: kb(size(x0,1))   ! 0: no bounds, 1: lower bound, 2: upper bound, 3: both
 
     interface
       function func(xvar) result(resid)
@@ -2742,6 +2760,37 @@ module toolkit_optim
     fz      = .true.      ; if (present(fzero)  ) fz      = fzero
 
     n  = size(x0,1)
+
+    ! bounds and transformed initial point
+    lbv = -huge(uno) ; if (present(lb)) lbv = lb
+    ubv =  huge(uno) ; if (present(ub)) ubv = ub
+    if (present(lb)) then
+      if (size(lb,1).ne.n) then
+        write(*,*) ' error in simplex: size of lb does not match size of x0 '
+        stop
+      end if
+    end if
+    if (present(ub)) then
+      if (size(ub,1).ne.n) then
+        write(*,*) ' error in simplex: size of ub does not match size of x0 '
+        stop
+      end if
+    end if
+    if (any(ubv.le.lbv)) then
+      write(*,*) ' error in simplex: ub <= lb '
+      stop
+    end if
+    do i=1,n
+      kb(i) = 0
+      if (lbv(i).gt.-huge(uno)) kb(i) = kb(i) + 1
+      if (ubv(i).lt. huge(uno)) kb(i) = kb(i) + 2
+      select case (kb(i))
+        case (0) ; z0(i) = x0(i)
+        case (1) ; z0(i) = sqrt(max(x0(i)-lbv(i),cero))
+        case (2) ; z0(i) = sqrt(max(ubv(i)-x0(i),cero))
+        case (3) ; z0(i) = asin(sqrt(min(max((x0(i)-lbv(i))/(ubv(i)-lbv(i)),cero),uno)))
+      end select
+    end do
     ca = uno                                        ! reflection
     cg = uno + dos/max(dble(n),dos)                 ! expansion
     cr = 0.75_dp - uno/(dos*max(dble(n),dos))       ! contraction
@@ -2756,7 +2805,7 @@ module toolkit_optim
     ind = 9 ; xp = cero ; yp = huge(uno)
 
     ! initial point
-    y0 = func(x0) ; iy = 1 ; xp(:,1) = x0 ; yp(1) = y0
+    y0 = fw(z0) ; iy = 1 ; xp(:,1) = z0 ; yp(1) = y0
     if (ipri.ge.1) print 93 , y0
     if (fz .and. y0.lt.toler) then
       ind = 0 ; goto 7
@@ -2769,11 +2818,11 @@ module toolkit_optim
       write(*,*) '  '
     end if
     do i=1,n
-      xp(:,i+1) = x0
-      if (x0(i).lt.cero) xp(i,i+1) = x0(i) - stp
-      if (x0(i).ge.cero) xp(i,i+1) = x0(i) + stp
-      yp(i+1) = func(xp(:,i+1)) ; iy = iy + 1
-      if (ipri.gt.1 .and. n.lt.5) write(*,97) i, yp(i+1) , xp(:,i+1)
+      xp(:,i+1) = z0
+      if (z0(i).lt.cero) xp(i,i+1) = z0(i) - stp
+      if (z0(i).ge.cero) xp(i,i+1) = z0(i) + stp
+      yp(i+1) = fw(xp(:,i+1)) ; iy = iy + 1
+      if (ipri.gt.1 .and. n.lt.5) write(*,97) i, yp(i+1) , xofz(xp(:,i+1))
       if (ipri.gt.1 .and. n.ge.5) write(*,97) i, yp(i+1)
       if (fz .and. yp(i+1).lt.toler) then
         ind = 0 ; goto 7
@@ -2813,12 +2862,12 @@ module toolkit_optim
       xm = (sum(xp,dim=2) - xp(:,iw))/dble(n)
 
       ! reflection
-      xr = xm + ca*(xm-xp(:,iw)) ; yr = func(xr) ; iy = iy + 1
+      xr = xm + ca*(xm-xp(:,iw)) ; yr = fw(xr) ; iy = iy + 1
       shrink = .false.
 
       if (yr.lt.yp(ib)) then
         ! expansion
-        xe = xm + cg*(xr-xm) ; ye = func(xe) ; iy = iy + 1
+        xe = xm + cg*(xr-xm) ; ye = fw(xe) ; iy = iy + 1
         if (ye.lt.yr) then
           xp(:,iw) = xe ; yp(iw) = ye
         else
@@ -2829,7 +2878,7 @@ module toolkit_optim
         xp(:,iw) = xr ; yp(iw) = yr
       elseif (yr.lt.yp(iw)) then
         ! outside contraction
-        xc = xm + cr*(xr-xm) ; yc = func(xc) ; iy = iy + 1
+        xc = xm + cr*(xr-xm) ; yc = fw(xc) ; iy = iy + 1
         if (yc.le.yr) then
           xp(:,iw) = xc ; yp(iw) = yc
         else
@@ -2837,7 +2886,7 @@ module toolkit_optim
         end if
       else
         ! inside contraction
-        xc = xm + cr*(xp(:,iw)-xm) ; yc = func(xc) ; iy = iy + 1
+        xc = xm + cr*(xp(:,iw)-xm) ; yc = fw(xc) ; iy = iy + 1
         if (yc.lt.yp(iw)) then
           xp(:,iw) = xc ; yp(iw) = yc
         else
@@ -2850,7 +2899,7 @@ module toolkit_optim
         do i=1,n+1
           if (i.ne.ib) then
             xp(:,i) = xp(:,ib) + cs*(xp(:,i)-xp(:,ib))
-            yp(i)   = func(xp(:,i)) ; iy = iy + 1
+            yp(i)   = fw(xp(:,i)) ; iy = iy + 1
           end if
         end do
       end if
@@ -2865,7 +2914,7 @@ module toolkit_optim
     7 continue
 
     ib = minloc(yp,dim=1)
-    x  = xp(:,ib)
+    x  = xofz(xp(:,ib))
     y  = yp(ib)
 
     if (ipri.ge.1) then
@@ -2885,6 +2934,30 @@ module toolkit_optim
     94 format ('  iterations = ',i4)
     93 format ('  error      = ',f10.4)
     92 format ('  reduction  = ',f10.4)
+
+    contains
+
+    ! x as a function of the transformed (free) variable z
+    function xofz(z) result(xv)
+      real(dp) , intent(in) :: z(:)
+      real(dp)              :: xv(size(z))
+      integer               :: k
+      do k=1,size(z)
+        select case (kb(k))
+          case (0) ; xv(k) = z(k)
+          case (1) ; xv(k) = lbv(k) + z(k)**2
+          case (2) ; xv(k) = ubv(k) - z(k)**2
+          case (3) ; xv(k) = lbv(k) + (ubv(k)-lbv(k))*sin(z(k))**2
+        end select
+      end do
+    end function xofz
+
+    ! objective as a function of z
+    function fw(z) result(f)
+      real(dp) , intent(in) :: z(:)
+      real(dp)              :: f
+      f = func(xofz(z))
+    end function fw
 
   end subroutine simplex
 

@@ -6,7 +6,7 @@
 ## ```simplex```
 
 ```fortran
-subroutine simplex(func,x,y,numiter,exitcode,x0,itermax,tol,iprint,tolx,step,fzero)
+subroutine simplex(func,x,y,numiter,exitcode,x0,itermax,tol,iprint,tolx,step,fzero,lb,ub)
   implicit none
   external                             :: func    
   real(kind=8) , intent(out)           :: x(:)    
@@ -20,6 +20,8 @@ subroutine simplex(func,x,y,numiter,exitcode,x0,itermax,tol,iprint,tolx,step,fze
   real(kind=8) , intent(in) , optional :: tolx
   real(kind=8) , intent(in) , optional :: step
   logical      , intent(in) , optional :: fzero
+  real(kind=8) , intent(in) , optional :: lb(:)
+  real(kind=8) , intent(in) , optional :: ub(:)
 ```
 
 This subroutine minimizes a function using the Nelder-Mead algorithm (click [here](https://en.wikipedia.org/wiki/Nelder–Mead_method) for more information), with the adaptive coefficients of Gao and Han (2012, *Computational Optimization and Applications* 51, 259–277), which perform better than the standard ones in high-dimensional problems: reflection 1, expansion 1+2/n, contraction 0.75−1/(2n), and shrink 1−1/n.
@@ -45,16 +47,30 @@ Optionally, the user can also supply:
 - ```tolx``` (double precision): tolerance on the size of the simplex, default = sqrt(```tol```)
 - ```step``` (double precision): size of the initial simplex, default = 0.20
 - ```fzero``` (logical): if .true. (default), the algorithm stops as soon as ```func``` is smaller than ```tol```, which is useful when ```func``` is a sum of squared residuals. Set ```fzero``` = .false. for general minimization problems (e.g., when ```func``` can be negative).
+- ```lb```, ```ub``` (double precision vectors of dimension "n"): lower and upper bounds for ```x``` (box constraints, ```lb``` <= ```x``` <= ```ub```). Either or both can be supplied; use ```-huge(1.0d0)``` or ```huge(1.0d0)``` for an unknown without a lower or an upper bound. The bounds are imposed by an internal transformation: the simplex works on a free variable ```z```, and ```func``` is evaluated at ```x(z)```:
+  - both bounds: ```x = lb + (ub-lb)*sin(z)**2```
+  - lower bound only: ```x = lb + z**2```
+  - upper bound only: ```x = ub - z**2```
+  - no bounds: ```x = z```
+
+  Hence ```func``` is never evaluated outside the box, the bounds can be attained, and the subroutine returns ```x``` in its original units. For bounded unknowns, ```step``` and ```tolx``` refer to ```z```, not to ```x```. If ```x0``` is outside the box, it is projected onto it.
 - ```iprint``` (integer): indicator for printing behaviour
   - ```iprint``` = 0: don't print anything (default)
   - ```iprint``` = 1: print main results
   - ```iprint``` = 2: print main results and each iteration
 
-**Note**: for constrained optimization problems, one can make use of the [```normalize and denormalize```](normalize.md) subroutines.
+**Note**: for constrained optimization problems, supply ```lb``` and/or ```ub``` (there is no need to transform the variables with [```normalize and denormalize```](normalize.md)).
+
+**Example with bounds**
+
+```fortran
+  ! minimize func with x(1) >= 0 and 4 <= x(2) <= 7
+  call simplex(func,x,y,numiter,exitcode,x0,lb=(/0.0d0,4.0d0/),ub=(/huge(1.0d0),7.0d0/),fzero=.false.)
+```
 
 **Internal dependencies**: none
 
-**Updates**: November 2026. Corrected the expansion and contraction points (previously ```(1-g)*xm - g*xhigh``` and ```(1-b)*xm - b*xhigh```, instead of ```xm + g*(xr-xm)``` and ```xm + b*(xhigh-xm)```); added the outside contraction, the adaptive coefficients, the convergence criterion on the spread of ```func```, and the optional inputs ```tolx```, ```step``` and ```fzero```.
+**Updates**: November 2026. Corrected the expansion and contraction points (previously ```(1-g)*xm - g*xhigh``` and ```(1-b)*xm - b*xhigh```, instead of ```xm + g*(xr-xm)``` and ```xm + b*(xhigh-xm)```); added the outside contraction, the adaptive coefficients, the convergence criterion on the spread of ```func```, and the optional inputs ```tolx```, ```step``` and ```fzero```; optional bounds ```lb``` and ```ub```.
 
 ---
 

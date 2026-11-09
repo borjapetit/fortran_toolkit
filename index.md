@@ -97,7 +97,7 @@ The variable ```print_err``` controls error printing: the user can deactivate er
 
 **_Constrained optimization_**:
 
-* [```lmmin```](docs/lmmin.md) accepts lower and upper bounds for the unknowns (optional inputs ```lb``` and ```ub```).
+* [```lmmin```](docs/lmmin.md) and [```simplex```](docs/simplex.md) accept lower and upper bounds for the unknowns (optional inputs ```lb``` and ```ub```).
 * For the other algorithms, one can transform a constrained optimization problem into an unconstrained one using the [```normalize``` and ```denormalize```](docs/normalize.md) subroutines.
 
 <br>

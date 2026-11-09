@@ -710,18 +710,17 @@ module toolkit_econ
   ! ----------------------------------------------------------------------------
   ! crra function with "x" being the argument and "b" being the rra parameter
   ! if teh rra parameter is 0, the function returns log(x)
-  function crra(x,b) result(u)
+  elemental function crra(x,b,tolfun) result(u)
     implicit none
-    real(dp) :: x,b,u ; u = cero
+    real(dp) , intent(in) :: x,b
+    real(dp) , intent(in) , optional :: tolfun
+    real(dp)              :: tolf,u ; u = cero ; tolf = tolvl ; if (present(tolfun)) tolf = tolfun
     if (abs(b).gt.tolvl) then
-      if (abs(x).gt.tolvl) u = (x**b)/b
-      if (abs(x).le.tolvl) then
-        if (b.gt.cero) u = cero
-        if (b.lt.cero) u = -huge(x)
-      end if
+      if (x.gt.tolf) u = (x**b)/b
+      if (x.le.tolf) u = (tolf**b)/b  + (x-tolf)*( tolf**(b-uno) )
     else if (abs(b).le.tolvl) then
-      if (x.gt.tolvl) u = log(x)
-      if (x.le.tolvl) u = -huge(x)
+      if (x.gt.tolf) u = log(x)
+      if (x.le.tolf) u = log(tolf) + (x-tolf)*(uno/tolf)
     end if
     return
   end function crra

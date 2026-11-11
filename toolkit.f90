@@ -46,6 +46,8 @@
 !     * inverse: optional argument "method": 'gj' (default), 'qr' (qr with column pivoting) or 'svd'
 !       (moore-penrose pseudo-inverse); new inverse_gj, inverse_qr, inverse_svd and qrsolve.
 !     * varmean, varvar, varstd, correlation, percentile and olsreg accept 2-dimensional arrays.
+!     * simplex: generic interface; simplex_fun (single-valued func, the previous simplex) and simplex_sys
+!       (system of equations, same func as lmmin; minimizes the sum of squares with simplex_fun).
 !     * olsreg: observations with nan excluded; explanatory variables with zero variance dropped
 !       (coefficient = 0); optional standardized coefficients (betas).
 !     * new: dcrra, rouwenhorst_grid, rouwenhorst_transition; vect accepts 1-dimensional arrays.
@@ -2235,7 +2237,8 @@ module toolkit_optim
   !   - golden: maximum of a single-value function with one unknown (golden search)
   !   - brent: root of a single-value function with one unknown (brent method)
   !   - simplex: minimum of a single-value function with "n" unknowns (nelder-mead),
-  !     optionally with bounds lb <= x <= ub
+  !     optionally with bounds lb <= x <= ub. generic name: if func returns a vector
+  !     (as in lmmin), it minimizes the sum of squares of func (simplex_sys)
   !   - lmmin: minimum of the sum of squares of a system of "m" functions with "n"
   !     unknowns (levenberg–marquardt algorithm), optionally with bounds lb <= x <= ub
   !     and a maximum step
@@ -2262,6 +2265,11 @@ module toolkit_optim
   use toolkit_linalg , only : qrsolve
 
   implicit none
+
+  interface simplex
+    module procedure simplex_fun,simplex_sys
+  end interface simplex
+
   contains
 
   ! ----------------------------------------------------------------------------
@@ -2661,7 +2669,59 @@ module toolkit_optim
   ! ----------------------------------------------------------------------------
   ! simplex algorithm
 
-  subroutine simplex(func,x,y,iy,ind,x0,itermax,tol,iprint,tolx,step,fzero,lb,ub)
+  subroutine simplex_sys(func,x,y,iy,ind,x0,itermax,tol,iprint,tolx,step,fzero,lb,ub)
+
+    ! this subroutine minimizes the sum of squared residuals of a system of "m" equations
+    ! with "n" unknowns using the nelder-mead simplex algorithm. it is called through the
+    ! generic name "simplex", so the same function can be used with lmmin and simplex.
+    !
+    ! func has the same form as in lmmin:
+    !
+    !       function func(x) result(resid)
+    !         real(dp)               :: x(:)
+    !         real(dp) , allocatable :: resid(:)
+    !       end function func
+    !
+    ! the sum of squares sum(resid**2) is minimized with simplex_fun, so all the other
+    ! inputs and outputs are the same as in simplex_fun (y is the sum of squares at x).
+
+    implicit none
+
+    integer  , intent(out)           :: iy,ind
+    real(dp) , intent(out)           :: x(:),y
+    real(dp) , intent(in)            :: x0(:)
+    real(dp) , intent(in) , optional :: tol,tolx,step
+    integer  , intent(in) , optional :: itermax
+    integer  , intent(in) , optional :: iprint
+    logical  , intent(in) , optional :: fzero
+    real(dp) , intent(in) , optional :: lb(:),ub(:)
+
+    interface
+      function func(xvec) result(resid)
+        real(kind=kind(1.0d00))               :: xvec(:)
+        real(kind=kind(1.0d00)) , allocatable :: resid(:)
+      end function func
+    end interface
+
+    ! absent optional arguments are passed on as absent
+    call simplex_fun(sumsq,x,y,iy,ind,x0,itermax,tol,iprint,tolx,step,fzero,lb,ub)
+
+    return
+    contains
+
+    ! sum of squared residuals of func
+    function sumsq(xvar) result(ss)
+      implicit none
+      real(dp)               :: xvar(:),ss
+      real(dp) , allocatable :: res(:)
+      res = func(xvar)
+      ss  = sum(res(:)*res(:))
+      return
+    end function sumsq
+
+  end subroutine simplex_sys
+
+  subroutine simplex_fun(func,x,y,iy,ind,x0,itermax,tol,iprint,tolx,step,fzero,lb,ub)
 
     ! this subroutine minimizes a single-valued function with "n" unknowns using the
     ! nelder-mead simplex algorithm, with the adaptive coefficients of gao and han
@@ -2959,7 +3019,7 @@ module toolkit_optim
       f = func(xofz(z))
     end function fw
 
-  end subroutine simplex
+  end subroutine simplex_fun
 
   ! ----------------------------------------------------------------------------
   ! levenberg–marquardt algorithm
